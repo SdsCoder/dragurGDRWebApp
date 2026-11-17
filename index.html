@@ -269,7 +269,8 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 .bk-b{display:grid;gap:8px;margin-top:8px}
 .bk textarea{background:var(--paper);border:1px solid var(--line);padding:6px 8px;line-height:1.3;min-height:70px;background-image:none;font:12px var(--f-num)}
 /* Fila di icone */
-.dock{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.dock{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+@media(max-width:520px){.dock{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:10px}}
 .dk{display:grid;justify-items:center;gap:4px;border:0;background:transparent;padding:4px 0;min-width:0}
 .dk:hover{background:transparent}
 .dk .ico{width:min(58px,100%);height:auto;display:block;color:var(--bronze);transition:transform .15s}
@@ -285,6 +286,17 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 h2.bag{justify-content:flex-start;align-items:center}
 h2.bag .info-i{font-size:14px}
 .bubble::before{left:72px}
+/* Ritaglio */
+#cropdlg{width:min(720px,calc(100vw - 24px));padding:12px}
+.crop{position:relative;overflow:hidden;margin:10px auto;touch-action:none;user-select:none;-webkit-user-select:none;width:fit-content;max-width:100%;line-height:0}
+#cr-img{display:block;max-width:100%;max-height:58vh;width:auto;height:auto;pointer-events:none;-webkit-user-drag:none}
+.sel{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.62);cursor:move;box-sizing:border-box;touch-action:none}
+.sel i{position:absolute;width:24px;height:24px;border:4px solid #fff;box-sizing:border-box}
+.sel i::after{content:"";position:absolute;inset:-12px}
+.sel i[data-h="nw"]{left:-5px;top:-5px;border-right:0;border-bottom:0;cursor:nwse-resize}
+.sel i[data-h="ne"]{right:-5px;top:-5px;border-left:0;border-bottom:0;cursor:nesw-resize}
+.sel i[data-h="sw"]{left:-5px;bottom:-5px;border-right:0;border-top:0;cursor:nesw-resize}
+.sel i[data-h="se"]{right:-5px;bottom:-5px;border-left:0;border-top:0;cursor:nwse-resize}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -319,6 +331,7 @@ h2.bag .info-i{font-size:14px}
   <button class="dk" data-sec="sec-def" data-ico="def" aria-expanded="false" aria-controls="sec-def"><span class="dk-i"></span><small>Difesa</small></button>
   <button class="dk" data-sec="inv-sec" data-ico="inv" aria-expanded="false" aria-controls="inv-sec"><span class="dk-i"></span><small>Inventario</small></button>
   <button class="dk" data-sec="sec-coin" data-ico="coin" aria-expanded="false" aria-controls="sec-coin"><span class="dk-i"></span><small>Borsa</small></button>
+  <button class="dk" data-sec="pp-sec" data-ico="people" aria-expanded="false" aria-controls="pp-sec"><span class="dk-i"></span><small>Personaggi</small></button>
 </nav>
 
 <div class="secs">
@@ -400,12 +413,14 @@ h2.bag .info-i{font-size:14px}
     <div class="row"><span>Rame</span><div class="ctl"><button class="sq" data-coin="-1" aria-label="Rame meno uno">−</button><span class="val num" id="c-ram"></span><button class="sq" data-coin="1" aria-label="Rame più uno">+</button></div></div>
   </div>
 </section>
-</div>
 
-<section id="pp-sec">
+<section id="pp-sec" class="sec" hidden>
   <h2>Personaggi <button class="pri" id="pp-add">Aggiungi personaggio</button></h2>
   <div class="people" id="people"></div>
 </section>
+</div>
+
+
 
 <section>
   <h2>Cronaca <small>note di campagna</small></h2>
@@ -457,7 +472,7 @@ h2.bag .info-i{font-size:14px}
     <div class="dlg-h"><h3 id="pe-t" tabindex="-1" autofocus>Personaggio</h3></div>
     <label>Nome<input id="pe-name" autocomplete="off"></label>
     <div class="pe-imgrow"><div class="pe-img" id="pe-img"></div>
-      <div class="pe-imgbtns"><label class="filebtn">Scegli immagine<input type="file" id="pe-file" class="vh" accept="image/*"></label><button type="button" id="pe-rmimg" hidden>Rimuovi immagine</button></div></div>
+      <div class="pe-imgbtns"><label class="filebtn">Scegli immagine<input type="file" id="pe-file" class="vh" accept="image/*"></label><button type="button" id="pe-crop" hidden>Ritaglia</button><button type="button" id="pe-rmimg" hidden>Rimuovi immagine</button></div></div>
     <div class="lab"><label for="pe-tag">Etichette</label>
       <span class="tagin"><input id="pe-tag" list="tag-list" autocomplete="off" placeholder="es. alleato, Kalderon"><button type="button" id="pe-tagadd">Aggiungi</button></span></div>
     <datalist id="tag-list"></datalist>
@@ -466,6 +481,13 @@ h2.bag .info-i{font-size:14px}
     <p class="err" id="pe-err"></p>
     <div class="rollrow"><button class="pri" type="submit">Salva</button><button type="button" id="pe-cancel">Annulla</button><button type="button" class="danger" id="pe-del">Elimina personaggio</button></div>
   </form>
+</dialog>
+
+<dialog id="cropdlg" aria-labelledby="cr-t">
+  <div class="dlg-h"><h3 id="cr-t" tabindex="-1" autofocus>Ritaglia l'immagine</h3></div>
+  <p class="note">Trascina gli angoli per scegliere la parte da tenere. Trascina il riquadro per spostarlo.</p>
+  <div class="crop" id="crop"><img id="cr-img" alt=""><div class="sel" id="cr-sel"><i data-h="nw"></i><i data-h="ne"></i><i data-h="sw"></i><i data-h="se"></i></div></div>
+  <div class="rollrow"><button class="pri" id="cr-ok">Usa ritaglio</button><button id="cr-full">Usa intera</button><button id="cr-cancel">Annulla</button></div>
 </dialog>
 
 <dialog id="viewdlg" aria-labelledby="vw-name">
@@ -509,6 +531,10 @@ const GLY={
    <circle cx="43" cy="43" r="23" fill="none" stroke="#000" stroke-width="2.6"/>
    <path d="M29 51 L31.5 34 L37.5 42 L43 29 L48.5 42 L54.5 34 L57 51 Z"/>
    <path d="M30 56 L56 56" stroke="#000" stroke-width="3.4"/>`},
+ people:{pos:`<circle cx="33" cy="30" r="11"/><path d="M11 82 Q11 54 33 52 Q55 54 55 82 Z"/>
+   <path d="M86 6 L88 12 L94 14 L88 16 L86 22 L84 16 L78 14 L84 12 Z"/>`,
+  cut:`<g stroke="#000" stroke-width="7" stroke-linejoin="round"><circle cx="58" cy="40" r="13"/><path d="M33 92 Q33 62 58 60 Q83 62 83 92 Z"/></g>`,
+  top:`<circle cx="58" cy="40" r="13"/><path d="M33 92 Q33 62 58 60 Q83 62 83 92 Z"/>`},
  head:{pos:`<path d="M30 84 L30 44 Q30 14 50 12 Q70 14 70 44 L70 84 Q50 90 30 84 Z"/><path d="M22 92 Q50 82 78 92 L80 97 L20 97 Z"/>`,
   cut:`<rect x="35" y="44" width="12.5" height="5" rx="1.5"/><rect x="52.5" y="44" width="12.5" height="5" rx="1.5"/>
    <path d="M50 13 L50 42 M50 51 L50 88" stroke="#000" stroke-width="2.6"/>
@@ -844,7 +870,7 @@ function openPerson(id){const p=id?S.people.find(x=>x.id===id):null;
   $("tag-list").innerHTML=[...new Set(S.people.flatMap(x=>x.tags))].map(t=>`<option value="${esc(t)}">`).join("");
   renderPeTags();renderPeImg();openDlg(pdlg);}
 function renderPeTags(){$("pe-tags").innerHTML=pe.tags.map((t,i)=>`<span class="tag">${esc(t)}<button type="button" data-rt="${i}" aria-label="Togli etichetta ${esc(t)}">×</button></span>`).join("")}
-function renderPeImg(){const show=u=>{$("pe-img").innerHTML=u?`<img src="${u}" alt="">`:`<span class="note">Nessuna immagine</span>`;$("pe-rmimg").hidden=!u};
+function renderPeImg(){const show=u=>{$("pe-img").innerHTML=u?`<img src="${u}" alt="">`:`<span class="note">Nessuna immagine</span>`;$("pe-rmimg").hidden=!u;$("pe-crop").hidden=!u};
   if(pe.blob){if(pe.blobURL)URL.revokeObjectURL(pe.blobURL);pe.blobURL=URL.createObjectURL(pe.blob);show(pe.blobURL)}
   else if(pe.hadImg&&!pe.removeImg)imgURL(pe.id).then(show).catch(()=>show(null));else show(null);}
 $("pe-tags").onclick=e=>{const b=e.target.closest("[data-rt]");if(!b)return;pe.tags.splice(+b.dataset.rt,1);renderPeTags()};
@@ -853,7 +879,9 @@ $("pe-tagadd").onclick=addTag;
 $("pe-tag").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addTag()}});
 $("pe-file").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
   if(!/^image\//.test(f.type)){$("pe-err").textContent="Il file scelto non è un'immagine.";return}
-  pe.blob=f;pe.removeImg=false;$("pe-err").textContent="";renderPeImg()};
+  $("pe-err").textContent="";openCrop(f,b=>{if(!pe)return;pe.blob=b;pe.removeImg=false;renderPeImg()})};
+$("pe-crop").onclick=async()=>{let b=pe.blob;if(!b){try{b=await IDB.get(pe.id)}catch(e){}}
+  if(b)openCrop(b,nb=>{if(!pe)return;pe.blob=nb;pe.removeImg=false;renderPeImg()})};
 $("pe-rmimg").onclick=()=>{pe.blob=null;pe.removeImg=true;renderPeImg()};
 function closePe(){if(pe&&pe.blobURL)URL.revokeObjectURL(pe.blobURL);pe=null;closeDlg(pdlg)}
 $("pe-cancel").onclick=closePe;
@@ -872,6 +900,32 @@ $("pe-del").onclick=()=>{const b=$("pe-del");
   if(!peArm){b.textContent="Tocca di nuovo per eliminare";peArm=setTimeout(()=>{peArm=null;b.textContent="Elimina personaggio"},3000);return}
   clearTimeout(peArm);peArm=null;const id=pe.id,p=S.people.find(x=>x.id===id);closePe();
   if(p)act(()=>{S.people=S.people.filter(x=>x.id!==id);log(`Personaggio eliminato: ${esc(p.name)}.`)});};
+/* ---------- Ritaglio libero ---------- */
+const cdlg=$("cropdlg");let cr=null,drag=null;
+function openCrop(blob,onDone){const url=URL.createObjectURL(blob),im=$("cr-img");cr={blob,url,onDone};
+  im.onload=()=>{openDlg(cdlg);requestAnimationFrame(()=>{if(!cr)return;cr.W=im.clientWidth;cr.H=im.clientHeight;
+    cr.sel={x:cr.W*.1,y:cr.H*.1,w:cr.W*.8,h:cr.H*.8};drawSel()})};
+  im.onerror=()=>{URL.revokeObjectURL(url);cr=null;$("pe-err").textContent="Non riesco ad aprire questa immagine."};
+  im.src=url;}
+function drawSel(){const s=cr.sel,e=$("cr-sel");e.style.left=s.x+"px";e.style.top=s.y+"px";e.style.width=s.w+"px";e.style.height=s.h+"px"}
+const csel=$("cr-sel");
+csel.addEventListener("pointerdown",e=>{if(!cr||!cr.sel)return;e.preventDefault();drag={h:e.target.dataset.h||"move",x0:e.clientX,y0:e.clientY,s:{...cr.sel}};csel.setPointerCapture(e.pointerId)});
+csel.addEventListener("pointermove",e=>{if(!drag||!cr)return;const dx=e.clientX-drag.x0,dy=e.clientY-drag.y0,W=cr.W,H=cr.H,M=24,s={...drag.s};
+  if(drag.h==="move"){s.x=Math.min(Math.max(0,s.x+dx),W-s.w);s.y=Math.min(Math.max(0,s.y+dy),H-s.h)}
+  else{let x1=s.x,y1=s.y,x2=s.x+s.w,y2=s.y+s.h;
+    if(drag.h.includes("w"))x1=Math.min(Math.max(0,x1+dx),x2-M);if(drag.h.includes("e"))x2=Math.max(Math.min(W,x2+dx),x1+M);
+    if(drag.h.includes("n"))y1=Math.min(Math.max(0,y1+dy),y2-M);if(drag.h.includes("s"))y2=Math.max(Math.min(H,y2+dy),y1+M);
+    Object.assign(s,{x:x1,y:y1,w:x2-x1,h:y2-y1})}
+  cr.sel=s;drawSel()});
+["pointerup","pointercancel"].forEach(ev=>csel.addEventListener(ev,()=>{drag=null}));
+function endCrop(){if(cr)URL.revokeObjectURL(cr.url);cr=null;closeDlg(cdlg)}
+$("cr-cancel").onclick=endCrop;
+$("cr-full").onclick=()=>{const c=cr;endCrop();if(c)c.onDone(c.blob)};
+$("cr-ok").onclick=()=>{if(!cr||!cr.sel)return;const im=$("cr-img"),k=im.naturalWidth/cr.W,s=cr.sel,cv=document.createElement("canvas");
+  cv.width=Math.max(1,Math.round(s.w*k));cv.height=Math.max(1,Math.round(s.h*k));
+  cv.getContext("2d").drawImage(im,s.x*k,s.y*k,s.w*k,s.h*k,0,0,cv.width,cv.height);
+  const c=cr,type=c.blob.type==="image/png"?"image/png":"image/jpeg";
+  cv.toBlob(b=>{endCrop();if(b)c.onDone(b)},type,.92)};
 const vdlg=$("viewdlg");
 function openViewer(id){const p=S.people.find(x=>x.id===id);if(!p)return;$("vw-name").textContent=p.name;$("vw-img").removeAttribute("src");$("vw-img").alt=p.name;
   imgURL(id).then(u=>{if(u)$("vw-img").src=u}).catch(()=>{});openDlg(vdlg)}
