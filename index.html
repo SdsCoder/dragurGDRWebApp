@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dragur</title>
+<meta name="description" content="Scheda di Nefastor: Vigore, Spirito, incantesimi, inventario e personaggi.">
+<meta name="theme-color" content="#eceae4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141312" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: barra fissa vita/mana in alto; poi incantesimi (colonna 1) e scheda (colonna 2); cronaca in fondo */
+:root{
+  --paper:#eceae4; --sheet:#f7f6f2; --ink:#1d1c1a; --muted:#5f5b52; --line:#c9c4b8;
+  --bronze:#7a5a1f; --bronze-soft:#efe4cc; --danger:#a3352a;
+  --hp:#b8342a; --mp:#2e5ea8; --track:#2b2825; --on-bar:#ffffff;
+  --f-display:"IM Fell English SC", "Palatino Linotype", Georgia, serif;
+  --f-body:"Alegreya", Georgia, serif;
+  --f-num:"JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#141312; --sheet:#1d1c1a; --ink:#ebe6da; --muted:#a39d90; --line:#3a3731;
+  --bronze:#d4a95a; --bronze-soft:#2e2619; --danger:#e07a6a;
+  --hp:#c9443a; --mp:#3f74c4; --track:#0b0a09; --on-bar:#ffffff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#141312; --sheet:#1d1c1a; --ink:#ebe6da; --muted:#a39d90; --line:#3a3731;
+  --bronze:#d4a95a; --bronze-soft:#2e2619; --danger:#e07a6a;
+  --hp:#c9443a; --mp:#3f74c4; --track:#0b0a09; --on-bar:#ffffff; color-scheme:dark}
+body{background:var(--paper);color:var(--ink);font:17px/1.45 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--paper)}
+.wrap{max-width:1040px;margin:0 auto;display:grid;gap:16px}
+.cols{display:grid;gap:16px;align-items:start}
+.cols>div{display:grid;gap:16px;min-width:0}
+@media(min-width:860px){.cols{grid-template-columns:1fr 1fr}}
+header.who{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+h1{font:clamp(30px,7vw,42px)/1 var(--f-display);margin:0;letter-spacing:.02em}
+.sub{color:var(--muted);font-style:italic}
+section{background:var(--sheet);border:1px solid var(--line);padding:14px 16px;min-width:0}
+h2{font:22px/1.1 var(--f-display);margin:0 0 10px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;text-wrap:balance}
+h2 small{font:13px var(--f-body);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.cap{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.note{font-size:14px;color:var(--muted);margin:0}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+input,textarea{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);padding:6px 8px;min-width:0;box-sizing:border-box}
+textarea{width:100%;min-height:120px;resize:vertical;line-height:28px;background:var(--sheet);border:0;padding:0;
+  background-image:repeating-linear-gradient(transparent 0 27px,var(--line) 27px 28px)}
+button{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--ink);cursor:pointer;padding:4px 10px;min-height:34px}
+button:hover{background:var(--bronze-soft)}
+button.pri{background:var(--ink);color:var(--sheet)}
+button.pri:hover{background:var(--bronze);border-color:var(--bronze)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button:disabled:hover{background:var(--sheet)}
+button.pri:disabled:hover{background:var(--ink);border-color:var(--ink)}
+:focus-visible{outline:2px solid var(--bronze);outline-offset:2px}
+.sq{width:34px;padding:0}
+.ctl{display:flex;align-items:center;gap:6px}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.rollrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* HUD fisso */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);padding-block:8px 10px;border-bottom:3px double var(--ink);
+  display:grid;grid-template-columns:1fr auto;gap:8px;align-items:stretch}
+.bars{display:grid;gap:6px;min-width:0}
+.bar-row{display:grid;grid-template-columns:36px 1fr 36px;gap:6px;align-items:center}
+.bar-row button{height:34px}
+.gauge{position:relative;height:34px;background:var(--track);border:1px solid var(--ink);overflow:hidden}
+.gauge i{position:absolute;inset:0 auto 0 0;transition:width .25s}
+.gauge.hp i{background:var(--hp)} .gauge.mp i{background:var(--mp)}
+.gauge span{position:relative;display:flex;justify-content:space-between;align-items:center;height:100%;padding:0 10px;color:var(--on-bar);text-shadow:0 1px 2px rgba(0,0,0,.8)}
+.gauge span b{font:17px var(--f-display);letter-spacing:.04em;font-weight:400}
+.gauge span em{font:15px var(--f-num);font-style:normal}
+.gauge.warn{box-shadow:0 0 0 2px var(--danger)}
+.gauge.warn i{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.logbtn{display:grid;place-items:center;gap:2px;padding:4px 12px;min-width:84px}
+.logbtn small{font:12px var(--f-num);color:inherit;opacity:.8}
+
+/* Incantesimi */
+.sp{border-top:1px solid var(--line)}
+.sp:first-child{border-top:0}
+.sp-h{width:100%;display:grid;grid-template-columns:1fr auto 14px;gap:10px;align-items:center;background:transparent;border:0;padding:8px 4px;text-align:left;min-height:48px}
+.sp-n{font:21px var(--f-display)}
+.sp-c{font:13px var(--f-num);color:var(--muted)}
+.chev::before{content:"";display:block;width:8px;height:8px;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:translateY(-2px) rotate(45deg);transition:transform .2s}
+.sp-h[aria-expanded="true"] .chev::before{transform:translateY(2px) rotate(-135deg)}
+.sp-h[aria-expanded="true"]{background:var(--bronze-soft)}
+.sp-b{padding:10px 4px 14px;display:grid;gap:10px}
+.sp-b dl{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:0;font-size:15px}
+.sp-b dt{color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding-top:3px}
+.sp-b dd{margin:0}
+.sp-b p{margin:0}
+.sp-b ul{margin:0;padding-left:20px;display:grid;gap:4px;font-size:15px}
+.lv{display:flex;gap:6px;flex-wrap:wrap}
+.lv button{min-width:68px;min-height:40px}
+.lv button[aria-pressed="true"]{background:var(--mp);border-color:var(--mp);color:var(--on-bar)}
+.castbox{border:1px solid var(--line);background:var(--paper);padding:10px 12px;display:grid;gap:8px}
+.castbox h3{font:18px var(--f-display);margin:0;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.castbox h3 small{font:12px var(--f-body);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.ex{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:15px}
+.ex .num{min-width:1.6em;text-align:center}
+details{font-size:14px;color:var(--muted)}
+summary{cursor:pointer}
+details ul{margin:6px 0 0;padding-left:20px;display:grid;gap:3px}
+.cast{min-height:46px;font-size:19px}
+#nomana{width:100%;margin-top:10px;min-height:46px}
+
+/* Caratteristiche */
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.legend span{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--muted)}
+.st{display:grid;grid-template-columns:minmax(7.5em,auto) auto 1fr;gap:4px 12px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.st:first-child{border-top:0}
+.st-n{display:grid}
+.st-n b{font:20px var(--f-display);font-weight:400}
+.st-l{display:flex;align-items:center;gap:6px}
+.lvln{min-width:1.8em;text-align:center;font-size:16px}
+.st-p{display:flex;gap:6px;flex-wrap:wrap}
+@media(max-width:520px){.st{grid-template-columns:1fr auto}.st-p{grid-column:1/-1}}
+.pip{width:30px;height:30px;min-height:30px;padding:0;border-radius:50%;border:2px solid var(--bronze);background:var(--bronze)}
+.pip.dtm{border-radius:3px;transform:rotate(45deg) scale(.82);border-color:var(--ink);background:var(--ink)}
+.pip:hover{background:var(--bronze-soft)}
+.pip.dtm:hover{background:var(--line)}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--bronze)}
+.dot.dtm{border-radius:2px;transform:rotate(45deg) scale(.85);background:var(--ink)}
+#editlvl[aria-pressed="true"]{background:var(--bronze-soft);border-color:var(--bronze)}
+
+/* Difesa */
+.body{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.loc{border:1px solid var(--line);padding:6px 4px;display:grid;gap:2px;justify-items:center}
+.loc b{font:15px var(--f-display);font-weight:400}
+.loc .d{font-size:12px;color:var(--muted)}
+.loc input{width:3.2em;text-align:center;font-family:var(--f-num);padding:2px}
+.g-head{grid-column:2}.g-shield{grid-column:3;grid-row:1}
+
+/* Inventario */
+.wbar{height:8px;background:var(--line);position:relative;overflow:hidden;margin-bottom:10px}
+.wbar i{position:absolute;inset:0 auto 0 0;background:var(--bronze)}
+.over .wbar i{background:var(--danger)}
+.over #w-tot{color:var(--danger)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;border:1px solid var(--ink);background:var(--sheet);max-width:100%}
+.chip.on{box-shadow:0 0 0 2px var(--bronze)}
+.chip-b{border:0;background:transparent;display:inline-flex;gap:8px;align-items:center;padding:4px 8px 4px 10px;text-align:left;min-width:0}
+.chip-b b{font:13px var(--f-num);font-weight:500;background:var(--bronze-soft);padding:1px 6px;flex:none}
+.chip-x{border:0;border-left:1px solid var(--line);background:transparent;width:34px;padding:0;font-size:19px;line-height:1}
+.chip-x:hover{background:var(--danger);color:var(--sheet)}
+.itemform{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+#it-name{flex:1 1 10em}
+#it-w{flex:0 0 5.5em;font-family:var(--f-num)}
+.err{color:var(--danger);font-size:14px;margin:4px 0 0}
+.err:empty{display:none}
+.sub-h{font:17px var(--f-display);margin:16px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
+.coins{display:grid;gap:6px}
+.coins .val{min-width:2.2em;text-align:center}
+.chk{display:flex;gap:8px;align-items:center}
+.chk input{width:20px;height:20px;accent-color:var(--bronze)}
+
+/* Registro */
+dialog{background:var(--sheet);color:var(--ink);border:1px solid var(--ink);padding:16px;width:min(600px,calc(100vw - 32px));max-height:82vh;box-sizing:border-box}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.dlg-h h3{font:24px var(--f-display);margin:0}
+#log{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px;font-size:15px}
+#log li{border-left:3px solid var(--mp);padding-left:8px}
+#log li time{font:12px var(--f-num);color:var(--muted);margin-right:6px}
+.danger{border-color:var(--danger);color:var(--danger)}
+/* Difesa compatta */
+.def-top{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dv{border:1px solid var(--line);padding:8px 6px;display:grid;justify-items:center;align-content:start;gap:4px;text-align:center}
+.dv b{font:36px/1 var(--f-display);font-weight:400}
+.dv.stone b{color:var(--muted)}
+.dv.stone.on{background:var(--bronze-soft);border-color:var(--bronze)}
+.dv.stone.on b{color:var(--ink)}
+.hitrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+#hit-n{width:4.5em;font-family:var(--f-num)}
+#hit-r{font:20px var(--f-display)}
+/* Tabella inventario */
+.tablewrap{overflow-x:auto}
+.itab{width:100%;border-collapse:collapse;font-size:15px}
+.itab th{text-align:left;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:400;border-bottom:1px solid var(--ink);padding:4px 6px}
+.itab td{border-bottom:1px solid var(--line);padding:3px 6px;vertical-align:middle}
+.itab .w{text-align:right;font-family:var(--f-num);width:4.5em}
+.itab .a{width:1%;white-space:nowrap;text-align:right}
+.itab .a button{min-height:30px;padding:2px 8px;font-size:14px}
+.itab .a .del{width:32px;padding:0;font-size:18px;margin-left:4px}
+.itab .a .del:hover{background:var(--danger);color:var(--sheet)}
+.itab tr.on td{background:var(--bronze-soft)}
+.itab tfoot td{border-bottom:0;font-weight:600;padding-top:6px}
+/* Registro: voci cancellabili */
+#log li{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.lx{flex:none;width:28px;min-height:28px;padding:0;border-color:var(--line);color:var(--muted);font-size:16px;line-height:1}
+.lx:hover{background:var(--danger);color:var(--sheet);border-color:var(--danger)}
+.rbtns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.rbtns button{min-height:48px;font:20px var(--f-num)}
+#stone-c p{margin:0 0 10px}
+/* Pop-up zona colpita */
+#hitdlg{width:min(320px,calc(100vw - 32px));text-align:center}
+.fig{color:var(--bronze);width:190px;max-width:100%;height:auto;display:block;margin:0 auto 6px}
+
+.hit-txt{font:26px var(--f-display);margin:0 0 12px}
+#hit-ok{min-width:120px;min-height:44px}
+/* Inventario a righe */
+#items{list-style:none;margin:0;padding:0;display:grid}
+.it{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--line);padding:3px 0}
+.it-b{flex:1;display:flex;justify-content:space-between;align-items:center;gap:10px;border:0;background:transparent;text-align:left;padding:3px 6px;position:relative;overflow:hidden;min-width:0;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y}
+.it-b::before{content:"";position:absolute;inset:0 100% 0 0;background:var(--bronze-soft)}
+.it-b.pressing::before{right:0;transition:right 2s linear}
+.it-b>*{position:relative}
+.it-n{min-width:0}
+.wt{position:relative;width:40px;height:36px;flex:none;color:var(--ink)}
+.wt svg{width:100%;height:100%;display:block}
+.wt circle{fill:none;stroke:currentColor;stroke-width:3}
+.wt path{fill:currentColor}
+.wt span{position:absolute;left:0;right:0;bottom:4px;text-align:center;font:12px var(--f-num);color:var(--sheet)}
+.it .del{width:34px;padding:0;font-size:18px;border-color:var(--line)}
+.it .del:hover{background:var(--danger);color:var(--sheet);border-color:var(--danger)}
+.it .use{min-height:34px}
+/* Pop-up oggetto */
+.ie{display:grid;gap:10px}
+.ie label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.ie input,.ie textarea{font-size:16px;color:var(--ink)}
+.ie textarea{background:var(--paper);border:1px solid var(--line);padding:6px 8px;line-height:1.4;min-height:72px;background-image:none}
+.ie-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ie .chk{display:flex;color:var(--ink);font-size:15px}
+/* Info borsa */
+.bag{display:flex;align-items:center;gap:8px}
+.info-i{width:24px;height:24px;min-height:24px;padding:0;border-radius:50%;font:italic 600 14px/1 var(--f-body)}
+.bubble{position:relative;background:var(--ink);color:var(--sheet);font-size:14px;padding:8px 10px;margin:0 0 10px;max-width:34em}
+.bubble::before{content:"";position:absolute;top:-6px;left:58px;border:6px solid transparent;border-top:0;border-bottom-color:var(--ink)}
+/* Personaggi */
+#pp-add{font:15px var(--f-body)}
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.pc{display:flex;gap:10px;border:1px solid var(--line);background:var(--paper);padding:8px;min-width:0}
+.pc-img{flex:none;width:64px;height:64px;padding:0;border:1px solid var(--ink);overflow:hidden;background:var(--sheet)}
+.pc-img img{width:100%;height:100%;object-fit:cover;display:block}
+.pc-ph{display:grid;place-items:center;font:22px var(--f-display);color:var(--muted);border-color:var(--line)}
+.pc-b{flex:1;min-width:0;display:grid;gap:5px;align-content:start;border:0;background:transparent;text-align:left;padding:0 2px}
+.pc-b:hover{background:transparent}
+.pc-b:hover .pc-h b{text-decoration:underline;text-decoration-color:var(--bronze)}
+.pc-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pc-h b{font:19px var(--f-display);font-weight:400;overflow-wrap:anywhere}
+.pen{width:18px;height:18px;flex:none;fill:none;stroke:var(--muted);stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;letter-spacing:.04em;border:1px solid var(--bronze);color:var(--ink);background:var(--bronze-soft);padding:1px 8px;border-radius:999px}
+.tag button{border:0;background:transparent;min-height:0;padding:0 2px;font-size:15px;line-height:1}
+.pc-n{font-size:14px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+.pe-imgrow{display:flex;gap:12px;align-items:center}
+.pe-img{width:88px;height:88px;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex:none;text-align:center;padding:4px;box-sizing:border-box}
+.pe-img img{width:calc(100% + 8px);height:calc(100% + 8px);object-fit:cover;margin:-4px}
+.pe-imgbtns{display:grid;gap:6px;justify-items:start}
+.filebtn,.ie .filebtn{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--ink);padding:4px 10px;min-height:34px;cursor:pointer;color:var(--ink);font-size:16px;background:var(--sheet)}
+.filebtn:hover{background:var(--bronze-soft)}
+.filebtn{position:relative;overflow:hidden}
+.vh{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}
+.filebtn:focus-within{outline:2px solid var(--bronze);outline-offset:2px}
+.lab{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.tagin{display:flex;gap:6px}
+.tagin input{flex:1;font-size:16px}
+#viewdlg{width:min(900px,calc(100vw - 24px));max-height:92vh;padding:12px}
+#vw-img{display:block;max-width:100%;max-height:76vh;margin:0 auto;object-fit:contain}
+/* Backup */
+.bk{margin-top:14px;font-size:15px;color:var(--ink);border-top:1px solid var(--line);padding-top:10px}
+.bk summary{font:18px var(--f-display);color:var(--ink)}
+.bk-b{display:grid;gap:8px;margin-top:8px}
+.bk textarea{background:var(--paper);border:1px solid var(--line);padding:6px 8px;line-height:1.3;min-height:70px;background-image:none;font:12px var(--f-num)}
+/* Fila di icone */
+.dock{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.dk{display:grid;justify-items:center;gap:4px;border:0;background:transparent;padding:4px 0;min-width:0}
+.dk:hover{background:transparent}
+.dk .ico{width:min(58px,100%);height:auto;display:block;color:var(--bronze);transition:transform .15s}
+.dk{position:relative;padding-bottom:8px}
+.dk::after{content:"";position:absolute;left:25%;right:25%;bottom:0;height:3px;background:var(--bronze);opacity:0;transition:opacity .15s}
+.dk[aria-expanded="true"]::after{opacity:1}
+.dk:hover .ico{transform:translateY(-2px)}
+.dk small{font-size:clamp(9.5px,2.7vw,13px);white-space:nowrap;letter-spacing:.02em;color:var(--muted)}
+.dk[aria-expanded="true"] small{color:var(--ink)}
+.secs{display:grid;gap:16px;align-items:start}
+@media(min-width:860px){.secs{grid-template-columns:1fr 1fr}}
+.sec{scroll-margin-top:110px}
+h2.bag{justify-content:flex-start;align-items:center}
+h2.bag .info-i{font-size:14px}
+.bubble::before{left:72px}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+<header class="who">
+  <h1>Nefastor</h1><span class="sub">Umano anziano · Mago · Livello <span class="num">1</span></span>
+</header>
+
+<div class="hud" role="region" aria-label="Vigore e Spirito">
+  <div class="bars">
+    <div class="bar-row">
+      <button class="sq" id="m-vig" aria-label="Vigore meno uno">−</button>
+      <div class="gauge hp" id="gauge-vig"><i id="g-vig"></i><span><b>Vigore</b><em id="t-vig"></em></span></div>
+      <button class="sq" id="p-vig" aria-label="Vigore più uno">+</button>
+    </div>
+    <div class="bar-row">
+      <button class="sq" id="m-spi" aria-label="Spirito meno uno">−</button>
+      <div class="gauge mp" id="gauge-spi"><i id="g-spi"></i><span><b>Spirito</b><em id="t-spi"></em></span></div>
+      <button class="sq" id="p-spi" aria-label="Spirito più uno">+</button>
+    </div>
+  </div>
+  <button class="logbtn pri" id="logbtn">Registro<small id="log-n"></small></button>
+</div>
+
+<nav class="dock" aria-label="Sezioni della scheda">
+  <button class="dk" data-sec="sec-spells" data-ico="spells" aria-expanded="false" aria-controls="sec-spells"><span class="dk-i"></span><small>Incantesimi</small></button>
+  <button class="dk" data-sec="sec-stats" data-ico="stats" aria-expanded="false" aria-controls="sec-stats"><span class="dk-i"></span><small>Caratteristiche</small></button>
+  <button class="dk" data-sec="sec-def" data-ico="def" aria-expanded="false" aria-controls="sec-def"><span class="dk-i"></span><small>Difesa</small></button>
+  <button class="dk" data-sec="inv-sec" data-ico="inv" aria-expanded="false" aria-controls="inv-sec"><span class="dk-i"></span><small>Inventario</small></button>
+  <button class="dk" data-sec="sec-coin" data-ico="coin" aria-expanded="false" aria-controls="sec-coin"><span class="dk-i"></span><small>Borsa</small></button>
+</nav>
+
+<div class="secs">
+<section id="sec-spells" class="sec" hidden>
+  <h2>Incantesimi <small>uno aperto alla volta</small></h2>
+  <div id="spell-list"></div>
+  <button id="nomana" disabled hidden>Ricarica punti Spirito</button>
+
+  <div class="castbox" id="castbox" hidden>
+    <h3>Potenziamento Estensivo <small>abilità · +1 PS ciascuno</small></h3>
+    <div id="ext"></div>
+    <details>
+      <summary>Come funziona</summary>
+      <ul>
+        <li>Si sceglie al lancio, nel proprio turno, finché il Mago ha PS.</li>
+        <li>+1 bersaglio: negli incantesimi con danno il totale si distribuisce liberamente; negli altri estende le creature influenzate.</li>
+        <li>Durata +1 round oltre la durata naturale.</li>
+        <li>Gittata +2 m. Area +2 m dall'epicentro (raggio 4 m → 6 m).</li>
+        <li>Gli effetti si combinano: +2 bersagli e +1 round = 3 PS aggiuntivi.</li>
+      </ul>
+    </details>
+    <button class="pri cast" id="cast">Lancia</button>
+  </div>
+</section>
+
+<section id="sec-stats" class="sec" hidden>
+  <h2>Caratteristiche <small>tocca: MOD ⇄ DTM</small></h2>
+  <div class="legend"><span><i class="dot"></i>MOD disponibile</span><span><i class="dot dtm"></i>DTM</span></div>
+  <div id="stats"></div>
+  <div class="rollrow" style="margin-top:10px">
+    <button id="editlvl" aria-pressed="false">Modifica livelli</button>
+    <button id="rest">Riposo</button>
+    <button id="sleep">Dormi</button>
+  </div>
+  <p class="note" style="margin-top:8px">Riposo: + MOD Tenacia al Vigore, azzera i DTM. Dormi: come il riposo, più MOD Intelletto + MOD Volontà allo Spirito.</p>
+</section>
+
+<section id="sec-def" class="sec" hidden>
+  <h2>Difesa</h2>
+  <div class="def-top">
+    <div class="dv"><span class="cap">Corpo</span><b>1</b></div>
+    <div class="dv stone" id="stone-box"><span class="cap">Pietra</span><b id="stone-v">+0</b>
+      <div class="ctl"><button class="sq" id="stone-m" aria-label="Pelle di Pietra: un round in meno" hidden>−</button><span class="note" id="stone-r"></span></div></div>
+    <div class="dv"><span class="cap">Mente</span><b>3</b></div>
+  </div>
+  <form class="hitrow" id="hitform" novalidate>
+    <label for="hit-n">Tiro d12</label><input id="hit-n" inputmode="numeric" autocomplete="off" placeholder="1–12">
+    <button class="pri" type="submit">OK</button>
+  </form>
+  <p class="err" id="hit-err"></p>
+</section>
+
+<section id="inv-sec" class="sec" hidden>
+  <h2>Inventario <small id="w-tot" class="num"></small></h2>
+  <div class="wbar"><i id="w-bar"></i></div>
+  <ul id="items"></ul>
+  <form class="itemform" id="itemform" novalidate>
+    <input id="it-name" aria-label="Nome oggetto" placeholder="Nome oggetto" autocomplete="off">
+    <input id="it-w" aria-label="Peso" placeholder="Peso" inputmode="decimal" autocomplete="off">
+    <button class="pri" type="submit" id="it-go">Aggiungi</button>
+  </form>
+  <p class="err" id="it-err"></p>
+  <p class="note" style="margin-top:6px">Tocca un consumabile per usarlo. Tieni premuto un oggetto per 2 secondi per vedere info e modificarlo.</p>
+
+  <h3 class="sub-h">Tratto</h3>
+  <label class="chk"><input type="checkbox" id="versa"> Versatilità Inarrestabile usata (1 per sessione)</label>
+  <p class="note" style="margin-top:6px">Movimento base 8 m · nessuna penalità su terra battuta/città e foresta/bosco · +2 ai test di IST di percezione su quei terreni.</p>
+
+  <h3 class="sub-h"><label for="inv-extra">Note</label></h3>
+  <textarea id="inv-extra" style="min-height:84px"></textarea>
+</section>
+
+<section id="sec-coin" class="sec" hidden>
+  <h2 class="bag">Borsa <button class="info-i" id="coin-i" aria-expanded="false" aria-controls="coin-tip" aria-label="Come funziona la borsa">i</button></h2>
+  <div class="bubble" id="coin-tip" hidden>10 rame = 1 argento, 10 argento = 1 oro. Il cambio è automatico: il decimo rame diventa 1 argento, e se togli un rame quando sei a 0 si spezza una moneta più grande.</div>
+  <div class="coins">
+    <div class="row"><span>Oro</span><div class="ctl"><button class="sq" data-coin="-100" aria-label="Oro meno uno">−</button><span class="val num" id="c-oro"></span><button class="sq" data-coin="100" aria-label="Oro più uno">+</button></div></div>
+    <div class="row"><span>Argento</span><div class="ctl"><button class="sq" data-coin="-10" aria-label="Argento meno uno">−</button><span class="val num" id="c-arg"></span><button class="sq" data-coin="10" aria-label="Argento più uno">+</button></div></div>
+    <div class="row"><span>Rame</span><div class="ctl"><button class="sq" data-coin="-1" aria-label="Rame meno uno">−</button><span class="val num" id="c-ram"></span><button class="sq" data-coin="1" aria-label="Rame più uno">+</button></div></div>
+  </div>
+</section>
+</div>
+
+<section id="pp-sec">
+  <h2>Personaggi <button class="pri" id="pp-add">Aggiungi personaggio</button></h2>
+  <div class="people" id="people"></div>
+</section>
+
+<section>
+  <h2>Cronaca <small>note di campagna</small></h2>
+  <textarea id="cronaca" aria-label="Cronaca" placeholder="Cosa è successo nell'ultima sessione…"></textarea>
+</section>
+</div>
+
+<dialog id="logdlg" aria-labelledby="log-t">
+  <div class="dlg-h"><h3 id="log-t">Registro</h3><button id="log-x">Chiudi</button></div>
+  <div class="rollrow">
+    <button class="pri" id="undo">Annulla ultima azione</button>
+    <button class="danger" id="reset">Reset completo</button>
+  </div>
+  <details class="bk"><summary>Backup della scheda</summary><div class="bk-b">
+    <p class="note">Salva tutta la scheda, per non perderla o per spostarla su un altro telefono.</p>
+    <div class="rollrow"><button id="bk-exp-img">Esporta con immagini</button><button id="bk-exp-no">Esporta senza immagini</button></div>
+    <textarea id="bk-out" readonly hidden aria-label="Testo del backup"></textarea>
+    <p class="note" id="bk-msg" aria-live="polite"></p>
+    <label class="cap" for="bk-in">Importa un backup</label>
+    <textarea id="bk-in" placeholder="Incolla qui il testo del backup, oppure carica il file"></textarea>
+    <div class="rollrow"><label class="filebtn">Carica file<input type="file" id="bk-file" class="vh" accept=".json,application/json,text/plain"></label><button class="pri" id="bk-imp">Importa</button></div>
+    <p class="err" id="bk-err"></p>
+    <p class="note">Importare sostituisce i valori della scheda. I personaggi e le immagini già sul telefono restano; quelli presenti nel backup aggiornano quelli uguali.</p>
+  </div></details>
+  <p class="note" style="margin-top:10px">Annulla riporta i valori a prima dell'ultima azione. La × toglie solo la riga dal registro.</p>
+  <ul id="log"></ul>
+</dialog>
+
+<dialog id="hitdlg" aria-labelledby="hit-txt">
+  <div id="hit-fig"></div>
+  <p id="hit-txt" class="hit-txt"></p>
+  <button class="pri" id="hit-ok">OK</button>
+</dialog>
+
+<dialog id="itemdlg" aria-labelledby="ie-t">
+  <form id="itemedit" class="ie" novalidate>
+    <div class="dlg-h"><h3 id="ie-t" tabindex="-1" autofocus>Oggetto</h3></div>
+    <label>Nome<input id="ie-name" autocomplete="off"></label>
+    <div class="ie-row"><label>Peso<input id="ie-w" inputmode="decimal" autocomplete="off"></label><label>Danno<input id="ie-dmg" autocomplete="off" placeholder="es. 1d4"></label></div>
+    <label>Note<textarea id="ie-note" rows="3"></textarea></label>
+    <label class="chk"><input type="checkbox" id="ie-cons"> Consumabile: un tocco mostra Usa</label>
+    <p class="err" id="ie-err"></p>
+    <div class="rollrow"><button class="pri" type="submit">Salva</button><button type="button" id="ie-cancel">Annulla</button></div>
+  </form>
+</dialog>
+
+<dialog id="persondlg" aria-labelledby="pe-t">
+  <form id="personform" class="ie" novalidate>
+    <div class="dlg-h"><h3 id="pe-t" tabindex="-1" autofocus>Personaggio</h3></div>
+    <label>Nome<input id="pe-name" autocomplete="off"></label>
+    <div class="pe-imgrow"><div class="pe-img" id="pe-img"></div>
+      <div class="pe-imgbtns"><label class="filebtn">Scegli immagine<input type="file" id="pe-file" class="vh" accept="image/*"></label><button type="button" id="pe-rmimg" hidden>Rimuovi immagine</button></div></div>
+    <div class="lab"><label for="pe-tag">Etichette</label>
+      <span class="tagin"><input id="pe-tag" list="tag-list" autocomplete="off" placeholder="es. alleato, Kalderon"><button type="button" id="pe-tagadd">Aggiungi</button></span></div>
+    <datalist id="tag-list"></datalist>
+    <div class="tags" id="pe-tags"></div>
+    <label>Cosa so di lui<textarea id="pe-notes" rows="4"></textarea></label>
+    <p class="err" id="pe-err"></p>
+    <div class="rollrow"><button class="pri" type="submit">Salva</button><button type="button" id="pe-cancel">Annulla</button><button type="button" class="danger" id="pe-del">Elimina personaggio</button></div>
+  </form>
+</dialog>
+
+<dialog id="viewdlg" aria-labelledby="vw-name">
+  <div class="dlg-h"><h3 id="vw-name"></h3><button id="vw-x">Chiudi</button></div>
+  <img id="vw-img" alt="">
+</dialog>
+
+<dialog id="stonedlg" aria-labelledby="st-t">
+  <div class="dlg-h"><h3 id="st-t">Pelle di Pietra</h3><button id="st-x">Chiudi</button></div>
+  <div id="stone-c"></div>
+</dialog>
+
+<script>
+/* Icone piatte a un colore con tagli in negativo (stile glifo). Disegno originale. */
+const GLY={
+ spells:{pos:`<rect x="27" y="17" width="46" height="66" rx="4"/>
+   <path d="M60 80 L60 92 L64.5 88 L69 92 L69 80 Z"/>
+   <path d="M13 34 L15.5 41.5 L23 44 L15.5 46.5 L13 54 L10.5 46.5 L3 44 L10.5 41.5 Z"/>
+   <path d="M87 54 L89 59.5 L94.5 61.5 L89 63.5 L87 69 L85 63.5 L79.5 61.5 L85 59.5 Z"/>`,
+  cut:`<rect x="34" y="17" width="3.2" height="66"/>
+   <path d="M55 29 L71 50 L55 71 L39 50 Z" fill="none" stroke="#000" stroke-width="2.6" stroke-linejoin="round"/>
+   <path d="M55 41 L55 62 M55 48 L48.5 41.5 M55 48 L61.5 41.5" fill="none" stroke="#000" stroke-width="3.6" stroke-linecap="round"/>`},
+ stats:{pos:`<circle cx="50" cy="22" r="10"/>
+   <path d="M33 37 Q50 31 67 37 L76 62 Q77 67 72 67 L66 52 L65 63 L64 86 Q63.5 90 59.5 90 L55.5 90 L52.5 66 L47.5 66 L44.5 90 L40.5 90 Q36.5 90 36 86 L35 63 L34 52 L28 67 Q23 67 24 62 Z"/>
+   <path d="M12 76 L14 81 L19 83 L14 85 L12 90 L10 85 L5 83 L10 81 Z"/><path d="M88 76 L90 81 L95 83 L90 85 L88 90 L86 85 L81 83 L86 81 Z"/>`,
+  cut:`<path d="M37 60 L63 60" stroke="#000" stroke-width="3.2" fill="none"/><path d="M50 40 L50 57" stroke="#000" stroke-width="2.6" fill="none"/>
+   <path d="M43 50 L57 50" stroke="#000" stroke-width="2.6" fill="none"/>`},
+ def:{pos:`<path d="M50 12 L82 23 Q83 62 50 90 Q17 62 18 23 Z"/>
+   <path d="M8 30 L18 34 L18 44 Z"/><path d="M92 30 L82 34 L82 44 Z"/>`,
+  cut:`<path d="M50 19.5 L75.5 28.5 Q76 59 50 82 Q24 59 24.5 28.5 Z" fill="none" stroke="#000" stroke-width="3.4"/>
+   <path d="M50 33 L50 70 M50 39 L40 50 L50 61 L60 50 Z" fill="none" stroke="#000" stroke-width="4" stroke-linejoin="round"/>`},
+ inv:{pos:`<path d="M41 27 Q41 13 50 13 Q59 13 59 27 L54.5 27 Q54.5 18 50 18 Q45.5 18 45.5 27 Z"/>
+   <rect x="26" y="25" width="48" height="62" rx="13"/>
+   <rect x="17" y="44" width="7" height="30" rx="3.5"/><rect x="76" y="44" width="7" height="30" rx="3.5"/>`,
+  cut:`<path d="M27 45 Q50 55 73 45" fill="none" stroke="#000" stroke-width="3.4"/>
+   <rect x="46" y="44" width="8" height="10" rx="1.5"/><rect x="48.5" y="46.5" width="3" height="5" fill="#fff"/>
+   <rect x="35" y="62" width="30" height="17" rx="3" fill="none" stroke="#000" stroke-width="3"/>
+   <path d="M35 68 L65 68" stroke="#000" stroke-width="2.4"/>`},
+ coin:{pos:`<circle cx="60" cy="61" r="25"/><circle cx="43" cy="43" r="29"/>`,
+  cut:`<circle cx="43" cy="43" r="32" fill="none" stroke="#000" stroke-width="4.5"/>
+   <circle cx="43" cy="43" r="23" fill="none" stroke="#000" stroke-width="2.6"/>
+   <path d="M29 51 L31.5 34 L37.5 42 L43 29 L48.5 42 L54.5 34 L57 51 Z"/>
+   <path d="M30 56 L56 56" stroke="#000" stroke-width="3.4"/>`},
+ head:{pos:`<path d="M30 84 L30 44 Q30 14 50 12 Q70 14 70 44 L70 84 Q50 90 30 84 Z"/><path d="M22 92 Q50 82 78 92 L80 97 L20 97 Z"/>`,
+  cut:`<rect x="35" y="44" width="12.5" height="5" rx="1.5"/><rect x="52.5" y="44" width="12.5" height="5" rx="1.5"/>
+   <path d="M50 13 L50 42 M50 51 L50 88" stroke="#000" stroke-width="2.6"/>
+   <path d="M30 38 Q50 33 70 38 M30 56 Q50 61 70 56" fill="none" stroke="#000" stroke-width="2.2"/>
+   <circle cx="56" cy="66" r="1.7"/><circle cx="61" cy="66" r="1.7"/><circle cx="56" cy="71" r="1.7"/><circle cx="61" cy="71" r="1.7"/><circle cx="56" cy="76" r="1.7"/>`},
+ torso:{pos:`<path d="M22 22 Q36 14 42 14 Q50 22 58 14 Q64 14 78 22 L88 42 L76 48 L75 88 Q50 95 25 88 L24 48 L12 42 Z"/>`,
+  cut:`<path d="M42 14 Q50 27 58 14" fill="none" stroke="#000" stroke-width="2.6"/>
+   <path d="M50 26 L50 68 M50 83 L50 92" stroke="#000" stroke-width="2.4"/>
+   <path d="M30 44 Q40 52 48 46 M52 46 Q60 52 70 44 M24 48 Q32 44 33 30 M76 48 Q68 44 67 30" fill="none" stroke="#000" stroke-width="2.2"/>
+   <path d="M24.5 71 L44 71 M56 71 L75.5 71 M24.5 80 L44 80 M56 80 L75.5 80" stroke="#000" stroke-width="2.4"/>
+   <rect x="44.5" y="68" width="11" height="15" rx="1.5" fill="none" stroke="#000" stroke-width="2.4"/><path d="M50 72 L50 79" stroke="#000" stroke-width="2"/>`},
+ arm:{pos:`<path d="M38 8 Q50 3 62 8 L63 48 Q66 54 62 58 L67 78 L52 80 L46 58 Q41 54 43 48 Z"/><path d="M50 80 L68 77 Q73 86 69 94 Q60 99 51 95 Q47 88 50 80 Z"/>`,
+  cut:`<path d="M39 17 Q50 13 61 17 M44 53 Q53 57 63 52" fill="none" stroke="#000" stroke-width="2.4"/>
+   <path d="M48 64 L65 61 M50 72 L66.5 69" stroke="#000" stroke-width="2.2"/><path d="M50 66 L64 70 M50 70 L64 66" stroke="#000" stroke-width="1.6"/>
+   <path d="M49 80.5 L69 77.5" stroke="#000" stroke-width="3"/><path d="M54 88 L68 86 M53 92 L66 91" stroke="#000" stroke-width="1.8"/>`},
+ leg:{pos:`<path d="M36 6 L64 6 L63 52 Q65 57 61 61 L60 76 L40 76 L41 61 Q36 57 37 52 Z"/><path d="M39 74 L61 74 L61 86 Q76 87 80 94 L80 97 L38 97 Z"/>`,
+  cut:`<path d="M36 13 L64 13" stroke="#000" stroke-width="3"/><circle cx="50" cy="56" r="6" fill="none" stroke="#000" stroke-width="2.4"/>
+   <path d="M38 76 L62 76" stroke="#000" stroke-width="3"/><path d="M44 80 L56 85 M44 85 L56 80" stroke="#000" stroke-width="2"/>
+   <path d="M38 92 L80 92" stroke="#000" stroke-width="2.2"/><path d="M50 18 L50 46" stroke="#000" stroke-width="1.8"/>`}
+};
+let gid=0;
+function glyph(k,cls="ico"){const g=GLY[k],id="gm"+(gid++);
+ return `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true"><mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><g fill="#fff">${g.pos}</g><g fill="#000">${g.cut}</g>${g.top?`<g fill="#fff">${g.top}</g>`:""}</mask><rect width="100" height="100" fill="currentColor" mask="url(#${id})"/></svg>`}
+
+const KEY="nefastor-v1";
+const STATS=[["Forza",5],["Agilità",6],["Tenacia",7],["Intelletto",11],["Volontà",15],["Istinto",7],["Presenza",9]];
+const ZONES=[[1,2,"Gamba destra"],[3,4,"Gamba sinistra"],[5,6,"Braccio destro"],[7,8,"Braccio sinistro"],[9,11,"Torso"],[12,12,"Testa"]];
+const MAX={vig:10,spi:13};
+const ITEMS0=[["Bastone Rituale",1],["Pugnale Rituale",0.5],["Zaino",1],["Torcia",0.5],["Pietra focaia",0.5],["Amuleto",0.5],["Razione da viaggio",1],["Razione da viaggio",1],["Razione da viaggio",1]];
+let uid=0;const newId=()=>"i"+Date.now().toString(36)+(uid++);
+const ITEM_DEF={"Bastone Rituale":{dmg:"2d4",note:"Tiro per colpire su Agilità."},"Pugnale Rituale":{dmg:"1d4",note:"Mischia, tiro per colpire su Agilità."}};
+function normItem(i){
+  const m=/^(Bastone Rituale|Pugnale Rituale) · (\d+d\d+)$/.exec(i.name||"");if(m){i.name=m[1];if(i.dmg==null)i.dmg=m[2]}
+  const d=ITEM_DEF[i.name];if(d){if(i.dmg==null)i.dmg=d.dmg;if(i.note==null)i.note=d.note}
+  if(i.cons==null)i.cons=/^razion/i.test(i.name||"");if(i.dmg==null)i.dmg="";if(i.note==null)i.note="";return i}
+const mkItems=()=>ITEMS0.map(([name,w])=>normItem({id:newId(),name,w}));
+const fresh=()=>({vig:10,spi:13,cu:296,dtmv:{},lvl:{},stone:{v:0,r:0},cronaca:"",inv:"",versa:false,log:[],items:mkItems(),people:[]});
+
+let S=fresh();
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&typeof s==="object")S=Object.assign(S,s)}catch(e){}
+function normS(){
+  ["mod","used","turn","raz","uiv","dtm","ui","def"].forEach(k=>delete S[k]);
+  S.dtmv=S.dtmv||{};S.lvl=S.lvl||{};S.stone=S.stone||{v:0,r:0};if(!Array.isArray(S.log))S.log=[];S.log.forEach(l=>{if(!l.id)l.id=newId()});if(Array.isArray(S.items))S.items.forEach(normItem);if(!Array.isArray(S.items))S.items=mkItems();if(S.cu==null)S.cu=296;
+  if(!Array.isArray(S.people))S.people=[];S.people.forEach(p=>{if(!p.id)p.id=newId();p.name=p.name||"Senza nome";p.tags=Array.isArray(p.tags)?p.tags:[];p.notes=p.notes||"";p.hasImg=!!p.hasImg});
+}
+normS();
+
+const ui={open:null,sel:{},ext:[0,0,0,0],editLvl:false,useOpen:null};
+const $=id=>document.getElementById(id);
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=n=>(Math.round(n*100)/100).toLocaleString("it-IT");
+const sign=n=>(n>=0?"+":"")+n;
+const lvlOf=n=>S.lvl[n]!=null?S.lvl[n]:STATS.find(s=>s[0]===n)[1];
+const modOf=n=>Math.floor((lvlOf(n)-5)/2);
+const pipsOf=n=>Math.max(0,modOf(n));
+const dtmOf=n=>Math.min(S.dtmv[n]||0,pipsOf(n));
+const weight=()=>S.items.reduce((a,i)=>a+(i.w||0),0);
+const hist=[];
+function log(t){S.log.unshift({id:newId(),t,time:new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})});S.log=S.log.slice(0,150)}
+function act(fn){hist.push(JSON.stringify(S));if(hist.length>100)hist.shift();fn();save();render()}
+
+/* ---------- Incantesimi ---------- */
+const SPELLS=[
+ {k:"fuoco",t:"Palla di Fuoco",lv:[1,2,3],m:[["Tipo","Offensivo, danno diretto"],["Gittata","10 m"],["Bersagli","Raggio 2 m dal punto d'impatto"]],
+  d:"Il mago scaglia una sfera di energia incendiaria che esplode al contatto e investe tutte le creature nell'area. Il danno ignora la protezione delle armature.",
+  l:["1 PS → 1d6 +1 danni","2 PS → 2d6 +2 danni","3 PS → 3d6 +3 danni"],
+  fx:(p,e)=>`${p}d6 +${p} danni a chi è nel raggio, ignora l'armatura${e.tg?`; il danno si ripartisce tra ${e.tg+1} bersagli`:""}`},
+ {k:"pietra",t:"Pelle di Pietra",lv:[1,2,3],m:[["Tipo","Difensivo, potenziamento singolo"],["Gittata","Contatto"],["Bersagli","1"]],
+  d:"Il bersaglio ottiene una protezione temporanea.",
+  l:["1 PS → +1 Resistenza Fisica per 1d8 round","2 PS → +2 Resistenza Fisica per 1d6 round","3 PS → +3 Resistenza Fisica per 1d4 round"],
+  n:"Protezione breve e tattica; non cumulabile con altri bonus difensivi magici.",
+  fx:(p,e)=>`+${p} Resistenza Fisica per 1d${{1:8,2:6,3:4}[p]}${e.du?` +${e.du}`:""} round${e.tg?`, su ${e.tg+1} bersagli`:""}`},
+ {k:"rivelare",t:"Rivelare",lv:[1,2,3],m:[["Categoria","Percezione / Investigazione"],["Portata","Area di 8 m"],["Bersaglio","Oggetti, creature o strutture"]],
+  d:"Il Mago esamina l'ambiente con la percezione arcana e individua indizi che sfuggirebbero ai sensi comuni.",
+  l:["1 PS → percepisce la presenza di magia entro 8 m, senza per forza individuarne la fonte","2 PS → individua la fonte di una magia attiva, di una maledizione o di un'alterazione soprannaturale","3 PS → ottiene un indizio più preciso sulla natura dell'effetto, sul suo scopo o sul modo in cui si manifesta"],
+  n:"Non rivela il funzionamento completo di un oggetto magico e non rimuove maledizioni o incantesimi.",
+  fx:p=>["","percepisce magia entro 8 m","individua la fonte di magia o maledizione","indizio sulla natura e lo scopo dell'effetto"][p]},
+ {k:"occhio",t:"Occhio della Strega",lv:[1,2,3],m:[["Tipo","Utilità"],["Costo","1–2 PS (la scheda descrive anche 3 PS)"],["Gittata","Personale"],["Durata","Fino alla fine della scena"]],
+  d:"L'iride del Mago si torce in un glifo vivente e rivela ciò che resta nascosto.",
+  l:["1 PS → ignora oscurità lieve, fumo o nebbia entro 10 m","2 PS → percepisce illusioni, inganni magici e trappole arcane semplici entro 10 m","3 PS → individua creature invisibili o perfettamente nascoste entro 10 m"],
+  fx:p=>["","ignora oscurità lieve, fumo o nebbia entro 10 m","percepisce illusioni, inganni magici e trappole arcane semplici entro 10 m","individua creature invisibili o perfettamente nascoste entro 10 m"][p]+", fino a fine scena"},
+ {k:"sfinimento",t:"Sfinimento",lv:[2,3],m:[["Tipo","Controllo, impedimento singolo"],["Gittata","10 m"],["Bersagli","1"]],
+  d:"Il bersaglio avverte un'improvvisa stanchezza crescente che gli prosciuga le energie.",
+  l:["2 PS → perde 1 azione, a scelta del Mago, tra movimento e azione standard","3 PS → perde 1 azione a scelta del Mago e non può fare una Reazione di Difesa contro il prossimo attacco subito"],
+  fx:p=>p===2?"il bersaglio perde 1 azione (movimento o standard, a scelta del Mago)":"il bersaglio perde 1 azione a scelta del Mago e non può fare Reazione di Difesa contro il prossimo attacco"}
+];
+const EXT=["Bersaglio +1","Durata +1 round","Gittata +2 m","Area +2 m"];
+const spEl={};
+SPELLS.forEach(sp=>{
+  const w=document.createElement("div");w.className="sp";
+  w.innerHTML=`<button class="sp-h" aria-expanded="false" aria-controls="b-${sp.k}"><span class="sp-n">${sp.t}</span><span class="sp-c">${sp.lv[0]}–${sp.lv[sp.lv.length-1]} PS</span><span class="chev" aria-hidden="true"></span></button>
+  <div class="sp-b" id="b-${sp.k}" hidden>
+    <dl>${sp.m.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join("")}</dl>
+    <p>${sp.d}</p><ul>${sp.l.map(x=>`<li>${x}</li>`).join("")}</ul>${sp.n?`<p class="note">${sp.n}</p>`:""}
+    <div class="cap">PS dell'incantesimo</div>
+    <div class="lv" role="group" aria-label="PS ${sp.t}">${sp.lv.map(p=>`<button data-p="${p}">${p} PS</button>`).join("")}</div>
+  </div>`;
+  $("spell-list").appendChild(w);spEl[sp.k]=w;
+  w.querySelector(".sp-h").onclick=()=>{ui.open=ui.open===sp.k?null:sp.k;ui.ext=[0,0,0,0];render()};
+  w.querySelectorAll(".lv button").forEach(b=>b.onclick=()=>{ui.sel[sp.k]=+b.dataset.p;render()});
+});
+$("ext").innerHTML=EXT.map((l,i)=>`<div class="ex"><span>${l}</span><div class="ctl"><button class="sq" data-i="${i}" data-d="-1" aria-label="${l}: meno uno">−</button><span class="num" id="ex-${i}">0</span><button class="sq" data-i="${i}" data-d="1" aria-label="${l}: più uno">+</button></div></div>`).join("");
+$("ext").onclick=e=>{const b=e.target.closest("button[data-i]");if(!b||b.disabled)return;const i=+b.dataset.i;ui.ext[i]=Math.max(0,ui.ext[i]+ +b.dataset.d);render()};
+
+function renderSpells(){
+  const spi=S.spi;
+  $("nomana").hidden=spi>0;
+  if(spi<=0)ui.open=null;
+  let base=0;
+  SPELLS.forEach(sp=>{
+    const w=spEl[sp.k],open=ui.open===sp.k,h=w.querySelector(".sp-h");
+    h.disabled=spi<=0;h.setAttribute("aria-expanded",open);w.querySelector(".sp-b").hidden=!open;
+    if(open){
+      let sel=ui.sel[sp.k];const ok=sp.lv.filter(p=>p<=spi);
+      if(!sel)sel=ok[0];else if(sel>spi)sel=ok[ok.length-1];
+      ui.sel[sp.k]=sel;base=sel||0;
+      w.querySelector(".sp-b").appendChild($("castbox"));
+    }
+    w.querySelectorAll(".lv button").forEach(b=>{const p=+b.dataset.p;b.disabled=p>spi;b.setAttribute("aria-pressed",open&&ui.sel[sp.k]===p)});
+  });
+  $("castbox").hidden=!ui.open;
+  let tot=base+ui.ext.reduce((a,b)=>a+b,0);
+  for(let i=3;i>=0&&tot>spi;i--){while(ui.ext[i]>0&&tot>spi){ui.ext[i]--;tot--}}
+  ui.ext.forEach((v,i)=>{$("ex-"+i).textContent=v;
+    $("ext").querySelector(`[data-i="${i}"][data-d="-1"]`).disabled=v<=0;
+    $("ext").querySelector(`[data-i="${i}"][data-d="1"]`).disabled=!base||tot+1>spi});
+  $("cast").disabled=!base||tot>spi;
+}
+$("cast").onclick=()=>{
+  const sp=SPELLS.find(s=>s.k===ui.open);if(!sp)return;const p=ui.sel[sp.k];if(!p)return;
+  const [tg,du,ra,ar]=ui.ext,extra=tg+du+ra+ar,tot=p+extra;if(tot>S.spi)return;
+  act(()=>{const b=S.spi;S.spi-=tot;
+    const parts=[];if(tg)parts.push(`+${tg} ${tg>1?"bersagli":"bersaglio"}`);if(du)parts.push(`+${du} round`);if(ra)parts.push(`+${ra*2} m gittata`);if(ar)parts.push(`+${ar*2} m area`);
+    const more=[];if(sp.k!=="pietra"&&sp.k!=="fuoco"&&tg)more.push(`${tg+1} bersagli`);if(sp.k!=="pietra"&&du)more.push(`durata +${du} round`);if(ra)more.push(`gittata +${ra*2} m`);if(ar)more.push(`area +${ar*2} m`);
+    log(`<b>${sp.t}</b> a ${p} PS${extra?` + Potenziamento Estensivo (${parts.join(", ")}) = ${tot} PS`:""}. Spirito ${b} → ${S.spi}. Effetto: ${sp.fx(p,{tg,du,ra,ar})}${more.length?"; "+more.join(", "):""}.`)});
+  ui.ext=[0,0,0,0];render();
+  if(sp.k==="pietra")openStone(p,du);
+};
+
+/* ---------- Pelle di Pietra: pop-up ---------- */
+const sdlg=$("stonedlg");
+const openDlg=d=>{if(d.showModal)d.showModal();else d.setAttribute("open","")};
+const closeDlg=d=>{if(d.close)d.close();else d.removeAttribute("open")};
+$("st-x").onclick=()=>closeDlg(sdlg);
+function openStone(p,du){
+  const die={1:8,2:6,3:4}[p],c=$("stone-c");
+  $("st-t").textContent="Pelle di Pietra · su chi?";
+  c.innerHTML=`<p>+${p} Resistenza Fisica per 1d${die} round.</p><div class="rollrow"><button class="pri" id="st-me">Su di me</button><button id="st-other">Su un altro</button></div>`;
+  $("st-other").onclick=()=>closeDlg(sdlg);
+  $("st-me").onclick=()=>{
+    $("st-t").textContent="Pelle di Pietra · quanti round?";
+    c.innerHTML=`<p>Tocca il risultato del d${die}.${du?` Il Potenziamento aggiunge ${du} round.`:""}</p><div class="rbtns">${Array.from({length:die},(_,i)=>`<button data-r="${i+1}">${i+1}</button>`).join("")}</div>`;
+    c.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{const roll=+b.dataset.r,r=roll+du;
+      act(()=>{S.stone={v:p,r};log(`Pelle di Pietra su Nefastor: protezione magica +${p} per ${r} round (d${die}: ${roll}${du?` +${du} Potenziamento`:""}).`)});closeDlg(sdlg)});
+    c.querySelector("[data-r]").focus();
+  };
+  openDlg(sdlg);
+}
+
+/* ---------- Barre ---------- */
+const BN={vig:"Vigore",spi:"Spirito"};
+["vig","spi"].forEach(k=>{
+  $("m-"+k).onclick=()=>{if(S[k]>0)act(()=>{const b=S[k];S[k]--;log(`${BN[k]} −1 (${b} → ${S[k]})`)})};
+  $("p-"+k).onclick=()=>{if(S[k]<MAX[k])act(()=>{const b=S[k];S[k]++;log(`${BN[k]} +1 (${b} → ${S[k]})`)})};
+});
+function renderBars(){
+  ["vig","spi"].forEach(k=>{const v=S[k],m=MAX[k];
+    $("g-"+k).style.width=(v/m*100)+"%";$("t-"+k).textContent=`${v} / ${m}`;
+    $("gauge-"+k).classList.toggle("warn",k==="vig"?v>=1&&v<=2:v>=1&&v<=3);
+    $("m-"+k).disabled=v<=0;$("p-"+k).disabled=v>=m;});
+}
+
+/* ---------- Caratteristiche ---------- */
+function renderStats(){
+  $("stats").innerHTML=STATS.map(([n])=>{
+    const p=pipsOf(n),d=dtmOf(n),free=p-d,mod=modOf(n);
+    let pips="";for(let i=0;i<free;i++)pips+=`<button class="pip" data-n="${n}" data-a="to" aria-label="${n}: sposta un punto MOD in DTM"></button>`;
+    for(let i=0;i<d;i++)pips+=`<button class="pip dtm" data-n="${n}" data-a="back" aria-label="${n}: riporta un punto DTM in MOD"></button>`;
+    if(!p)pips=`<span class="note">nessun punto MOD</span>`;
+    const lv=ui.editLvl?`<span class="ctl"><button class="sq" data-n="${n}" data-a="lv-" ${lvlOf(n)<=1?"disabled":""} aria-label="${n}: livello meno uno">−</button><span class="lvln num">${lvlOf(n)}</span><button class="sq" data-n="${n}" data-a="lv+" aria-label="${n}: livello più uno">+</button></span>`:`<span class="lvln num">${lvlOf(n)}</span>`;
+    return `<div class="st"><div class="st-n"><b>${n}</b><span class="note num">${mod>0?`MOD ${free}/${mod} · DTM ${d}`:`MOD ${sign(mod)}`}</span></div><div class="st-l"><span class="cap">LVL</span>${lv}</div><div class="st-p">${pips}</div></div>`}).join("");
+}
+$("stats").onclick=e=>{const b=e.target.closest("button[data-a]");if(!b||b.disabled)return;const n=b.dataset.n,a=b.dataset.a;
+  if(a==="to"&&dtmOf(n)<pipsOf(n))act(()=>{S.dtmv[n]=dtmOf(n)+1;log(`${n}: 1 punto MOD → DTM (MOD ${pipsOf(n)-S.dtmv[n]}/${pipsOf(n)}, DTM ${S.dtmv[n]})`)});
+  if(a==="back"&&dtmOf(n)>0)act(()=>{S.dtmv[n]=dtmOf(n)-1;log(`${n}: 1 punto DTM → MOD (MOD ${pipsOf(n)-S.dtmv[n]}/${pipsOf(n)}, DTM ${S.dtmv[n]})`)});
+  if(a==="lv+"||a==="lv-")act(()=>{const o=lvlOf(n),om=modOf(n);S.lvl[n]=o+(a==="lv+"?1:-1);S.dtmv[n]=dtmOf(n);log(`${n}: LVL ${o} → ${lvlOf(n)} (MOD ${sign(om)} → ${sign(modOf(n))})`)});
+};
+$("editlvl").onclick=()=>{ui.editLvl=!ui.editLvl;$("editlvl").setAttribute("aria-pressed",ui.editLvl);$("editlvl").textContent=ui.editLvl?"Fine modifica":"Modifica livelli";renderStats()};
+const gV=()=>Math.max(0,modOf("Tenacia")),gS=()=>Math.max(0,modOf("Intelletto"))+Math.max(0,modOf("Volontà"));
+$("rest").onclick=()=>act(()=>{const b=S.vig,g=Math.min(MAX.vig-S.vig,gV());S.vig+=g;S.dtmv={};
+  log(`Riposo: Vigore ${b} → ${S.vig} (+${g}, MOD Tenacia ${gV()}${g<gV()?", fermato al massimo":""}). DTM azzerati, MOD ripristinate.`)});
+$("sleep").onclick=()=>act(()=>{const bv=S.vig,v=Math.min(MAX.vig-S.vig,gV());S.vig+=v;const bs=S.spi,g=Math.min(MAX.spi-S.spi,gS());S.spi+=g;S.dtmv={};
+  log(`Dormito: Vigore ${bv} → ${S.vig} (+${v}, MOD Tenacia). Spirito ${bs} → ${S.spi} (+${g}, MOD Intelletto ${Math.max(0,modOf("Intelletto"))} + Volontà ${Math.max(0,modOf("Volontà"))}${g<gS()?", fermato al massimo":""}). DTM azzerati, MOD ripristinate.`)});
+
+/* ---------- Difesa ---------- */
+const FIG={"Testa":["head",61,31,24],"Torso":["torso",60,38,26],"Braccio destro":["arm",57,28,24],"Braccio sinistro":["arm",57,28,24,1],"Gamba destra":["leg",56,26,20],"Gamba sinistra":["leg",56,26,20,1]};
+function figFor(z){const [k,px,py,len,m]=FIG[z],g=GLY[k],tx=px+len,ty=py-len,id="gz"+(gid++);
+  const o=(dx,dy)=>`${tx+dx} ${ty+dy}`,q=(dx,dy)=>`${px+dx} ${py+dy}`;
+  const cut=`<path d="M${q(-1,1)} L${o(1,-1)}" stroke="#000" stroke-width="10" stroke-linecap="round"/>
+    <path d="M${q(-6,-5)} L${q(-2.5,-1.5)} M${q(5,6)} L${q(1.5,2.5)} M${q(-5.5,4)} L${q(-2,2)} M${q(4.5,-4)} L${q(1,-2)}" stroke="#000" stroke-width="2"/>`;
+  const top=`<path d="M${q(0,0)} L${o(0,0)}" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/>
+    <path d="M${o(-8,8)} L${o(-9,-2)} L${o(-5,-6)} L${o(-4,4)} Z M${o(-8,8)} L${o(2,9)} L${o(6,5)} L${o(-4,4)} Z" fill="#fff"/>`;
+  return `<svg class="fig" viewBox="0 0 100 100" role="img" aria-label="${z} colpito da una freccia"${m?' style="transform:scaleX(-1)"':""}><mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><g fill="#fff">${g.pos}</g><g fill="#000">${g.cut}${cut}</g>${top}</mask><rect width="100" height="100" fill="currentColor" mask="url(#${id})"/></svg>`}
+$("hitform").onsubmit=e=>{e.preventDefault();
+  const v=Number($("hit-n").value.trim());
+  if(!Number.isInteger(v)||v<1||v>12){$("hit-err").textContent="Scrivi un numero intero da 1 a 12.";return}
+  $("hit-err").textContent="";const z=ZONES.find(([a,b])=>v>=a&&v<=b)[2];
+  $("hit-n").value="";$("hit-n").blur();
+  $("hit-fig").innerHTML=figFor(z);
+  $("hit-txt").textContent=z;act(()=>log(`Colpito: d12 ${v} → ${z}`));openDlg($("hitdlg"));
+};
+$("hit-ok").onclick=()=>closeDlg($("hitdlg"));
+function renderDef(){const s=S.stone,on=s.v>0;
+  $("stone-v").textContent="+"+s.v;$("stone-box").classList.toggle("on",on);
+  $("stone-r").textContent=on?`${s.r} round`:"non attiva";$("stone-m").hidden=!on;}
+$("stone-m").onclick=()=>{if(S.stone.v<=0)return;act(()=>{S.stone.r--;
+  if(S.stone.r<=0){S.stone={v:0,r:0};log("Pelle di Pietra terminata: protezione magica tornata a 0.")}
+  else log(`Pelle di Pietra: −1 round, ne restano ${S.stone.r}.`)})};
+
+/* ---------- Inventario ---------- */
+function renderInv(){
+  const t=weight();
+  $("w-tot").textContent=`Peso ${fmt(t)} / 10${t>10?" · sovraccarico":""}`;
+  $("w-bar").style.width=Math.min(100,t*10)+"%";$("inv-sec").classList.toggle("over",t>10);
+  $("items").innerHTML=S.items.length?S.items.map(i=>`<li class="it"><button class="it-b" data-id="${i.id}" aria-label="${esc(i.name)}, peso ${i.w==null?"non indicato":fmt(i.w)}${i.cons?". Tocca per usarlo":""}. Tieni premuto per info e modifica"><span class="it-n">${esc(i.name)}</span>${wIcon(i.w)}</button>${ui.useOpen===i.id?`<button class="pri use" data-use="${i.id}">Usa</button>`:""}<button class="del" data-x="${i.id}" aria-label="Rimuovi ${esc(i.name)}">×</button></li>`).join(""):`<li class="note">Inventario vuoto. Aggiungi il primo oggetto qui sotto.</li>`;
+  $("c-oro").textContent=Math.floor(S.cu/100);$("c-arg").textContent=Math.floor(S.cu/10)%10;$("c-ram").textContent=S.cu%10;
+  document.querySelectorAll("[data-coin]").forEach(b=>b.disabled=S.cu+ +b.dataset.coin<0);
+}
+const wIcon=w=>`<span class="wt" aria-hidden="true"><svg viewBox="0 0 40 36"><circle cx="20" cy="7" r="5"/><path d="M9 13h22l6 21H3z"/></svg><span>${w==null?"—":fmt(w)}</span></span>`;
+const parseW=v=>{const raw=String(v).trim().replace(",",".");if(raw==="")return null;const n=Number(raw);return isFinite(n)&&n>=0?n:false};
+const itemsEl=$("items");let lp=null;
+itemsEl.addEventListener("pointerdown",e=>{const b=e.target.closest(".it-b");if(!b)return;
+  if(lp&&lp.t)clearTimeout(lp.t);
+  const cur={b,id:b.dataset.id,x:e.clientX,y:e.clientY,fired:false};
+  cur.t=setTimeout(()=>{cur.fired=true;b.classList.remove("pressing");openItem(cur.id)},2000);
+  lp=cur;b.classList.add("pressing");});
+const cancelLp=()=>{if(lp&&!lp.fired){clearTimeout(lp.t);lp.b.classList.remove("pressing")}};
+itemsEl.addEventListener("pointermove",e=>{if(lp&&!lp.fired&&Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>10){cancelLp();lp=null}});
+["pointerup","pointercancel","pointerleave"].forEach(ev=>itemsEl.addEventListener(ev,cancelLp));
+itemsEl.addEventListener("contextmenu",e=>{if(e.target.closest(".it-b"))e.preventDefault()});
+itemsEl.addEventListener("click",e=>{
+  if(lp&&lp.fired){lp=null;return}lp=null;
+  const x=e.target.closest("[data-x]");
+  if(x){const it=S.items.find(i=>i.id===x.dataset.x);if(!it)return;
+    act(()=>{S.items=S.items.filter(i=>i.id!==it.id);log(`Rimosso: ${esc(it.name)}${it.w!=null?` (peso ${fmt(it.w)})`:""}. Peso ${fmt(weight())} / 10.`)});return}
+  const u=e.target.closest("[data-use]");
+  if(u){const it=S.items.find(i=>i.id===u.dataset.use);if(!it)return;ui.useOpen=null;
+    act(()=>{S.items=S.items.filter(i=>i.id!==it.id);log(`Usato: ${esc(it.name)}. Peso ${fmt(weight())} / 10.`)});return}
+  const b=e.target.closest(".it-b");if(!b)return;const it=S.items.find(i=>i.id===b.dataset.id);
+  if(it&&it.cons){ui.useOpen=ui.useOpen===it.id?null:it.id;renderInv()}
+});
+const idlg=$("itemdlg");let editing=null;
+function openItem(id){const it=S.items.find(i=>i.id===id);if(!it)return;editing=id;ui.useOpen=null;
+  $("ie-t").textContent=it.name;$("ie-name").value=it.name;$("ie-w").value=it.w==null?"":fmt(it.w);
+  $("ie-dmg").value=it.dmg||"";$("ie-note").value=it.note||"";$("ie-cons").checked=!!it.cons;$("ie-err").textContent="";
+  openDlg(idlg);}
+$("ie-cancel").onclick=()=>{editing=null;closeDlg(idlg)};
+$("itemedit").onsubmit=e=>{e.preventDefault();const it=S.items.find(i=>i.id===editing);if(!it){closeDlg(idlg);return}
+  const name=$("ie-name").value.trim();if(!name){$("ie-err").textContent="Il nome non può essere vuoto.";return}
+  const w=parseW($("ie-w").value);if(w===false){$("ie-err").textContent="Il peso deve essere un numero, per esempio 1 o 0,5. Lascialo vuoto se non lo conosci.";return}
+  act(()=>{const on=it.name,ow=it.w;Object.assign(it,{name,w,dmg:$("ie-dmg").value.trim(),note:$("ie-note").value.trim(),cons:$("ie-cons").checked});
+    log(`Modificato: ${esc(on)}${on!==name?` → ${esc(name)}`:""}${ow!==w?`, peso ${ow==null?"—":fmt(ow)} → ${w==null?"—":fmt(w)}. Peso ${fmt(weight())} / 10`:""}.`)});
+  editing=null;closeDlg(idlg);
+};
+$("coin-i").onclick=e=>{e.stopPropagation();const t=$("coin-tip");t.hidden=!t.hidden;$("coin-i").setAttribute("aria-expanded",!t.hidden)};
+document.addEventListener("click",e=>{const t=$("coin-tip");if(!t.hidden&&!t.contains(e.target)){t.hidden=true;$("coin-i").setAttribute("aria-expanded","false")}});
+$("itemform").onsubmit=e=>{e.preventDefault();
+  const name=$("it-name").value.trim();if(!name){$("it-err").textContent="Scrivi il nome dell'oggetto.";$("it-name").focus();return}
+  const raw=$("it-w").value.trim().replace(",",".");const w=raw===""?null:Number(raw);
+  if(raw!==""&&(!isFinite(w)||w<0)){$("it-err").textContent="Il peso deve essere un numero, per esempio 1 o 0,5. Lascialo vuoto se non lo conosci.";$("it-w").focus();return}
+  $("it-err").textContent="";
+  act(()=>{S.items.push(normItem({id:newId(),name,w}));log(`Aggiunto: ${esc(name)} (${w==null?"senza peso":"peso "+fmt(w)}). Peso ${fmt(weight())} / 10.`)});
+  $("it-name").value="";$("it-w").value="";if(document.activeElement)document.activeElement.blur();
+};
+const CN={100:"oro",10:"argento",1:"rame"};
+document.querySelectorAll("[data-coin]").forEach(b=>b.onclick=()=>{const v=+b.dataset.coin;if(S.cu+v<0)return;
+  act(()=>{S.cu+=v;log(`Borsa ${v>0?"+":"−"}1 ${CN[Math.abs(v)]}: ${Math.floor(S.cu/100)} oro, ${Math.floor(S.cu/10)%10} argento, ${S.cu%10} rame`)})});
+$("versa").onchange=e=>act(()=>{S.versa=e.target.checked;log(`Versatilità Inarrestabile ${S.versa?"usata":"di nuovo disponibile"}`)});
+$("cronaca").oninput=e=>{S.cronaca=e.target.value;save()};
+$("inv-extra").oninput=e=>{S.inv=e.target.value;save()};
+
+/* ---------- Registro ---------- */
+const dlg=$("logdlg");
+$("logbtn").onclick=()=>{drawLog();if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","")};
+$("log-x").onclick=()=>closeDlg(dlg);
+[dlg,sdlg].forEach(d=>d.addEventListener("click",e=>{if(e.target===d)closeDlg(d)}));
+$("log").onclick=e=>{const b=e.target.closest("[data-del]");if(!b)return;S.log=S.log.filter(l=>l.id!==b.dataset.del);save();drawLog()};
+function drawLog(){
+  $("log").innerHTML=S.log.length?S.log.map(l=>`<li><span>${l.time?`<time>${l.time}</time>`:""}${l.t}</span><button class="lx" data-del="${l.id}" aria-label="Cancella questa voce">×</button></li>`).join(""):"<li>Nessuna azione ancora. Lancia un incantesimo o usa i contatori.</li>";
+  $("log-n").textContent=S.log.length?S.log.length+" voci":"vuoto";
+}
+function updUndo(){$("undo").disabled=!hist.length;$("undo").textContent=hist.length?`Annulla ultima azione (${hist.length})`:"Annulla ultima azione"}
+function keepText(){return{cronaca:S.cronaca,inv:S.inv}}
+$("undo").onclick=()=>{if(!hist.length)return;const k=keepText(),ids=new Set(S.log.map(l=>l.id));
+  S=JSON.parse(hist.pop());Object.assign(S,k);S.log=S.log.filter(l=>ids.has(l.id));save();render()};
+let arm=null;
+$("reset").onclick=()=>{const b=$("reset");
+  if(!arm){b.textContent="Tocca di nuovo per confermare";arm=setTimeout(()=>{arm=null;b.textContent="Reset completo"},3000);return}
+  clearTimeout(arm);arm=null;b.textContent="Reset completo";
+  act(()=>{const k=keepText(),pp=S.people;S=fresh();Object.assign(S,k);S.people=pp;ui.sel={};ui.open=null;ui.useOpen=null;log("Reset completo: valori di partenza ripristinati. Cronaca, note e personaggi restano.")});
+};
+
+/* ---------- Immagini (IndexedDB) ---------- */
+const IDB=(()=>{let p=null;
+  const open=()=>p||(p=new Promise((res,rej)=>{try{const r=indexedDB.open("dragur",1);r.onupgradeneeded=()=>r.result.createObjectStore("img");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}}));
+  const run=(mode,fn)=>open().then(db=>new Promise((res,rej)=>{const t=db.transaction("img",mode);const q=fn(t.objectStore("img"));t.oncomplete=()=>res(q?q.result:undefined);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)}));
+  return{get:k=>run("readonly",s=>s.get(k)),put:(k,v)=>run("readwrite",s=>s.put(v,k)),del:k=>run("readwrite",s=>s.delete(k)),keys:()=>run("readonly",s=>s.getAllKeys())};})();
+const urls={};
+function imgURL(id){if(urls[id])return Promise.resolve(urls[id]);return IDB.get(id).then(b=>{if(!b)return null;urls[id]=URL.createObjectURL(b);return urls[id]})}
+function dropURL(id){if(urls[id]){URL.revokeObjectURL(urls[id]);delete urls[id]}}
+const blobToDataURL=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(b)});
+function dataURLToBlob(d){const i=d.indexOf(",");const mime=(d.slice(0,i).match(/data:([^;]+)/)||[])[1]||"image/jpeg";const bin=atob(d.slice(i+1));const u=new Uint8Array(bin.length);for(let j=0;j<bin.length;j++)u[j]=bin.charCodeAt(j);return new Blob([u],{type:mime})}
+IDB.keys().then(ks=>{const keep=new Set(S.people.filter(p=>p.hasImg).map(p=>p.id));ks.forEach(k=>{if(!keep.has(k))IDB.del(k).catch(()=>{})})}).catch(()=>{});
+
+/* ---------- Personaggi ---------- */
+const initials=n=>(n||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+function renderPeople(){
+  const list=$("people");
+  if(!S.people.length){list.innerHTML=`<p class="note">Nessun personaggio ancora. Aggiungi il primo: nome, immagine, etichette e quello che sai di lui.</p>`;return}
+  list.innerHTML=S.people.map(p=>`<article class="pc">${p.hasImg?`<button class="pc-img" data-view="${p.id}" aria-label="Apri l'immagine di ${esc(p.name)}"><img alt="" data-img="${p.id}"></button>`:`<div class="pc-img pc-ph" aria-hidden="true">${esc(initials(p.name))}</div>`}
+    <button class="pc-b" data-edit="${p.id}" aria-label="Modifica ${esc(p.name)}"><span class="pc-h"><b>${esc(p.name)}</b><svg class="pen" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z M14 6l3 3"/></svg></span>
+    ${p.tags.length?`<span class="tags">${p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</span>`:""}${p.notes?`<span class="pc-n">${esc(p.notes)}</span>`:""}</button></article>`).join("");
+  list.querySelectorAll("img[data-img]").forEach(im=>imgURL(im.dataset.img).then(u=>{if(u)im.src=u}).catch(()=>{}));
+}
+$("people").onclick=e=>{const v=e.target.closest("[data-view]");if(v){openViewer(v.dataset.view);return}const ed=e.target.closest("[data-edit]");if(ed)openPerson(ed.dataset.edit)};
+$("pp-add").onclick=()=>openPerson(null);
+const pdlg=$("persondlg");let pe=null;
+function openPerson(id){const p=id?S.people.find(x=>x.id===id):null;
+  pe={id:p?p.id:newId(),tags:p?[...p.tags]:[],blob:null,hadImg:p?p.hasImg:false,removeImg:false,blobURL:null};
+  $("pe-t").textContent=p?p.name:"Nuovo personaggio";$("pe-name").value=p?p.name:"";$("pe-notes").value=p?p.notes:"";
+  $("pe-err").textContent="";$("pe-tag").value="";$("pe-del").hidden=!p;$("pe-del").textContent="Elimina personaggio";
+  $("tag-list").innerHTML=[...new Set(S.people.flatMap(x=>x.tags))].map(t=>`<option value="${esc(t)}">`).join("");
+  renderPeTags();renderPeImg();openDlg(pdlg);}
+function renderPeTags(){$("pe-tags").innerHTML=pe.tags.map((t,i)=>`<span class="tag">${esc(t)}<button type="button" data-rt="${i}" aria-label="Togli etichetta ${esc(t)}">×</button></span>`).join("")}
+function renderPeImg(){const show=u=>{$("pe-img").innerHTML=u?`<img src="${u}" alt="">`:`<span class="note">Nessuna immagine</span>`;$("pe-rmimg").hidden=!u};
+  if(pe.blob){if(pe.blobURL)URL.revokeObjectURL(pe.blobURL);pe.blobURL=URL.createObjectURL(pe.blob);show(pe.blobURL)}
+  else if(pe.hadImg&&!pe.removeImg)imgURL(pe.id).then(show).catch(()=>show(null));else show(null);}
+$("pe-tags").onclick=e=>{const b=e.target.closest("[data-rt]");if(!b)return;pe.tags.splice(+b.dataset.rt,1);renderPeTags()};
+function addTag(){const v=$("pe-tag").value.trim();if(v&&!pe.tags.some(t=>t.toLowerCase()===v.toLowerCase()))pe.tags.push(v);$("pe-tag").value="";renderPeTags()}
+$("pe-tagadd").onclick=addTag;
+$("pe-tag").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addTag()}});
+$("pe-file").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
+  if(!/^image\//.test(f.type)){$("pe-err").textContent="Il file scelto non è un'immagine.";return}
+  pe.blob=f;pe.removeImg=false;$("pe-err").textContent="";renderPeImg()};
+$("pe-rmimg").onclick=()=>{pe.blob=null;pe.removeImg=true;renderPeImg()};
+function closePe(){if(pe&&pe.blobURL)URL.revokeObjectURL(pe.blobURL);pe=null;closeDlg(pdlg)}
+$("pe-cancel").onclick=closePe;
+$("personform").onsubmit=async e=>{e.preventDefault();if(!pe)return;
+  const name=$("pe-name").value.trim();if(!name){$("pe-err").textContent="Scrivi almeno il nome.";return}
+  if($("pe-tag").value.trim())addTag();
+  const cur=pe;let hasImg=cur.hadImg&&!cur.removeImg;
+  if(cur.blob){try{await IDB.put(cur.id,cur.blob);dropURL(cur.id);hasImg=true}
+    catch(err){$("pe-err").textContent="Non riesco a salvare l'immagine in questo browser. Togli l'immagine per salvare il resto.";return}}
+  act(()=>{const data={id:cur.id,name,tags:cur.tags,notes:$("pe-notes").value.trim(),hasImg};
+    const i=S.people.findIndex(x=>x.id===cur.id);
+    if(i<0){S.people.push(data);log(`Personaggio aggiunto: ${esc(name)}.`)}else{S.people[i]=data;log(`Personaggio aggiornato: ${esc(name)}.`)}});
+  closePe();};
+let peArm=null;
+$("pe-del").onclick=()=>{const b=$("pe-del");
+  if(!peArm){b.textContent="Tocca di nuovo per eliminare";peArm=setTimeout(()=>{peArm=null;b.textContent="Elimina personaggio"},3000);return}
+  clearTimeout(peArm);peArm=null;const id=pe.id,p=S.people.find(x=>x.id===id);closePe();
+  if(p)act(()=>{S.people=S.people.filter(x=>x.id!==id);log(`Personaggio eliminato: ${esc(p.name)}.`)});};
+const vdlg=$("viewdlg");
+function openViewer(id){const p=S.people.find(x=>x.id===id);if(!p)return;$("vw-name").textContent=p.name;$("vw-img").removeAttribute("src");$("vw-img").alt=p.name;
+  imgURL(id).then(u=>{if(u)$("vw-img").src=u}).catch(()=>{});openDlg(vdlg)}
+$("vw-x").onclick=()=>closeDlg(vdlg);
+vdlg.addEventListener("click",e=>{if(e.target===vdlg)closeDlg(vdlg)});
+
+/* ---------- Backup ---------- */
+const IN_ARTIFACT=/claude/i.test(location.hostname);
+async function buildBackup(withImg){const out={app:"dragur",v:2,date:new Date().toISOString(),data:S};
+  if(withImg){out.images={};for(const p of S.people)if(p.hasImg){try{const b=await IDB.get(p.id);if(b)out.images[p.id]=await blobToDataURL(b)}catch(e){}}}
+  return JSON.stringify(out)}
+async function doExport(withImg){const msg=$("bk-msg");msg.textContent="Preparo il backup…";
+  const t=await buildBackup(withImg),kb=Math.max(1,Math.round(t.length/1024));
+  let dl=false;
+  if(!IN_ARTIFACT){try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"application/json"}));
+    a.download=`dragur-backup-${new Date().toISOString().slice(0,10)}${withImg?"":"-senza-immagini"}.json`;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),3000);dl=true}catch(e){}}
+  const o=$("bk-out");o.value=t;o.hidden=false;
+  try{await navigator.clipboard.writeText(t);msg.textContent=`Backup pronto (${kb} KB): ${dl?"scaricato come file e ":""}copiato. Conservalo in un posto sicuro, per esempio una nota.`}
+  catch(e){o.focus();o.select();msg.textContent=`Backup pronto (${kb} KB)${dl?", scaricato come file":""}. Il testo è selezionato qui sopra: copialo a mano se ti serve.`}}
+$("bk-exp-img").onclick=()=>doExport(true);
+$("bk-exp-no").onclick=()=>doExport(false);
+$("bk-file").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;const r=new FileReader();
+  r.onload=()=>{$("bk-in").value=r.result;$("bk-err").textContent="";$("bk-msg").textContent="File caricato: premi Importa per applicarlo."};r.readAsText(f)};
+let impArm=null;
+$("bk-imp").onclick=async()=>{let raw=null;try{raw=JSON.parse($("bk-in").value)}catch(e){}
+  const d=raw&&raw.data?raw.data:raw;
+  if(!d||typeof d!=="object"||!("vig" in d)||!("spi" in d)){$("bk-err").textContent="Questo testo non è un backup della scheda. Incolla tutto il testo esportato, dalla prima all'ultima parentesi graffa.";return}
+  $("bk-err").textContent="";const b=$("bk-imp");
+  if(!impArm){b.textContent="Tocca di nuovo: sostituisce la scheda";impArm=setTimeout(()=>{impArm=null;b.textContent="Importa"},4000);return}
+  clearTimeout(impArm);impArm=null;b.textContent="Importa";
+  const imgs=raw.images||{};let saved=0;
+  for(const [id,du] of Object.entries(imgs)){try{await IDB.put(id,dataURLToBlob(du));dropURL(id);saved++}catch(e){}}
+  const local=S.people;
+  act(()=>{S=Object.assign(fresh(),d);normS();const ids=new Set(S.people.map(p=>p.id));
+    local.forEach(p=>{if(!ids.has(p.id))S.people.push(p)});
+    log(`Backup importato${saved?`, con ${saved} immagini`:""}.`)});
+  IDB.keys().then(ks=>{const k=new Set(ks);S.people.forEach(p=>{p.hasImg=k.has(p.id)});save();renderPeople()}).catch(()=>{});
+  fillInputs();$("bk-in").value="";$("bk-out").hidden=true;$("bk-msg").textContent="Backup importato.";};
+
+/* ---------- Fila di icone ---------- */
+const UIK="dragur-ui";let openSecs=[];try{const v=JSON.parse(localStorage.getItem(UIK)||"[]");if(Array.isArray(v))openSecs=v}catch(e){}
+document.querySelectorAll(".dk").forEach(b=>{b.querySelector(".dk-i").outerHTML=glyph(b.dataset.ico);
+  b.onclick=()=>{const id=b.dataset.sec,on=!openSecs.includes(id);openSecs=on?[...openSecs,id]:openSecs.filter(x=>x!==id);
+    try{localStorage.setItem(UIK,JSON.stringify(openSecs))}catch(e){}applySecs();
+    if(on)$(id).scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"})}});
+function applySecs(){document.querySelectorAll(".dk").forEach(b=>{const on=openSecs.includes(b.dataset.sec);b.setAttribute("aria-expanded",on);$(b.dataset.sec).hidden=!on})}
+applySecs();
+
+function fillInputs(){
+  $("cronaca").value=S.cronaca||"";$("inv-extra").value=S.inv||"";$("versa").checked=!!S.versa;
+}
+function render(){renderBars();renderSpells();renderStats();renderDef();renderInv();renderPeople();drawLog();updUndo();$("versa").checked=!!S.versa}
+fillInputs();render();save();
+</script>
+
+<script>
+if("serviceWorker" in navigator){addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
+</script>
+</body>
+</html>
