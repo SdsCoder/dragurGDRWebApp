@@ -440,6 +440,7 @@ header.who{position:relative;padding-right:42px}
 .trait-r{display:block}
 .trait .tr-i{vertical-align:-3px;margin:0 2px;color:var(--bronze)}
 .trait-tip::before{left:var(--ax,20px)}
+.trait-tip{display:grid;gap:4px}.trait-tip .tu{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;opacity:.85}
 .trait .passive{pointer-events:none}
 #sd-cat,#cf-fig{font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--line);padding:6px 8px}
 .schema{margin:10px auto 0;max-width:440px}
@@ -587,7 +588,7 @@ header.who{position:relative;padding-right:42px}
     <div class="dv"><span class="cap">Mente</span><b id="mente-v">0</b></div>
   </div>
   <div class="schema" id="schema"></div>
-  <p class="note schema-leg" id="schema-leg">Tocca una parte del corpo per vederne la protezione (armatura + Corpo + Magia). Tieni premuto il petto per vederle tutte, tocca lo sfondo per nasconderle. Cerchio in fiamme: protezione aumentata.</p>
+  <p class="note schema-leg" id="schema-leg">Tocca una parte del corpo per vederne la protezione. Tieni premuto il petto per vederle tutte, tocca lo sfondo per nasconderle. Cerchio in fiamme: protezione aumentata.</p>
   <form class="dmgform" id="hitform" novalidate>
     <div class="dm-f"><span class="dm-l" id="dm-l">Danno</span><div class="stepper" role="group" aria-labelledby="dm-l"><button type="button" id="dm-m" aria-label="Danno meno uno">−</button><output id="dm-n" aria-live="polite">0</output><button type="button" id="dm-p" aria-label="Danno più uno">+</button></div></div>
     <label>Zona<select id="dm-z">
@@ -1552,8 +1553,8 @@ function renderHead(){const c=S.cfg;
   $("ch-name").textContent=c.name||"Nuovo personaggio";
   $("ch-sub").innerHTML=[c.race,c.cls].filter(Boolean).map(esc).concat(c.name?[`Livello <span class="num">${esc(c.level||1)}</span>`]:[]).join(" · ");
   $("race-i").hidden=!c.info;$("race-tip").textContent=c.info||"";if(!c.info)$("race-tip").hidden=true;
-  $("ch-trait").hidden=!c.trait;$("trait-n").textContent=c.trait||"";$("trait-u").textContent=c.traitUse?`(${c.traitUse})`:"";
-  $("versa").hidden=!c.traitUse;$("ch-trait").querySelector("label").classList.toggle("passive",!c.traitUse);$("versa-st").hidden=!c.traitUse;$("trait-d").textContent=c.traitDesc||"";$("trait-i").hidden=!c.traitDesc;if(!c.traitDesc){$("trait-d").hidden=true;$("trait-i").setAttribute("aria-expanded","false")}
+  $("ch-trait").hidden=!c.trait;$("trait-n").textContent=c.trait||"";$("trait-u").textContent="";$("trait-u").hidden=true;
+  $("versa").hidden=!c.traitUse;$("ch-trait").querySelector("label").classList.toggle("passive",!c.traitUse);$("versa-st").hidden=!c.traitUse;const tdx=!!(c.traitDesc||c.traitUse);$("trait-d").innerHTML=(c.traitUse?`<b class="tu">${esc(c.traitUse[0].toUpperCase()+c.traitUse.slice(1))}</b>`:"")+(c.traitDesc?`<span>${esc(c.traitDesc)}</span>`:"");$("trait-i").hidden=!tdx;if(!tdx){$("trait-d").hidden=true;$("trait-i").setAttribute("aria-expanded","false")}
   $("ch-edit").hidden=!c.name||IS_APP;document.body.classList.toggle("app",IS_APP);
   $("setup").hidden=!!c.name;document.body.classList.toggle("nochar",!c.name);}
 
