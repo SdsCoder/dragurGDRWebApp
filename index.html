@@ -306,11 +306,13 @@ dialog h3[tabindex="-1"]:focus{outline:none}.dm-l{font-size:13px;color:var(--mut
 .bon-r{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px;border:1px solid var(--line);background:var(--paper)}
 .it-full{width:100%;margin-top:8px;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:4px 8px;border-style:dashed;border-color:var(--bronze);color:var(--ink);background:transparent;min-height:44px}
 .it-full span{color:var(--bronze)}.it-full small{color:var(--muted);font-size:13px}
-.kseg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px}
+.kseg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:4px}
+.fx-box{display:grid;gap:10px;border-left:3px solid var(--bronze);padding-left:10px}
+.it-full.pri{border-style:solid;color:var(--sheet);align-items:center;font-size:17px}
 .kseg button{display:grid;gap:2px;justify-items:start;text-align:left;padding:8px;min-height:56px;font-size:15px}
 .kseg button small{font-size:11px;color:var(--muted)}
 .kseg button[aria-checked="true"]{border-color:var(--bronze);background:var(--bronze-soft);box-shadow:inset 0 -3px 0 var(--bronze)}
-@media(max-width:380px){.kseg{grid-template-columns:1fr}.kseg button{min-height:44px}}
+
 .dur-f{display:grid;gap:4px;justify-items:start}
 .stepper.wide output{min-width:7.5em;font-size:16px}
 .bon-r .stepper{height:40px}.bon-r .stepper output{min-width:2.6ch}
@@ -616,14 +618,14 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   <h2>Inventario <small id="w-tot" class="num"></small></h2>
   <div class="wbar"><i id="w-bar"></i></div>
   <ul id="items"></ul>
-  <form class="itemform" id="itemform" novalidate>
+  <form class="itemform" id="itemform" novalidate hidden>
     <input id="it-name" aria-label="Nome oggetto" placeholder="Nome oggetto" autocomplete="off">
     <input id="it-w" aria-label="Peso" placeholder="Peso" inputmode="decimal" autocomplete="off">
     <button class="pri" type="submit" id="it-go">Aggiungi</button>
   </form>
-  <button type="button" class="it-full" id="it-full"><span aria-hidden="true">✦</span> Aggiungi oggetto con effetti <small>armatura, amuleto, pozione…</small></button>
+  <button type="button" class="it-full pri" id="it-full">+ Aggiungi oggetto</button>
   <p class="err" id="it-err"></p>
-  <p class="note" style="margin-top:6px">Tocca un oggetto con effetti per indossarlo o usarlo. Tieni premuto un oggetto finché la barra si riempie per vedere info e modificarlo.</p>
+  <p class="note" style="margin-top:6px">Tocca un oggetto con effetti per indossarlo o usarlo, un consumabile per usarlo. Tieni premuto un oggetto finché la barra si riempie per vedere info e modificarlo.</p>
 
 
   <h3 class="sub-h" hidden><label for="inv-extra">Note</label></h3>
@@ -706,13 +708,15 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
     <label>Nome<input id="ie-name" autocomplete="off"></label>
     <div class="ie-row"><label>Peso<input id="ie-w" inputmode="decimal" autocomplete="off"></label><label>Danno<input id="ie-dmg" autocomplete="off" placeholder="es. 1d4"></label></div>
     <label>Note<textarea id="ie-note" rows="3"></textarea></label>
+    <label class="chk fx-chk"><input type="checkbox" id="ie-fx"> Oggetto con effetti</label>
+    <div class="fx-box" id="ie-fx-box">
     <div class="kind-f"><input type="hidden" id="ie-kind" value="norm"><span class="cap" id="ie-kind-l">Tipo</span>
       <div class="kseg" role="radiogroup" aria-labelledby="ie-kind-l">
-        <button type="button" role="radio" data-k="norm"><b>Normale</b><small>nessun effetto</small></button>
         <button type="button" role="radio" data-k="equip"><b>Equipaggiamento</b><small>armatura, amuleto…</small></button>
         <button type="button" role="radio" data-k="pot"><b>Pozione</b><small>effetto a tempo</small></button>
       </div></div>
     <p class="note" id="ie-kind-n"></p>
+    </div>
     <div class="dur-f" id="ie-dur-l"><span class="cap" id="ie-dur-c">Durata</span><div class="stepper wide" role="group" aria-labelledby="ie-dur-c"><button type="button" id="ie-dm" aria-label="Durata meno un round">−</button><output id="ie-dur">fine scena</output><button type="button" id="ie-dp" aria-label="Durata più un round">+</button></div></div>
     <label class="chk" id="ie-worn-l"><input type="checkbox" id="ie-worn"> Indossato: gli effetti sono attivi</label>
     <label class="chk" id="ie-cons-l"><input type="checkbox" id="ie-cons"> Consumabile: un tocco mostra Usa</label>
@@ -1362,8 +1366,8 @@ function openItem(id){const it=S.items.find(i=>i.id===id);if(!it)return;editing=
   $("ie-bon").innerHTML="";it.bon.forEach(b=>addBonRow(b.t,b.v));setDur(it.dur||0);$("ie-worn").checked=!!it.worn;setKind(it.kind);
   openDlg(idlg);}
 function openNewItem(){editing="__new";ui.useOpen=null;$("ie-t").textContent="Nuovo oggetto";
-  $("ie-name").value=$("it-name").value.trim();$("ie-w").value=$("it-w").value.trim();$("ie-dmg").value="";$("ie-note").value="";$("ie-cons").checked=false;$("ie-err").textContent="";
-  $("ie-bon").innerHTML="";setDur(0);$("ie-worn").checked=true;setKind("equip");openDlg(idlg)}
+  $("ie-name").value="";$("ie-w").value="";$("ie-dmg").value="";$("ie-note").value="";$("ie-cons").checked=false;$("ie-err").textContent="";
+  $("ie-bon").innerHTML="";setDur(0);$("ie-worn").checked=true;lastFx="equip";setKind("norm");openDlg(idlg)}
 $("it-full").onclick=openNewItem;
 const BON_GRP=[["Vigore e Spirito",t=>["vig","spi","hv","hs"].includes(t)],["Difesa",t=>t==="corpo"||t==="mente"||t.startsWith("arm:")],["Altro",t=>t==="maxw"]];
 const BON_OPTS=BON_GRP.map(([g,f])=>`<optgroup label="${g}">${BON_T.filter(([k])=>f(k)).map(([k,l])=>`<option value="${k}">${esc(l)}</option>`).join("")}</optgroup>`).join("");
@@ -1377,10 +1381,11 @@ $("ie-bon").onclick=e=>{const x=e.target.closest(".del");if(x){x.parentNode.remo
   const b=e.target.closest("[data-bs]");if(b){const r=b.closest(".bon-r");let v=+r.dataset.v+ +b.dataset.bs;if(v===0)v+= +b.dataset.bs;v=Math.max(-20,Math.min(30,v));r.dataset.v=v;r.querySelector("output").textContent=sgn(v)}};
 let durV=0;function setDur(v){durV=Math.max(0,Math.min(99,v));$("ie-dur").textContent=durV?`${durV} ${durV===1?"round":"round"}`:"fine scena";$("ie-dm").disabled=!durV}
 holdRepeat($("ie-dm"),()=>setDur(durV-1));holdRepeat($("ie-dp"),()=>setDur(durV+1));
-function setKind(k){$("ie-kind").value=k;document.querySelectorAll(".kseg [data-k]").forEach(b=>b.setAttribute("aria-checked",b.dataset.k===k));kindUI()}
+let lastFx="equip";$("ie-fx").onchange=e=>setKind(e.target.checked?lastFx:"norm");
+function setKind(k){if(k!=="norm")lastFx=k;$("ie-kind").value=k;document.querySelectorAll(".kseg [data-k]").forEach(b=>b.setAttribute("aria-checked",b.dataset.k===k));kindUI()}
 document.querySelector(".kseg").onclick=e=>{const b=e.target.closest("[data-k]");if(b)setKind(b.dataset.k)};
 const KIND_N={norm:"Oggetto semplice, senza effetti sulla scheda.",equip:"Tocca l'oggetto per Indossa o Togli. I bonus valgono solo mentre è indossato.",pot:"Tocca l'oggetto per Usa: sparisce, i bonus vanno in Effetti attivi e si annullano allo scadere dei round. Cura e Ricarica si applicano subito."};
-function kindUI(){const k=$("ie-kind").value;$("ie-kind-n").textContent=KIND_N[k];$("ie-dur-l").hidden=k!=="pot";$("ie-cons-l").hidden=k!=="norm";$("ie-worn-l").hidden=k!=="equip";$("ie-bon-f").hidden=k==="norm";
+function kindUI(){const k=$("ie-kind").value;$("ie-fx").checked=k!=="norm";$("ie-fx-box").hidden=k==="norm";$("ie-kind-n").textContent=KIND_N[k];$("ie-dur-l").hidden=k!=="pot";$("ie-cons-l").hidden=k!=="norm";$("ie-worn-l").hidden=k!=="equip";$("ie-bon-f").hidden=k==="norm";
   if(k!=="norm"&&!$("ie-bon").children.length)addBonRow()}
 $("ie-cancel").onclick=()=>{editing=null;closeDlg(idlg)};
 $("itemedit").onsubmit=e=>{e.preventDefault();const isNew=editing==="__new";const it=isNew?null:S.items.find(i=>i.id===editing);if(!it&&!isNew){closeDlg(idlg);return}
