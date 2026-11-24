@@ -117,7 +117,9 @@ details ul{margin:6px 0 0;padding-left:20px;display:grid;gap:3px}
 .legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
 body.nochar .hud,body.nochar .dock,body.nochar .secs,body.nochar #cron-sec,body.nochar #upg-b,body.nochar #ch-sub,body.nochar #ch-trait,body.nochar #race-i{display:none!important}
 .linkb{border:0;background:transparent;padding:0;min-height:0;color:var(--bronze);text-decoration:underline;font:inherit}
-.upg-b{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:4px 12px;border:1.5px solid var(--bronze);border-radius:0;background:var(--bronze-soft);color:var(--ink);font:17px var(--f-display);letter-spacing:.04em;align-self:center;flex:none}
+.hbrk{flex-basis:100%;height:0}
+body.app header.who{padding-right:0}
+.upg-b{margin-left:auto;display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:4px 10px;border:1.5px solid var(--bronze);border-radius:0;background:var(--bronze-soft);color:var(--ink);font:16px var(--f-display);letter-spacing:.04em;align-self:center;flex:none}
 .upg-b svg{width:14px;height:14px;fill:var(--bronze)}
 .upg-b:hover{background:var(--bronze);color:var(--sheet)}.upg-b:hover svg{fill:var(--sheet)}
 .upg-b span{font:600 13px var(--f-num);background:var(--bronze);color:var(--sheet);padding:1px 6px;margin-left:2px}
@@ -434,7 +436,10 @@ header.who{position:relative;padding-right:42px}
 .armor .ar.zero{opacity:.55}
 .sp-grp{font:13px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 2px;padding-top:8px;border-top:1px solid var(--line)}
 .sp-grp:first-child{border-top:0;margin-top:0;padding-top:0}
-.trait #trait-d{margin:0}
+.trait #trait-d{margin:4px 0 0}
+.trait-r{display:block}
+.trait .tr-i{vertical-align:-3px;margin:0 2px;color:var(--bronze)}
+.trait-tip::before{left:var(--ax,20px)}
 .trait .passive{pointer-events:none}
 #sd-cat,#cf-fig{font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--line);padding:6px 8px}
 .schema{margin:10px auto 0;max-width:440px}
@@ -496,13 +501,12 @@ header.who{position:relative;padding-right:42px}
 
 <div class="wrap">
 <header class="who">
-  <h1 id="ch-name">Nuovo personaggio</h1><span class="sub" id="ch-sub"></span><button class="info-i" id="race-i" aria-expanded="false" aria-controls="race-tip" aria-label="Informazioni sulla razza"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10 0a10 10 0 1 1 0 20a10 10 0 1 1 0-20Z M10 3.6a1.9 1.9 0 1 0 0 3.8a1.9 1.9 0 1 0 0-3.8Z M8.3 9h3.4v7.4H8.3Z"/></svg></button>
-  <button class="upg-b" id="upg-b" aria-label="Upgrade: spendi i punti esperienza"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L14.5 8.5 H10.5 V14.5 H5.5 V8.5 H1.5 Z"/></svg>Upgrade<span id="upg-pe" class="num"></span></button>
+  <h1 id="ch-name">Nuovo personaggio</h1><button class="upg-b" id="upg-b" aria-label="Upgrade: spendi i punti esperienza"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L14.5 8.5 H10.5 V14.5 H5.5 V8.5 H1.5 Z"/></svg>Upgrade<span id="upg-pe" class="num"></span></button><span class="hbrk" aria-hidden="true"></span><span class="sub" id="ch-sub"></span><button class="info-i" id="race-i" aria-expanded="false" aria-controls="race-tip" aria-label="Informazioni sulla razza"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10 0a10 10 0 1 1 0 20a10 10 0 1 1 0-20Z M10 3.6a1.9 1.9 0 1 0 0 3.8a1.9 1.9 0 1 0 0-3.8Z M8.3 9h3.4v7.4H8.3Z"/></svg></button>
   <button class="ch-edit" id="ch-edit" aria-label="Modifica il personaggio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z M14 6l3 3"/></svg></button>
   <div class="bubble race-tip" id="race-tip" hidden></div>
   <div class="trait" id="ch-trait" hidden>
-    <label class="chk"><input type="checkbox" id="versa"> <span><b id="trait-n"></b> <span id="versa-st" class="vst"></span> <span class="note" id="trait-u"></span></span></label>
-    <p class="note" id="trait-d"></p>
+    <div class="trait-r"><label class="chk"><input type="checkbox" id="versa"> <span><b id="trait-n"></b> <button class="info-i tr-i" id="trait-i" aria-expanded="false" aria-controls="trait-d" aria-label="Cosa fa il tratto"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10 0a10 10 0 1 1 0 20a10 10 0 1 1 0-20Z M10 3.6a1.9 1.9 0 1 0 0 3.8a1.9 1.9 0 1 0 0-3.8Z M8.3 9h3.4v7.4H8.3Z"/></svg></button> <span id="versa-st" class="vst"></span> <span class="note" id="trait-u"></span></span></label></div>
+    <p class="bubble trait-tip" id="trait-d" hidden></p>
   </div>
 </header>
 <div class="setup" id="setup" hidden>
@@ -566,7 +570,7 @@ header.who{position:relative;padding-right:42px}
   <div class="legend"><span><i class="dot"></i>MOD disponibile</span><span><i class="dot dtm"></i>DTM</span></div>
   <div id="stats"></div>
   <div class="rollrow" style="margin-top:10px">
-    <button id="editlvl" aria-pressed="false">Modifica livelli</button>
+    <button id="editlvl" aria-pressed="false" hidden>Modifica livelli</button>
     <button id="rest">Riposo</button>
     <button id="sleep">Dormi</button>
   </div>
@@ -610,8 +614,8 @@ header.who{position:relative;padding-right:42px}
   <p class="note" style="margin-top:6px">Tocca un oggetto con effetti per indossarlo o usarlo. Tieni premuto un oggetto finché la barra si riempie per vedere info e modificarlo.</p>
 
 
-  <h3 class="sub-h"><label for="inv-extra">Note</label></h3>
-  <textarea id="inv-extra" style="min-height:84px"></textarea>
+  <h3 class="sub-h" hidden><label for="inv-extra">Note</label></h3>
+  <textarea id="inv-extra" style="min-height:84px" hidden></textarea>
 </section>
 
 <section id="sec-coin" class="sec" hidden>
@@ -1372,6 +1376,9 @@ $("itemedit").onsubmit=e=>{e.preventDefault();const isNew=editing==="__new";cons
 };
 $("race-i").onclick=e=>{e.stopPropagation();const t=$("race-tip"),b=$("race-i");t.hidden=!t.hidden;b.setAttribute("aria-expanded",!t.hidden);
   if(!t.hidden)t.style.setProperty("--ax",Math.max(8,b.offsetLeft-t.offsetLeft+b.offsetWidth/2-6)+"px")};
+$("trait-i").onclick=e=>{e.stopPropagation();e.preventDefault();const t=$("trait-d"),b=$("trait-i");t.hidden=!t.hidden;b.setAttribute("aria-expanded",!t.hidden);
+  if(!t.hidden)t.style.setProperty("--ax",Math.max(8,b.offsetLeft-t.offsetLeft+b.offsetWidth/2-6)+"px")};
+document.addEventListener("click",e=>{const t=$("trait-d");if(!t.hidden&&!t.contains(e.target)){t.hidden=true;$("trait-i").setAttribute("aria-expanded","false")}});
 document.addEventListener("click",e=>{const t=$("race-tip");if(!t.hidden&&!t.contains(e.target)){t.hidden=true;$("race-i").setAttribute("aria-expanded","false")}});
 $("coin-i").onclick=e=>{e.stopPropagation();const t=$("coin-tip");t.hidden=!t.hidden;$("coin-i").setAttribute("aria-expanded",!t.hidden)};
 document.addEventListener("click",e=>{const t=$("coin-tip");if(!t.hidden&&!t.contains(e.target)){t.hidden=true;$("coin-i").setAttribute("aria-expanded","false")}});
@@ -1546,8 +1553,8 @@ function renderHead(){const c=S.cfg;
   $("ch-sub").innerHTML=[c.race,c.cls].filter(Boolean).map(esc).concat(c.name?[`Livello <span class="num">${esc(c.level||1)}</span>`]:[]).join(" · ");
   $("race-i").hidden=!c.info;$("race-tip").textContent=c.info||"";if(!c.info)$("race-tip").hidden=true;
   $("ch-trait").hidden=!c.trait;$("trait-n").textContent=c.trait||"";$("trait-u").textContent=c.traitUse?`(${c.traitUse})`:"";
-  $("versa").hidden=!c.traitUse;$("ch-trait").querySelector("label").classList.toggle("passive",!c.traitUse);$("versa-st").hidden=!c.traitUse;$("trait-d").textContent=c.traitDesc||"";$("trait-d").hidden=!c.traitDesc;
-  $("ch-edit").hidden=!c.name||IS_APP;
+  $("versa").hidden=!c.traitUse;$("ch-trait").querySelector("label").classList.toggle("passive",!c.traitUse);$("versa-st").hidden=!c.traitUse;$("trait-d").textContent=c.traitDesc||"";$("trait-i").hidden=!c.traitDesc;if(!c.traitDesc){$("trait-d").hidden=true;$("trait-i").setAttribute("aria-expanded","false")}
+  $("ch-edit").hidden=!c.name||IS_APP;document.body.classList.toggle("app",IS_APP);
   $("setup").hidden=!!c.name;document.body.classList.toggle("nochar",!c.name);}
 
 /* ---------- Editor del personaggio ---------- */
