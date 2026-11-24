@@ -208,8 +208,11 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 .it{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--line);padding:3px 0}
 .it-b{flex:1;display:flex;justify-content:space-between;align-items:center;gap:10px;border:0;background:transparent;text-align:left;padding:3px 6px;position:relative;overflow:hidden;min-width:0;
   user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y}
-.it-b::before{content:"";position:absolute;inset:0 100% 0 0;background:var(--bronze-soft)}
-.it-b.pressing::before{right:0;transition:right 2s linear}
+.it-b:hover{background:transparent}
+.it-b::before{content:"";position:absolute;inset:0 100% 0 0;background:var(--bronze);opacity:.22}
+.it-b::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--bronze)}
+.it-b.pressing::before{right:0;transition:right .7s linear}
+.it-b.pressing::after{width:100%;transition:width .7s linear}
 .it-b>*{position:relative}
 .it-n{min-width:0}
 .wt{position:relative;width:40px;height:36px;flex:none;color:var(--ink)}
@@ -410,7 +413,7 @@ h2.bag .info-i{align-self:center}
     <button class="pri" type="submit" id="it-go">Aggiungi</button>
   </form>
   <p class="err" id="it-err"></p>
-  <p class="note" style="margin-top:6px">Tocca un consumabile per usarlo. Tieni premuto un oggetto per 2 secondi per vedere info e modificarlo.</p>
+  <p class="note" style="margin-top:6px">Tocca un consumabile per usarlo. Tieni premuto un oggetto finché la barra si riempie per vedere info e modificarlo.</p>
 
 
   <h3 class="sub-h"><label for="inv-extra">Note</label></h3>
@@ -783,7 +786,7 @@ const itemsEl=$("items");let lp=null;
 itemsEl.addEventListener("pointerdown",e=>{const b=e.target.closest(".it-b");if(!b)return;
   if(lp&&lp.t)clearTimeout(lp.t);
   const cur={b,id:b.dataset.id,x:e.clientX,y:e.clientY,fired:false};
-  cur.t=setTimeout(()=>{cur.fired=true;b.classList.remove("pressing");openItem(cur.id)},2000);
+  cur.t=setTimeout(()=>{cur.fired=true;b.classList.remove("pressing");try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}openItem(cur.id)},700);
   lp=cur;b.classList.add("pressing");});
 const cancelLp=()=>{if(lp&&!lp.fired){clearTimeout(lp.t);lp.b.classList.remove("pressing")}};
 itemsEl.addEventListener("pointermove",e=>{if(lp&&!lp.fired&&Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>10){cancelLp();lp=null}});
