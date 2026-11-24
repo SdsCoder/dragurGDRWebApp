@@ -229,7 +229,11 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 .ie .chk{display:flex;color:var(--ink);font-size:15px}
 /* Info borsa */
 .bag{display:flex;align-items:center;gap:8px}
-.info-i{width:24px;height:24px;min-height:24px;padding:0;border-radius:50%;font:italic 600 14px/1 var(--f-body)}
+.info-i{width:18px;height:18px;min-height:18px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--bronze);display:inline-grid;place-items:center;flex:none}
+.info-i svg{width:18px;height:18px;display:block}
+.info-i{position:relative}
+.info-i::after{content:"";position:absolute;inset:-11px}
+.info-i:hover,.info-i[aria-expanded="true"]{background:transparent;color:var(--ink)}
 .bubble{position:relative;background:var(--ink);color:var(--sheet);font-size:14px;padding:8px 10px;margin:0 0 10px;max-width:34em}
 .bubble::before{content:"";position:absolute;top:-6px;left:58px;border:6px solid transparent;border-top:0;border-bottom-color:var(--ink)}
 /* Personaggi */
@@ -284,7 +288,7 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 @media(min-width:860px){.secs{grid-template-columns:1fr 1fr}}
 .sec{scroll-margin-top:110px}
 h2.bag{justify-content:flex-start;align-items:center}
-h2.bag .info-i{font-size:14px}
+h2.bag .info-i{align-self:center}
 .bubble::before{left:72px}
 /* Ritaglio */
 #cropdlg{width:min(720px,calc(100vw - 24px));padding:12px}
@@ -297,6 +301,14 @@ h2.bag .info-i{font-size:14px}
 .sel i[data-h="ne"]{right:-5px;top:-5px;border-left:0;border-bottom:0;cursor:nesw-resize}
 .sel i[data-h="sw"]{left:-5px;bottom:-5px;border-right:0;border-top:0;cursor:nesw-resize}
 .sel i[data-h="se"]{right:-5px;bottom:-5px;border-left:0;border-top:0;cursor:nwse-resize}
+#race-i{align-self:center}
+.race-tip{flex-basis:100%;margin:2px 0 0}
+.race-tip::before{left:var(--ax,20px)}
+.trait{flex-basis:100%;display:grid;gap:2px;border-left:3px solid var(--bronze);padding-left:10px;margin-top:2px}
+.trait b{font-weight:600}
+.vst{color:var(--bronze);font-weight:600}
+.vst.on{color:var(--muted);font-weight:400;font-style:italic}
+.trait .chk{font-size:16px}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -306,7 +318,11 @@ h2.bag .info-i{font-size:14px}
 
 <div class="wrap">
 <header class="who">
-  <h1>Nefastor</h1><span class="sub">Umano anziano · Mago · Livello <span class="num">1</span></span>
+  <h1>Nefastor</h1><span class="sub">Umano anziano · Mago · Livello <span class="num">1</span></span><button class="info-i" id="race-i" aria-expanded="false" aria-controls="race-tip" aria-label="Movimento e terreni"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10 0a10 10 0 1 1 0 20a10 10 0 1 1 0-20Z M10 3.6a1.9 1.9 0 1 0 0 3.8a1.9 1.9 0 1 0 0-3.8Z M8.3 9h3.4v7.4H8.3Z"/></svg></button>
+  <div class="bubble race-tip" id="race-tip" hidden>Movimento base 8 m. Nessuna penalità su terra battuta/città e foresta/bosco. +2 ai test di IST di percezione su quei terreni.</div>
+  <div class="trait">
+    <label class="chk"><input type="checkbox" id="versa"> <span><b>Versatilità Inarrestabile</b> <span id="versa-st" class="vst"></span> <span class="note">(1 per sessione)</span></span></label>
+  </div>
 </header>
 
 <div class="hud" role="region" aria-label="Vigore e Spirito">
@@ -396,16 +412,13 @@ h2.bag .info-i{font-size:14px}
   <p class="err" id="it-err"></p>
   <p class="note" style="margin-top:6px">Tocca un consumabile per usarlo. Tieni premuto un oggetto per 2 secondi per vedere info e modificarlo.</p>
 
-  <h3 class="sub-h">Tratto</h3>
-  <label class="chk"><input type="checkbox" id="versa"> Versatilità Inarrestabile usata (1 per sessione)</label>
-  <p class="note" style="margin-top:6px">Movimento base 8 m · nessuna penalità su terra battuta/città e foresta/bosco · +2 ai test di IST di percezione su quei terreni.</p>
 
   <h3 class="sub-h"><label for="inv-extra">Note</label></h3>
   <textarea id="inv-extra" style="min-height:84px"></textarea>
 </section>
 
 <section id="sec-coin" class="sec" hidden>
-  <h2 class="bag">Borsa <button class="info-i" id="coin-i" aria-expanded="false" aria-controls="coin-tip" aria-label="Come funziona la borsa">i</button></h2>
+  <h2 class="bag">Borsa <button class="info-i" id="coin-i" aria-expanded="false" aria-controls="coin-tip" aria-label="Come funziona la borsa"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10 0a10 10 0 1 1 0 20a10 10 0 1 1 0-20Z M10 3.6a1.9 1.9 0 1 0 0 3.8a1.9 1.9 0 1 0 0-3.8Z M8.3 9h3.4v7.4H8.3Z"/></svg></button></h2>
   <div class="bubble" id="coin-tip" hidden>10 rame = 1 argento, 10 argento = 1 oro. Il cambio è automatico: il decimo rame diventa 1 argento, e se togli un rame quando sei a 0 si spezza una moneta più grande.</div>
   <div class="coins">
     <div class="row"><span>Oro</span><div class="ctl"><button class="sq" data-coin="-100" aria-label="Oro meno uno">−</button><span class="val num" id="c-oro"></span><button class="sq" data-coin="100" aria-label="Oro più uno">+</button></div></div>
@@ -800,6 +813,9 @@ $("itemedit").onsubmit=e=>{e.preventDefault();const it=S.items.find(i=>i.id===ed
     log(`Modificato: ${esc(on)}${on!==name?` → ${esc(name)}`:""}${ow!==w?`, peso ${ow==null?"—":fmt(ow)} → ${w==null?"—":fmt(w)}. Peso ${fmt(weight())} / 10`:""}.`)});
   editing=null;closeDlg(idlg);
 };
+$("race-i").onclick=e=>{e.stopPropagation();const t=$("race-tip"),b=$("race-i");t.hidden=!t.hidden;b.setAttribute("aria-expanded",!t.hidden);
+  if(!t.hidden)t.style.setProperty("--ax",Math.max(8,b.offsetLeft-t.offsetLeft+b.offsetWidth/2-6)+"px")};
+document.addEventListener("click",e=>{const t=$("race-tip");if(!t.hidden&&!t.contains(e.target)){t.hidden=true;$("race-i").setAttribute("aria-expanded","false")}});
 $("coin-i").onclick=e=>{e.stopPropagation();const t=$("coin-tip");t.hidden=!t.hidden;$("coin-i").setAttribute("aria-expanded",!t.hidden)};
 document.addEventListener("click",e=>{const t=$("coin-tip");if(!t.hidden&&!t.contains(e.target)){t.hidden=true;$("coin-i").setAttribute("aria-expanded","false")}});
 $("itemform").onsubmit=e=>{e.preventDefault();
@@ -825,7 +841,7 @@ $("log-x").onclick=()=>closeDlg(dlg);
 $("log").onclick=e=>{const b=e.target.closest("[data-del]");if(!b)return;S.log=S.log.filter(l=>l.id!==b.dataset.del);save();drawLog()};
 function drawLog(){
   $("log").innerHTML=S.log.length?S.log.map(l=>`<li><span>${l.time?`<time>${l.time}</time>`:""}${l.t}</span><button class="lx" data-del="${l.id}" aria-label="Cancella questa voce">×</button></li>`).join(""):"<li>Nessuna azione ancora. Lancia un incantesimo o usa i contatori.</li>";
-  $("log-n").textContent=S.log.length?S.log.length+" voci":"vuoto";
+  $("log-n").textContent=S.log.length?S.log.length+(S.log.length===1?" voce":" voci"):"vuoto";
 }
 function updUndo(){$("undo").disabled=!hist.length;$("undo").textContent=hist.length?`Annulla ultima azione (${hist.length})`:"Annulla ultima azione"}
 function keepText(){return{cronaca:S.cronaca,inv:S.inv}}
@@ -978,7 +994,7 @@ applySecs();
 function fillInputs(){
   $("cronaca").value=S.cronaca||"";$("inv-extra").value=S.inv||"";$("versa").checked=!!S.versa;
 }
-function render(){renderBars();renderSpells();renderStats();renderDef();renderInv();renderPeople();drawLog();updUndo();$("versa").checked=!!S.versa}
+function render(){renderBars();renderSpells();renderStats();renderDef();renderInv();renderPeople();drawLog();updUndo();$("versa").checked=!!S.versa;$("versa-st").textContent=S.versa?"usata":"disponibile";$("versa-st").classList.toggle("on",!!S.versa)}
 fillInputs();render();save();
 </script>
 
