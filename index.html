@@ -395,7 +395,7 @@ dialog h3[tabindex="-1"]:focus{outline:none}.dm-l{font-size:13px;color:var(--mut
 .lvln.ma::after{content:"";position:absolute;inset:-2px;border:1.5px solid var(--danger);border-radius:50%;animation:mpulse 1.8s ease-out infinite;pointer-events:none}
 @keyframes mpulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.55);opacity:0}}
 .schema .call.dn .bub>circle:not(.pls){stroke:var(--danger)}
-.schema .call.dn .cv{fill:var(--danger)}
+.schema .call.dn .cv{fill:var(--danger)}.schema .call.dn .shp{stroke:var(--danger)}
 .schema .pls{fill:none;stroke:var(--danger);stroke-width:1.5;transform-box:fill-box;transform-origin:center;animation:mpulse 1.8s ease-out infinite}
 @media (prefers-reduced-motion:reduce){.lvln.ma::after,.schema .pls{animation:none;opacity:.4;transform:scale(1.25)}}
 .st-n .mal{color:var(--danger);font-size:13px}
@@ -1053,6 +1053,7 @@ const srcTxt=t=>bonSrc(t).map(([n,v])=>`${n} ${v>0?"+":""}${v}`).join(", ");
 /* ERS: Resistenza Fisica = MOD Tenacia / 2 per eccesso; Resistenza Mentale = MOD Volontà / 2 per eccesso */
 const resOf=n=>Math.max(0,Math.ceil(modOf(n)/2));
 /* corpoAdj/menteAdj: differenza fissa tra la scheda del master e la formula (es. Dûrgrim Mente 2), conservata quando le caratteristiche crescono */
+const zoneDelta=k=>{if(k==="scudo")return bonusOf("arm:scudo");return bonusOf("arm:"+k)+bonusOf("corpo")+(Math.ceil(modFor(lvlOf("Tenacia"))/2)-Math.ceil(modFor(lvlBase("Tenacia"))/2))+(S.stone.v||0)};
 const corpoE=()=>Math.max(0,resOf("Tenacia")+(S.cfg.corpoAdj||0)+bonusOf("corpo")),menteE=()=>Math.max(0,resOf("Volontà")+(S.cfg.menteAdj||0)+bonusOf("mente"));
 const armE=k=>Math.max(0,(S.cfg.armor[k]||0)+bonusOf("arm:"+k)),maxWE=()=>Math.max(0,(S.cfg.maxW||0)+bonusOf("maxw"));
 let uid=0;const newId=()=>"i"+Date.now().toString(36)+(uid++);
@@ -1507,19 +1508,19 @@ const FLAME_IN="M-2.98 -14.70 Q-1.78 -18.65 0.00 -21.90 Q1.78 -18.65 2.98 -14.70
 function schemaSVG(){const ar=S.cfg.armor,F=FIGIMG[figKey()];
   const H=282,W=H*F.w/F.h,x0=160-W/2,y0=10,P=k=>{const q=F.a[k];return q?[x0+q[0]*W,y0+q[1]*H]:null};
   const short=n=>n.replace(" destro"," d.").replace(" sinistro"," s.").replace(" destra"," d.").replace(" sinistra"," s.");
-  const raw=k=>(ar[k]||0)+(S.cfg.corpo||0),base=k=>armE(k)+corpoE(),mag=S.stone.v||0;
+  const base=k=>armE(k)+corpoE(),mag=S.stone.v||0;
   const lbl={};
-  const call=(key,name,rng,x,y)=>{const b0=base(key),v=b0+mag,inc=v-raw(key),up=inc>0,dn=inc<0,t=P(key);lbl[key]=`${name}, dado ${rng}, protezione ${v}${up?`, aumentata di ${inc}`:dn?`, ridotta di ${-inc}`:""}`;
+  const call=(key,name,rng,x,y)=>{const v=base(key)+mag,inc=zoneDelta(key),up=inc>0,dn=inc<0,t=P(key);lbl[key]=`${name}, dado ${rng}, protezione ${v}${up?`, aumentata di ${inc}`:dn?`, ridotta di ${-inc}`:""}`;
     return {line:"",
       box:`<g class="call hid${v?"":" zero"}${up?" up":dn?" dn":""}" data-k="${key}" data-zone="${name}" aria-hidden="true">${t?`<line class="ld" pathLength="1" x1="${t[0].toFixed(1)}" y1="${t[1].toFixed(1)}" x2="${x}" y2="${y}"/><circle class="dot" cx="${t[0].toFixed(1)}" cy="${t[1].toFixed(1)}" r="3.2"/>`:""}<g class="bub">
-      ${up?`<g transform="translate(${x} ${y})" style="--ad:-${((x*7+y*3)%13/10).toFixed(1)}s"><path class="aura-g" d="${FLAME}" filter="url(#auraglow)"/><path class="aura-o" d="${FLAME}"/><path class="aura-i" d="${FLAME_IN}"/></g>`:""}${dn?`<circle class="pls" cx="${x}" cy="${y}" r="15"/>`:""}<circle cx="${x}" cy="${y}" r="15"/><text x="${x}" y="${y+5}" class="cv">${v||""}</text>
+      ${up?`<g transform="translate(${x} ${y})" style="--ad:-${((x*7+y*3)%13/10).toFixed(1)}s"><path class="aura-g" d="${FLAME}" filter="url(#auraglow)"/><path class="aura-o" d="${FLAME}"/><path class="aura-i" d="${FLAME_IN}"/></g>`:""}${dn?`<circle class="pls" cx="${x}" cy="${y}" r="15"/>`:""}<circle cx="${x}" cy="${y}" r="15"/><text x="${x}" y="${y+5}" class="cv">${v||(dn?"0":"")}</text>
       <text x="${x}" y="${y-(up?31:21)}" class="cn" text-anchor="middle">${short(name)}</text><text x="${x}" y="${y+30}" class="cr" text-anchor="middle">${rng}</text></g></g>`}};
   const swp=figKey()==="nano",sdy=swp?118:0;
   const C=[call("testa","Testa","12",50,40),call("torso","Torso","9-11",34,112),call("bd","Braccio destro","5-6",34,190),call("gd","Gamba destra","1-2",54,268),
            call("bs","Braccio sinistro","7-8",286,swp?62:150),call("gs","Gamba sinistra","3-4",266,268)];
-  const sp=P("scudo"),sc=armE("scudo"),scUp=sc>(ar.scudo||0);lbl.scudo=`Scudo, armatura ${sc}`;
-  const shield=`<g class="call hid${sc?"":" zero"}${scUp?" up":""}" data-k="scudo" aria-hidden="true">${sp?`<line class="ld" pathLength="1" x1="${sp[0].toFixed(1)}" y1="${sp[1].toFixed(1)}" x2="276" y2="${62+sdy}"/><circle class="dot" cx="${sp[0].toFixed(1)}" cy="${sp[1].toFixed(1)}" r="3.2"/>`:""}<g class="bub"><g transform="translate(0 ${sdy})">
-      <path class="shp" d="M276 18 L298 25 Q299 50 276 68 Q253 50 254 25 Z"/><text x="276" y="50" class="cv">${sc?"+"+sc:""}</text>
+  const sp=P("scudo"),sc=armE("scudo"),scD=zoneDelta("scudo"),scUp=scD>0,scDn=scD<0;lbl.scudo=`Scudo, armatura ${sc}`;
+  const shield=`<g class="call hid${sc?"":" zero"}${scUp?" up":scDn?" dn":""}" data-k="scudo" aria-hidden="true">${sp?`<line class="ld" pathLength="1" x1="${sp[0].toFixed(1)}" y1="${sp[1].toFixed(1)}" x2="276" y2="${62+sdy}"/><circle class="dot" cx="${sp[0].toFixed(1)}" cy="${sp[1].toFixed(1)}" r="3.2"/>`:""}<g class="bub"><g transform="translate(0 ${sdy})">
+      ${scDn?`<path class="pls" d="M276 18 L298 25 Q299 50 276 68 Q253 50 254 25 Z"/>`:""}<path class="shp" d="M276 18 L298 25 Q299 50 276 68 Q253 50 254 25 Z"/><text x="276" y="50" class="cv">${sc?"+"+sc:scDn?"0":""}</text>
       <text x="276" y="84" class="cr" text-anchor="middle">scudo</text></g></g></g>`;
   return `<svg viewBox="0 0 320 306" class="schema-svg" role="group" aria-label="Armatura per zona">
     <defs><filter id="shblur" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="2.4"/></filter><filter id="auraglow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><rect class="bgr" width="320" height="306"/>
@@ -1558,10 +1559,11 @@ function renderDef(){const st=S.stone,on=st.v>0;
   {const sh=armE("scudo");$("dm-sh-l").hidden=!(sh>0);$("dm-sh-t").textContent=`Parato con lo scudo (−${sh})`;if(!(sh>0))$("dm-sh").checked=false}
   $("corpo-v").textContent=corpoE();$("mente-v").textContent=menteE();
   [["corpo-v","corpo"],["mente-v","mente"]].forEach(([id,t])=>{const box=$(id).parentNode,b=bonusOf(t);box.classList.toggle("up",b>0);box.title=b?`Base ${S.cfg[t]||0}, ${srcTxt(t)}`:""});
-  const sk=JSON.stringify([S.cfg.cls,S.cfg.fig,S.cfg.armor,S.cfg.corpo,S.stone.v,corpoE(),ARMK.map(([k])=>armE(k))]);const hasCh=!!(S.cfg.name||S.cfg.fig);$("schema-leg").hidden=!hasCh;
+  const sk=JSON.stringify([S.cfg.cls,S.cfg.fig,S.cfg.armor,S.cfg.corpo,S.stone.v,corpoE(),ARMK.map(([k])=>armE(k)),ARMK.map(([k])=>zoneDelta(k))]);const hasCh=!!(S.cfg.name||S.cfg.fig);$("schema-leg").hidden=!hasCh;
   if(sk+hasCh!==schemaKey){schemaKey=sk+hasCh;$("schema").innerHTML=hasCh?schemaSVG():`<p class="note" style="text-align:center">Scegli un personaggio per vedere lo schema del corpo.</p>`;ui.shown.forEach(k=>showZone(k,false))}
-  if(hasCh){const zv={},who=S.cfg.name+"|"+S.cfg.fig;["testa","torso","bd","bs","gd","gs"].forEach(k=>zv[k]=armE(k)+corpoE()+(S.stone.v||0));zv.scudo=armE("scudo");
-    if(prevZ&&prevZ.who===who){const up=Object.keys(zv).filter(k=>zv[k]>prevZ.v[k]&&(k!=="scudo"||zv[k]>0));up.forEach((k,i)=>setTimeout(()=>showZone(k,true),i*90));Object.keys(zv).filter(k=>zv[k]<prevZ.v[k]).forEach(hideZone)}
+  if(hasCh){const zv={},who=S.cfg.name+"|"+S.cfg.fig;ARMK.forEach(([k])=>zv[k]=zoneDelta(k));
+    if(prevZ&&prevZ.who===who){const ch=Object.keys(zv).filter(k=>zv[k]!==prevZ.v[k]);
+      ch.filter(k=>zv[k]!==0&&(k!=="scudo"||armE("scudo")>0||zv[k]<0)).forEach((k,i)=>setTimeout(()=>showZone(k,true),i*90));ch.filter(k=>zv[k]===0).forEach(hideZone)}
     prevZ={who,v:zv}}
   $("stone-v").textContent=st.v?"+"+st.v:"0";$("stone-box").classList.toggle("on",on);
   $("stone-r").textContent=on?`${st.r} round`:"non attiva";$("stone-m").hidden=!on;$("rd-p").hidden=!on;$("mg-m").disabled=!on;}
