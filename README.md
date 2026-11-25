@@ -7,7 +7,7 @@ Scheda interattiva di Nefastor, installabile sul telefono come app.
 1. Su GitHub crea un repository nuovo chiamato `dragur`, pubblico, vuoto.
 2. Nel repository premi **Add file → Upload files** e trascina tutti i file di questa cartella (non la cartella stessa). Premi **Commit changes**.
 3. Vai in **Settings → Pages**. In "Build and deployment" scegli **Deploy from a branch**, branch **main**, cartella **/ (root)**, poi **Save**.
-4. Dopo uno o due minuti la scheda è online all'indirizzo `[https://TUONOME.github.io/dragur/](https://sdscoder.github.io/dragurGDRWebApp/)`.
+4. Dopo uno o due minuti la scheda è online all'indirizzo https://sdscoder.github.io/dragurGDRWebApp.
 
 ## Installarla su Android
 
