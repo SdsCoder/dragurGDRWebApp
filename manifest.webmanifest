@@ -1,7 +1,7 @@
 {
-  "name": "Dragur",
-  "short_name": "Dragur",
-  "description": "Scheda di Nefastor per la campagna di Dragur",
+  "name": "Dralgûr",
+  "short_name": "Dralgûr",
+  "description": "Scheda del personaggio per Dralgûr: Il Ciclo dell'Ombra",
   "lang": "it",
   "start_url": "./",
   "scope": "./",
