@@ -63,23 +63,36 @@ button.pri:disabled:hover{background:var(--ink);border-color:var(--ink)}
 .rollrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
 /* HUD fisso */
-.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);padding-block:8px 10px;border-bottom:3px double var(--ink);
-  display:grid;grid-template-columns:1fr auto;gap:8px;align-items:stretch}
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);padding-block:6px 6px;border-bottom:3px double var(--ink);
+  display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.hud{grid-template-columns:minmax(0,1fr)!important}
+.hud-row{display:flex;align-items:center;gap:6px;min-width:0}
+.hud-name{font:22px/1.1 var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto;display:none}
+.hud.named .hud-name{display:block;animation:fadein .25s}
+.hud-sp{flex:1 1 0;min-width:0}
+.cdbar{display:flex;gap:5px;flex:none;align-items:center}
+.cdic{position:relative;width:34px;height:34px;min-height:0;padding:0;display:grid;place-items:center;border:1.5px solid var(--danger);background:var(--sheet);color:var(--danger);flex:none}
+.cdic.pos{border-color:var(--bronze);color:var(--bronze)}.cdic.mix{border-color:var(--ink);color:var(--ink)}
+.cdic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.cdic .ar{position:absolute;right:-6px;top:-7px;width:15px;height:15px;border-radius:50%;display:grid;place-items:center;font:8px/1 var(--f-num);color:#fff;background:var(--danger)}
+.cdic.pos .ar{background:var(--bronze)}.cdic.mix .ar{background:var(--ink)}
+.cdic[aria-expanded="true"]{background:var(--danger);color:var(--sheet)}.cdic.pos[aria-expanded="true"]{background:var(--bronze)}
+.cdic.more::before{content:"";position:absolute;inset:-5px;border:2px solid var(--danger);animation:cdpulse 1.4s ease-out infinite;pointer-events:none}
+.cdic.more.pos::before{border-color:var(--bronze)}
+.cdic.more .ar{width:auto;min-width:16px;padding:0 3px;border-radius:8px;font-size:10px}
+@keyframes cdpulse{0%{opacity:.7;transform:scale(.85)}100%{opacity:0;transform:scale(1.25)}}
+@media (prefers-reduced-motion:reduce){.cdic.more::before{animation:none;opacity:.5}}
 .bars{display:grid;gap:6px;min-width:0}
-.cdtab{position:absolute;top:calc(100% + 3px);right:0;display:flex;align-items:stretch;max-width:50vw;background:var(--paper);border:1.5px solid var(--ink);border-top:0;box-shadow:0 4px 10px rgba(0,0,0,.18)}
-.cdtab-h{display:flex;align-items:center;gap:2px;flex:none;min-height:0;height:38px;padding:0 6px 0 8px;border:0;background:transparent;color:var(--ink);font:600 13px var(--f-num)}
-.cdtab-h svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
-.cdtab-h[aria-expanded="true"] svg{transform:rotate(180deg)}
-.cdtab-h span{display:flex;gap:3px;align-items:center}.cdtab-h i{font-style:normal}
-.cdtab-l{display:flex;gap:4px;align-items:center;padding:3px 6px 3px 0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;min-width:0}
-.cdtab-h[aria-expanded="false"]+.cdtab-l{display:none}
-.cdi{flex:none;display:grid;justify-items:center;gap:0;min-width:40px;min-height:0;height:32px;padding:0 5px;border:1.5px solid var(--danger);background:transparent;color:var(--danger);font:600 11px/1.1 var(--f-num)}
-.cdi.pos{border-color:var(--bronze);color:var(--bronze)}
-.cdi b{font-size:12px}
-.cdi[aria-expanded="true"]{background:var(--danger);color:var(--sheet)}.cdi.pos[aria-expanded="true"]{background:var(--bronze)}
-.cdtip{position:absolute;top:calc(100% + 46px);right:0;width:min(280px,80vw);background:var(--sheet);border:1.5px solid var(--ink);padding:10px 12px;box-shadow:0 6px 16px rgba(0,0,0,.25);display:grid;gap:4px;font-size:15px}
+.cdtip{position:absolute;top:calc(100% + 6px);right:0;z-index:30;width:min(280px,80vw);background:var(--sheet);border:1.5px solid var(--ink);padding:10px 12px;box-shadow:0 6px 16px rgba(0,0,0,.25);display:grid;gap:4px;font-size:15px}
 .cdtip b{font:19px var(--f-display);font-weight:400}.cdtip .ef{font:600 14px var(--f-num)}.cdtip .ef.neg{color:var(--danger)}.cdtip .ef.pos{color:var(--bronze)}
-.cdtip small{color:var(--muted)}.cdtip button{justify-self:end;min-height:34px;padding:0 12px;font-size:14px;margin-top:4px}
+.cdtip small{color:var(--muted)}
+.cdtip .ct-h{display:flex;align-items:center;gap:8px}.cdtip .ct-h svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.cdtip .ct-c{display:flex;justify-content:space-between;gap:10px;width:100%;min-height:34px;padding:2px 0;border:0;border-bottom:1px dashed var(--line);background:transparent;font:15px var(--f-body);text-align:left;margin:0;color:var(--ink)}
+.cdtip .ct-c span:last-child{font:600 14px var(--f-num);white-space:nowrap}
+.cdtip .ct-g{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font:15px var(--f-num);margin-top:4px;align-items:baseline}.cdtip .ct-g dt{color:var(--muted);font:15px var(--f-body)}.cdtip .ct-g dd{margin:0;white-space:nowrap}.cdtip .ct-g small{font:13px var(--f-body);color:var(--muted)}
+.cdtip .ct-l{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;border:0;border-bottom:1px solid var(--line);background:transparent;padding:2px 0;margin:0;font:15px var(--f-body);color:var(--ink);text-align:left}
+.cdtip .neg{color:var(--danger)}.cdtip .pos{color:var(--bronze)}
+.cdtip .ct-l svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7}.cdtip button{justify-self:end;min-height:34px;padding:0 12px;font-size:14px;margin-top:4px}
 .hud-ko{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;border:1.5px solid var(--danger);background:var(--paper);padding:4px 4px 4px 10px}
 .hud-ko-t{flex:1;min-width:0;font-size:14px;color:var(--danger)}.hud-ko-t b{font-weight:600;font-family:var(--f-num)}
 .hud-ko>button{min-height:34px;padding:2px 12px;flex:none;font-size:14px}
@@ -99,7 +112,7 @@ button.pri:disabled:hover{background:var(--ink);border-color:var(--ink)}
 .gauge.warn{box-shadow:0 0 0 2px var(--danger)}
 .gauge.warn i{animation:pulse 1s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.hud-ic{display:grid;gap:6px;grid-template-rows:1fr 1fr}
+.hud-ic{display:flex;gap:6px}.hud-ic .icb{width:42px;height:40px}
 .icb{position:relative;width:48px;min-height:0;padding:0;display:grid;place-items:center;border:1.5px solid var(--ink);background:transparent;color:var(--ink)}
 .icb svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .icb small{position:absolute;top:-7px;right:-7px;font:600 11px var(--f-num);background:var(--bronze);color:var(--sheet);padding:0 4px;line-height:15px;min-width:9px;text-align:center}
@@ -215,6 +228,11 @@ dialog.page::backdrop{background:var(--sheet)}
 .ur>button{min-width:6.5em;flex:none}
 .ur details{font-size:14px;color:var(--muted)}.ur details p{margin:4px 0}.ur summary{cursor:pointer;color:var(--bronze)}
 #upg-add{margin-top:12px}
+.ur.lk{flex-wrap:wrap}
+.lockb{width:48px;height:44px;min-height:0;padding:0;display:grid;place-items:center;border:1.5px solid var(--line);background:transparent;color:var(--muted);flex:none}
+.lockb svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.lockb[aria-expanded="true"]{border-color:var(--ink);color:var(--ink)}
+.lk-tip{flex-basis:100%;margin:8px 0 0}.bubble.lk-tip::before{left:auto;right:18px}
 .spsub{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--ink);margin:6px 0 4px}
 .spsub button{border:0;min-height:44px;padding:6px 8px;background:transparent;color:var(--ink);font:17px var(--f-display);display:grid;justify-items:center;gap:0}
 .spsub button+button{border-left:1.5px solid var(--ink)}
@@ -317,9 +335,12 @@ body.lock .dock,body.lock .hud{pointer-events:none}
 #log li time{font:12px var(--f-num);color:var(--muted);margin-right:6px}
 .danger{border-color:var(--danger);color:var(--danger)}
 /* Difesa compatta */
-.def-top{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.def-top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.def-top .dv{min-width:0}
 .dv{border:1px solid var(--line);padding:8px 6px;display:grid;justify-items:center;align-content:start;gap:4px;text-align:center}
 .dv b{font:36px/1 var(--f-display);font-weight:400}
+.dv .cap{display:inline-flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;max-width:100%}
+.def-tip{margin:10px 0 0}.bubble.def-tip[data-k="corpo"]::before{left:14%}.bubble.def-tip[data-k="mente"]::before{left:auto;right:14%}
 .dv.stone b{color:var(--muted)}
 .dv.stone.on{background:var(--bronze-soft);border-color:var(--bronze)}
 .dv.stone.on b{color:var(--ink)}
@@ -450,8 +471,26 @@ dialog h3[tabindex="-1"]:focus{outline:none}.dm-l{font-size:13px;color:var(--mut
 .bubble{position:relative;background:var(--ink);color:var(--sheet);font-size:14px;padding:8px 10px;margin:0 0 10px;max-width:34em}
 .bubble::before{content:"";position:absolute;top:-6px;left:58px;border:6px solid transparent;border-top:0;border-bottom-color:var(--ink)}
 /* Personaggi */
-#pp-add{font:15px var(--f-body)}
-.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+h2.pp-h{align-items:center;flex-wrap:nowrap}
+.pp-add{border:1.5px solid var(--ink)}.pp-add svg{stroke-width:2.2}
+/* galleria */
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.pgal{position:relative;display:block;width:100%;aspect-ratio:3/4;min-height:0;padding:0;border:1px solid var(--line);background:var(--paper);overflow:hidden;color:var(--ink)}
+.pgal img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.pgal .pg-ph{position:absolute;inset:0 0 28px;display:grid;place-items:center;font:30px var(--f-display);color:var(--muted)}
+.pgal .pg-n{position:absolute;left:0;right:0;bottom:0;padding:18px 6px 5px;font:15px/1.15 var(--f-display);text-align:left;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.78));overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pgal.noimg .pg-n{color:var(--ink);background:none;padding-top:5px;border-top:1px solid var(--line)}
+.pgal:hover{background:var(--paper)}.pgal:hover .pg-n{text-decoration:underline}
+/* scheda di dettaglio */
+#pddlg{display:none;flex-direction:column;gap:10px;height:82vh}#pddlg[open]{display:flex}#pddlg .dlg-ft{justify-content:flex-end}
+.pd-top{display:flex;gap:12px;align-items:flex-start}
+.pd-img{flex:none;width:110px;aspect-ratio:3/4;padding:0;border:1px solid var(--ink);overflow:hidden;background:var(--paper);min-height:0}
+.pd-img img{width:100%;height:100%;object-fit:cover;display:block}
+.pd-img.ph{display:grid;place-items:center;font:34px var(--f-display);color:var(--muted);border-color:var(--line)}
+.pd-meta{display:grid;gap:8px;min-width:0;flex:1}
+.pd-notes{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;white-space:pre-line;font-size:16px;line-height:1.5;border-top:1px solid var(--line);padding-top:10px}
+.pd-notes.empty{color:var(--muted);font-style:italic}
+
 .pc{display:flex;gap:10px;border:1px solid var(--line);background:var(--paper);padding:8px;min-width:0}
 .pc-img{flex:none;width:64px;height:64px;padding:0;border:1px solid var(--ink);overflow:hidden;background:var(--sheet)}
 .pc-img img{width:100%;height:100%;object-fit:cover;display:block}
@@ -499,8 +538,52 @@ dialog h3[tabindex="-1"]:focus{outline:none}.dm-l{font-size:13px;color:var(--mut
 .bk-b{display:grid;gap:8px;margin-top:8px}
 .bk textarea{background:var(--paper);border:1px solid var(--line);padding:6px 8px;line-height:1.3;min-height:70px;background-image:none;font:12px var(--f-num)}
 /* Fila di icone */
-.dock{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
-@media(max-width:520px){.dock{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:10px}}
+/* barra da gioco fissa in basso */
+.gbar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--paper);border-top:3px double var(--ink);padding-bottom:env(safe-area-inset-bottom,0px)}
+.gbar-in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:64px minmax(0,1fr) 64px;height:64px}
+body.nochar .gbar{display:none}
+body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+.orb{position:relative;height:100%;min-height:0;padding:0;border:0;background:var(--track);color:#fff;overflow:hidden;display:grid;place-items:center;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.orb.hp{border-right:1.5px solid var(--ink)}.orb.mp{border-left:1.5px solid var(--ink)}
+.orb i{position:absolute;left:0;right:0;bottom:0;transition:height .25s}
+.orb.hp i{background:var(--hp)}.orb.mp i{background:var(--mp)}
+.orb-t{position:relative;display:grid;justify-items:center;line-height:1;text-shadow:0 1px 3px rgba(0,0,0,.85)}
+.orb-t b{font:700 21px var(--f-num)}.orb-t small{font:11px var(--f-num);opacity:.9}.orb-t em{font:10px var(--f-body);font-style:normal;opacity:.85;margin-top:2px;letter-spacing:.03em}
+.orb:hover{background:var(--track)}
+.orb.warn i{animation:pulse 1s ease-in-out infinite}.orb.warn{box-shadow:inset 0 0 0 2px var(--danger)}
+.orb.hit{animation:orbhit .3s}@keyframes orbhit{0%{filter:brightness(1.8)}100%{filter:none}}
+.orb.press .orb-t{transform:scale(.92)}
+/* pulsante unico al centro + menu ad arco */
+.gm-c{display:grid;place-items:center;position:relative}
+.gm-btn{position:relative;width:62px;height:62px;min-height:0;margin-top:-22px;padding:0;border-radius:50%;border:2px solid var(--ink);background:var(--sheet);color:var(--bronze);display:grid;place-items:center;box-shadow:0 -2px 10px rgba(0,0,0,.18);z-index:2}
+.gm-btn:hover{background:var(--sheet)}
+.gm-btn svg{width:40px;height:40px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;transition:transform .45s cubic-bezier(.3,1.4,.5,1)}
+.gm-btn .gm-r1{stroke-dasharray:6 3.4}.gm-btn .gm-t{stroke-width:2.4}
+.gm-btn[aria-expanded="true"] svg{transform:rotate(135deg)}
+.gm-dots{position:absolute;bottom:-14px;left:0;right:0;display:flex;justify-content:center;gap:3px}
+.gm-dots i{width:5px;height:5px;border-radius:50%;background:var(--bronze)}
+.arc-bg{position:fixed;inset:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));background:rgba(20,18,14,.28);z-index:-1;animation:fadein .25s}
+@keyframes fadein{from{opacity:0}}
+.arc{position:absolute;left:0;right:0;bottom:100%;height:0;pointer-events:none}
+.arc-ring{position:absolute;left:0;bottom:0;overflow:visible;pointer-events:none}
+.arc-ring path{fill:none;stroke:var(--bronze);stroke-width:2;stroke-dasharray:var(--al) var(--al);stroke-dashoffset:var(--al);transition:stroke-dashoffset .45s ease-out}
+.arc.on .arc-ring path{stroke-dashoffset:0}
+.arc .dock{position:absolute;inset:0;pointer-events:none}
+.arc .dk{position:absolute;left:0;bottom:0;padding:0;pointer-events:auto;background:var(--sheet);border:1.5px solid var(--line);border-radius:50%;width:var(--sz,76px);height:var(--sz,76px);margin-left:calc(var(--sz,76px)/-2);margin-bottom:calc(var(--sz,76px)/-2);align-content:center;gap:1px;opacity:0;transform:translate(var(--x),var(--y)) scale(.4);transition:transform .4s cubic-bezier(.3,1.35,.5,1),opacity .25s}
+.arc.on .dk{opacity:var(--o,1);transform:translate(var(--x),var(--y)) scale(1)}
+.arc.drag .dk{transition:none}
+.arc .dk .ico{width:calc(var(--sz,76px)*.52)}
+.arc .dk small{font-size:calc(var(--sz,76px)*.138);max-width:calc(var(--sz,76px) - 6px);overflow:hidden;text-overflow:ellipsis}
+.arc .dk[aria-expanded="true"]{border-color:var(--bronze);box-shadow:inset 0 0 0 2px var(--bronze)}
+.arc .dk::after{display:none}
+.arc .dk.off{pointer-events:none}
+.arc-hit{position:absolute;left:0;right:0;bottom:0;pointer-events:auto;touch-action:none}
+@media (prefers-reduced-motion:reduce){.arc .dk,.arc-ring path,.gm-btn svg{transition:none}}
+.gpop{position:absolute;left:8px;right:8px;bottom:calc(100% + 8px);max-width:420px;margin:0 auto;background:var(--sheet);border:1.5px solid var(--ink);box-shadow:0 -6px 18px rgba(0,0,0,.25);padding:10px 12px;display:grid;gap:8px}
+.gp-r{display:grid;grid-template-columns:62px 48px 1fr 48px;align-items:center;gap:8px}
+.gp-r .sq{height:44px;width:48px;font-size:22px}
+.gp-r b{text-align:center;font:600 22px var(--f-num)}.gp-r.hp b{color:var(--hp)}.gp-r.mp b{color:var(--mp)}
+.gp-n{font:17px var(--f-display)}.gp-h{margin:0;text-align:center;font-size:12px}
 .dk{display:grid;justify-items:center;gap:4px;border:0;background:transparent;padding:4px 0;min-width:0}
 .dk:hover{background:transparent}
 .dk .ico{width:min(58px,100%);height:auto;display:block;color:var(--bronze);transition:transform .15s}
@@ -512,7 +595,7 @@ dialog h3[tabindex="-1"]:focus{outline:none}.dm-l{font-size:13px;color:var(--mut
 .dk[aria-expanded="true"] small{color:var(--ink)}
 .secs{display:grid;gap:16px;align-items:start}
 @media(min-width:860px){.secs{grid-template-columns:1fr 1fr}}
-.sec{scroll-margin-top:110px}
+.sec{scroll-margin-top:calc(var(--stick,110px) + 10px)}
 h2.bag{justify-content:flex-start;align-items:center}
 h2.bag .info-i{align-self:center}
 .bubble::before{left:72px}
@@ -610,7 +693,12 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 .schema .call .dot{fill:var(--bronze);stroke:var(--sheet);stroke-width:1.5}
 .schema .upb circle{fill:var(--sheet);stroke:var(--bronze);stroke-width:1.5}
 .schema .upb path{fill:var(--bronze)}
-.schema-leg{text-align:center;margin:4px 0 0}
+/* figura: in pagina occupa il suo spazio (fig-space); scorrendo resta attaccata sotto le barre e si rimpicciolisce */
+.fig-space{margin:4px 0 14px}
+.fig-sec{position:fixed;z-index:15;margin:0;box-sizing:border-box;left:0;width:100%;transform-origin:50% 0;will-change:transform,top}
+.fig-sec .schema{margin-top:0}
+.fig-bk{position:fixed;z-index:14;background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 6px 10px -8px rgba(0,0,0,.35);pointer-events:none}
+.fig-sec.mini{cursor:pointer;background:transparent;border-color:transparent;box-shadow:none}.fig-sec.mini .call,.fig-sec.mini .zp{transition:none}
 .schema .bgr{fill:transparent}
 .schema .shadow{fill:#000;opacity:var(--shop,.25);pointer-events:none}
 .schema .zp{fill:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none}
@@ -656,28 +744,26 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   <p class="note" style="margin-top:12px">Hai già un backup della scheda? <button type="button" class="linkb" id="setup-bk">Importalo dal registro</button></p>
 </div>
 
-<div class="hud" role="region" aria-label="Vigore e Spirito">
-  <div class="bars">
-    <div class="bar-row">
-      <button class="sq" id="m-vig" aria-label="Vigore meno uno">−</button>
-      <div class="gauge hp" id="gauge-vig"><i id="g-vig"></i><span><b>Vigore</b><em id="t-vig"></em></span></div>
-      <button class="sq" id="p-vig" aria-label="Vigore più uno">+</button>
-    </div>
-    <div class="bar-row">
-      <button class="sq" id="m-spi" aria-label="Spirito meno uno">−</button>
-      <div class="gauge mp" id="gauge-spi"><i id="g-spi"></i><span><b>Spirito</b><em id="t-spi"></em></span></div>
-      <button class="sq" id="p-spi" aria-label="Spirito più uno">+</button>
-    </div>
-  </div>
+<div class="hud" role="region" aria-label="Barra in alto">
+  <div class="hud-row"><span class="hud-name" id="hud-name" aria-hidden="true"></span><div class="cdbar" id="cdbar" hidden></div><span class="hud-sp"></span>
   <div class="hud-ic"><button class="icb" id="logbtn" aria-label="Registro" title="Registro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h11a2 2 0 0 1 2 2v1h-4M7 4a2 2 0 0 0-2 2v12a2 2 0 0 1-2 2h11a2 2 0 0 0 2-2V6a2 2 0 0 1 2-2M8.5 9h5M8.5 12.5h5M8.5 16h3"/></svg><small id="log-n"></small></button><button class="icb" id="setbtn" aria-label="Impostazioni" title="Impostazioni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.07 9.81 L21.41 10.09 L21.41 13.91 L19.07 14.19 L18.55 15.45 L20.00 17.30 L17.30 20.00 L15.45 18.55 L14.19 19.07 L13.91 21.41 L10.09 21.41 L9.81 19.07 L8.55 18.55 L6.70 20.00 L4.00 17.30 L5.45 15.45 L4.93 14.19 L2.59 13.91 L2.59 10.09 L4.93 9.81 L5.45 8.55 L4.00 6.70 L6.70 4.00 L8.55 5.45 L9.81 4.93 L10.09 2.59 L13.91 2.59 L14.19 4.93 L15.45 5.45 L17.30 4.00 L20.00 6.70 L18.55 8.55Z M12 8.8a3.2 3.2 0 1 1 0 6.4a3.2 3.2 0 1 1 0-6.4Z"/></svg></button></div>
-  <div class="cdtab" id="cdtab" hidden><button type="button" class="cdtab-h" id="cdtab-h" aria-expanded="true" aria-controls="cdtab-l"><span id="cdtab-n"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><div class="cdtab-l" id="cdtab-l"></div></div>
+  </div>
   <div class="cdtip" id="cdtip" hidden></div>
   <div class="hud-ko" id="hud-ko" hidden><span class="hud-ko-t"><b>Vigore 0</b></span><button type="button" id="hud-ko-i" aria-expanded="false" aria-controls="hud-ko-d">Cosa succede</button>
     <div class="hud-ko-d" id="hud-ko-d" hidden></div></div>
   <div class="hud-fx" id="hud-fx" hidden><span class="hud-fx-t" id="hud-fx-t"></span><button id="hud-fx-r">Fine round</button></div>
 </div>
 
-<nav class="dock" aria-label="Sezioni della scheda">
+<!-- barra da gioco in basso: Vigore, sezioni, Spirito -->
+<div class="gbar" id="gbar">
+  <div class="gbar-in">
+    <button type="button" class="orb hp" id="gauge-vig" aria-label="Vigore"><i id="g-vig"></i><span class="orb-t" id="t-vig"></span></button>
+    <div class="gm-c"><button type="button" class="gm-btn" id="gm-btn" aria-expanded="false" aria-controls="arc" aria-label="Sezioni della scheda"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="15" class="gm-r1"/><circle cx="20" cy="20" r="9" class="gm-r2"/><path d="M20 3v6M20 31v6M3 20h6M31 20h6" class="gm-t"/></svg><span class="gm-dots" id="gm-dots"></span></button></div>
+    <button type="button" class="orb mp" id="gauge-spi" aria-label="Spirito"><i id="g-spi"></i><span class="orb-t" id="t-spi"></span></button>
+  </div>
+  <div class="arc-bg" id="arc-bg" hidden></div>
+  <div class="arc" id="arc" hidden><svg class="arc-ring" id="arc-ring" aria-hidden="true"><path id="arc-path"/></svg>
+    <nav class="dock" aria-label="Sezioni della scheda">
   <button class="dk" data-sec="sec-spells" data-ico="spells" aria-expanded="false" aria-controls="sec-spells"><span class="dk-i"></span><small>Incantesimi</small></button>
   <button class="dk" data-sec="sec-stats" data-ico="stats" aria-expanded="false" aria-controls="sec-stats"><span class="dk-i"></span><small>Caratteristiche</small></button>
   <button class="dk" data-sec="sec-def" data-ico="def" aria-expanded="false" aria-controls="sec-def"><span class="dk-i"></span><small>Difesa</small></button>
@@ -685,6 +771,18 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   <button class="dk" data-sec="sec-coin" data-ico="coin" aria-expanded="false" aria-controls="sec-coin"><span class="dk-i"></span><small>Borsa</small></button>
   <button class="dk" data-sec="pp-sec" data-ico="people" aria-expanded="false" aria-controls="pp-sec"><span class="dk-i"></span><small>Personaggi</small></button>
 </nav>
+  </div>
+  <div class="gpop" id="gpop" hidden role="group" aria-label="Vigore e Spirito">
+    <div class="gp-r hp"><span class="gp-n">Vigore</span><button class="sq" id="m-vig" aria-label="Vigore meno uno">−</button><b id="gp-vig"></b><button class="sq" id="p-vig" aria-label="Vigore più uno">+</button></div>
+    <div class="gp-r mp"><span class="gp-n">Spirito</span><button class="sq" id="m-spi" aria-label="Spirito meno uno">−</button><b id="gp-spi"></b><button class="sq" id="p-spi" aria-label="Spirito più uno">+</button></div>
+    <p class="note gp-h">Tocco sul cerchio: −1 · pressione lunga: questo pannello</p>
+  </div>
+</div>
+<div class="fig-space" id="fig-space" hidden></div><div class="fig-bk" id="fig-bk" hidden></div>
+<section class="fig-sec" id="fig-sec" aria-label="Protezione per zona del corpo" hidden>
+  <div class="schema" id="schema"></div>
+</section>
+
 
 <div class="secs">
 <div id="fx" class="fx" hidden aria-live="polite"></div>
@@ -725,14 +823,13 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 <section id="sec-def" class="sec" hidden>
   <h2>Difesa</h2>
   <div class="def-top">
-    <div class="dv"><span class="cap">Corpo</span><b id="corpo-v">0</b></div>
+    <div class="dv"><span class="cap">Corpo <button type="button" class="info-i" data-dtip="corpo" aria-expanded="false" aria-label="Come si calcola il Corpo"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10 0a10 10 0 1 1 0 20a10 10 0 1 1 0-20Z M10 3.6a1.9 1.9 0 1 0 0 3.8a1.9 1.9 0 1 0 0-3.8Z M8.3 9h3.4v7.4H8.3Z"/></svg></button></span><b id="corpo-v">0</b></div>
     <div class="dv stone" id="stone-box"><span class="cap">Magia</span>
       <div class="ctl sm"><button class="sq" id="mg-m" aria-label="Protezione magica meno uno">−</button><b id="stone-v">+0</b><button class="sq" id="mg-p" aria-label="Protezione magica più uno">+</button></div>
       <div class="ctl sm"><button class="sq" id="stone-m" aria-label="Un round in meno">−</button><span class="note" id="stone-r"></span><button class="sq" id="rd-p" aria-label="Un round in più">+</button></div></div>
-    <div class="dv"><span class="cap">Mente</span><b id="mente-v">0</b></div>
+    <div class="dv"><span class="cap">Mente <button type="button" class="info-i" data-dtip="mente" aria-expanded="false" aria-label="Come si calcola la Mente"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10 0a10 10 0 1 1 0 20a10 10 0 1 1 0-20Z M10 3.6a1.9 1.9 0 1 0 0 3.8a1.9 1.9 0 1 0 0-3.8Z M8.3 9h3.4v7.4H8.3Z"/></svg></button></span><b id="mente-v">0</b></div>
   </div>
-  <div class="schema" id="schema"></div>
-  <p class="note schema-leg" id="schema-leg">Tocca una parte del corpo per vederne la protezione. Tieni premuto il petto per vederle tutte, tocca lo sfondo per nasconderle. Cerchio in fiamme: protezione aumentata.</p>
+  <p class="bubble def-tip" id="def-tip" hidden></p>
   <form class="dmgform" id="hitform" novalidate>
     <div class="dm-row"><div class="dm-f"><span class="dm-l" id="dm-l">Danno</span><div class="stepper" role="group" aria-labelledby="dm-l"><button type="button" id="dm-m" aria-label="Danno meno uno">−</button><output id="dm-n" aria-live="polite">0</output><button type="button" id="dm-p" aria-label="Danno più uno">+</button></div></div>
       <button type="button" class="cd-btn" id="cd-add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 19H4ZM12 9v5M12 16.5v.5"/></svg>Condizione</button></div>
@@ -741,7 +838,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
       <option value="Braccio destro">5-6 · Braccio destro</option><option value="Braccio sinistro">7-8 · Braccio sinistro</option>
       <option value="Torso">9-11 · Torso</option><option value="Testa">12 · Testa</option></select></label>
     <label class="chk" id="dm-sh-l" hidden><input type="checkbox" id="dm-sh"> <span id="dm-sh-t">Parato con lo scudo</span></label>
-    <label class="chk"><input type="checkbox" id="dm-ign"> Ignora armatura e scudo <small class="note">(Mirare, incantesimi)</small></label>
+    <label class="chk"><input type="checkbox" id="dm-ign"> <span>Ignora armatura e scudo <small class="note" style="white-space:nowrap">(Mirare, incantesimi)</small></span></label>
     <button class="pri" type="submit">Calcola danno</button>
   </form>
   <p class="err" id="hit-err"></p>
@@ -777,7 +874,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 </section>
 
 <section id="pp-sec" class="sec" hidden>
-  <h2>Personaggi <button class="pri" id="pp-add">Aggiungi personaggio</button></h2>
+  <h2 class="pp-h">Personaggi <button type="button" class="icx pp-add" id="pp-add" aria-label="Aggiungi personaggio" title="Aggiungi personaggio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></h2>
   <div class="people" id="people"></div>
 </section>
 </div>
@@ -810,6 +907,12 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   </form>
 </dialog>
 
+<dialog id="pddlg" aria-labelledby="pd-t">
+  <div class="dlg-h"><h3 id="pd-t" tabindex="-1" autofocus>Personaggio</h3><button type="button" class="icx" id="pd-ed" aria-label="Modifica" title="Modifica"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z M14 6l3 3"/></svg></button></div>
+  <div class="pd-top"><div id="pd-imgw"></div><div class="pd-meta"><div class="tags" id="pd-tags"></div></div></div>
+  <div class="pd-notes" id="pd-notes" tabindex="0"></div>
+  <div class="dlg-ft"><button type="button" id="pd-x" class="pri">Chiudi</button></div>
+</dialog>
 <dialog id="notedlg" aria-labelledby="nt-t">
   <div class="dlg-h"><h3 id="nt-t">Note</h3></div>
   <div class="nt-read" id="nt-read" tabindex="0"></div>
@@ -1292,11 +1395,55 @@ const BN={vig:"Vigore",spi:"Spirito"};
   $("p-"+k).onclick=()=>{if(S[k]<MAX[k])act(()=>{const b=S[k];S[k]++;log(`${BN[k]} +1 (${b} → ${S[k]})`)})};
 });
 function renderBars(){
-  ["vig","spi"].forEach(k=>{const v=S[k],m=MAX[k];
-    $("g-"+k).style.width=(m?Math.min(100,v/m*100):0)+"%";$("t-"+k).textContent=`${v} / ${m}`;
+  ["vig","spi"].forEach(k=>{const v=S[k],m=MAX[k],n=k==="vig"?"Vigore":"Spirito";
+    $("g-"+k).style.height=(m?Math.min(100,v/m*100):0)+"%";$("t-"+k).innerHTML=`<b>${v}</b><small>/${m}</small><em>${n}</em>`;$("gp-"+k).textContent=`${v} / ${m}`;
+    $("gauge-"+k).setAttribute("aria-label",`${n} ${v} su ${m}. Tocca per togliere 1, tieni premuto per più e meno`);
     $("gauge-"+k).classList.toggle("warn",k==="vig"?v>=1&&v<=2:v>=1&&v<=3);
     $("m-"+k).disabled=v<=0;$("p-"+k).disabled=v>=m;});
 }
+/* menu ad arco: un pulsante al centro, le sezioni su un semicerchio che si fa scorrere col dito */
+(function(){const btn=$("gm-btn"),arc=$("arc"),bg=$("arc-bg"),path=$("arc-path"),ring=$("arc-ring"),items=[...arc.querySelectorAll(".dk")];
+  /* arco tra 25° e 155°: ci stanno 5 icone, la sesta entra scorrendo col dito */
+  let rot=0,R0=140,open=false,drag=null;const STEP=32,A0=155,A1=25,CY=-22;
+  const minRot=0,maxRot=Math.max(0,(items.length-1)*STEP-(A0-A1));
+  function layout(){const W=innerWidth,cx=W/2;R0=Math.max(108,Math.min(150,(W-84)/2));
+    const RH=R0-CY+40;ring.setAttribute("width",W);ring.setAttribute("height",RH);ring.style.height=RH+"px";ring.style.width=W+"px";ring.setAttribute("viewBox",`0 ${-RH} ${W} ${RH}`);
+    const P=d=>{const a=d*Math.PI/180;return `${(cx+R0*Math.cos(a)).toFixed(1)} ${(CY-R0*Math.sin(a)).toFixed(1)}`};
+    path.setAttribute("d",`M${P(A0+8)} A${R0} ${R0} 0 0 1 ${P(A1-8)}`);path.style.setProperty("--al",((A0-A1+16)/180*Math.PI*R0).toFixed(1));
+    const sz=Math.round(Math.min(76,2*R0*Math.sin(STEP/2*Math.PI/180)-5));arc.style.setProperty("--sz",sz+"px");
+    items.forEach((b,i)=>{const deg=A0-i*STEP+rot,a=deg*Math.PI/180;const x=cx+R0*Math.cos(a),y=CY-R0*Math.sin(a);
+      const inside=deg>=A1-14&&deg<=A0+14,full=deg>=A1-1&&deg<=A0+1;b.style.setProperty("--x",x+"px");b.style.setProperty("--y",y+"px");b.style.setProperty("--o",full?1:inside?.3:0);
+      b.classList.toggle("off",!inside);b.style.transitionDelay=open&&!drag?(i*35)+"ms":"0ms"})}
+  function dots(){$("gm-dots").innerHTML=items.filter(b=>b.getAttribute("aria-expanded")==="true").map(()=>"<i></i>").join("")}
+  function setOpen(v){open=v;btn.setAttribute("aria-expanded",v);arc.hidden=bg.hidden=!v;if(v){layout();requestAnimationFrame(()=>requestAnimationFrame(()=>arc.classList.add("on")))}else arc.classList.remove("on");dots()}
+  btn.onclick=()=>setOpen(!open);bg.onclick=()=>setOpen(false);
+  addEventListener("keydown",e=>{if(open&&e.key==="Escape")setOpen(false)});addEventListener("resize",()=>{if(open)layout()});
+  /* trascinare in orizzontale ruota l'arco */
+  const hit=document.createElement("div");hit.className="arc-hit";arc.prepend(hit);
+  const fitHit=()=>{hit.style.height=(R0-CY+50)+"px"};
+  arc.addEventListener("pointerdown",e=>{if(!open)return;drag={x:e.clientX,r:rot,moved:false,id:e.pointerId}});
+  arc.addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-drag.x;if(!drag.moved&&Math.abs(dx)<8)return;if(!drag.moved){drag.moved=true;arc.classList.add("drag");try{arc.setPointerCapture(drag.id)}catch(_){}}
+    rot=Math.max(minRot-10,Math.min(maxRot+10,drag.r-dx*180/(Math.PI*R0)));layout()});
+  const end=e=>{if(!drag)return;const mv=drag.moved;drag=null;arc.classList.remove("drag");if(mv){rot=Math.max(minRot,Math.min(maxRot,Math.round(rot/STEP)*STEP));if(rot>maxRot-STEP/2&&rot<maxRot)rot=maxRot;layout();arc.addEventListener("click",ev=>{ev.stopPropagation();ev.preventDefault()},{capture:true,once:true})}};
+  arc.addEventListener("pointerup",end);arc.addEventListener("pointercancel",end);
+  /* scegliere una sezione chiude il menu (il clic sulle icone apre/chiude la sezione come prima) */
+  items.forEach(b=>b.addEventListener("click",()=>setTimeout(()=>setOpen(false),120)));
+  window.arcMenu={setOpen,dots,layout:()=>{layout();fitHit()}};new MutationObserver(dots).observe(arc,{subtree:true,attributes:true,attributeFilter:["aria-expanded"]});
+  layout();fitHit();dots()})();
+/* cerchi in basso: tocco = −1, pressione lunga = pannello con − e + */
+(function(){let lp=null;const pop=$("gpop");
+  const close=()=>{pop.hidden=true};
+  ["vig","spi"].forEach(k=>{const o=$("gauge-"+k);
+    o.addEventListener("pointerdown",e=>{lp={k,x:e.clientX,y:e.clientY,fired:false};o.classList.add("press");lp.t=setTimeout(()=>{if(!lp)return;lp.fired=true;o.classList.remove("press");try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}pop.hidden=false},500)});
+    const cancel=()=>{if(lp){clearTimeout(lp.t)}o.classList.remove("press")};
+    o.addEventListener("pointermove",e=>{if(lp&&Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>10){cancel();lp=null}});
+    ["pointerup","pointercancel","pointerleave"].forEach(ev=>o.addEventListener(ev,cancel));
+    o.addEventListener("contextmenu",e=>e.preventDefault());
+    o.addEventListener("click",e=>{if(lp&&lp.fired){lp=null;return}lp=null;if(!pop.hidden){close();return}
+      const b=$("m-"+k);if(!b.disabled){b.click();o.classList.remove("hit");void o.offsetWidth;o.classList.add("hit")}});
+    o.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="+"){e.preventDefault();$("p-"+k).click()}})});
+  document.addEventListener("pointerdown",e=>{if(!pop.hidden&&!e.target.closest("#gpop,.orb"))close()},true);
+})();
 
 /* ---------- Caratteristiche ---------- */
 function renderStats(){{const k=gKeys();$("rest-n").textContent=`Riposo: + MOD Tenacia al Vigore, +1 Spirito, azzera i DTM. Dormi (riposo lungo): + MOD Tenacia al Vigore, + MOD ${k[0]} + MOD ${k[1]} allo Spirito, azzera i DTM.`+(keySt()?` Spirito massimo = 5 + MOD ${k[0]} + MOD ${k[1]} (max 15).`:"");
@@ -1317,7 +1464,7 @@ $("stats").onclick=e=>{const b=e.target.closest("button[data-a]");if(!b||b.disab
   if(a==="back"&&dtmOf(n)>0)act(()=>{S.dtmv[n]=dtmOf(n)-1;log(`${n}: 1 punto DTM → MOD (MOD ${pipsOf(n)-S.dtmv[n]}/${pipsOf(n)}, DTM ${S.dtmv[n]})`)});
   if(a==="lv+"||a==="lv-")act(()=>{const o=lvlBase(n),om=modOf(n);S.lvl[n]=o+(a==="lv+"?1:-1);S.dtmv[n]=dtmOf(n);log(`${n}: LVL base ${o} → ${lvlBase(n)} (MOD ${sign(om)} → ${sign(modOf(n))})`)});
 };
-const upg=$("upg");ui.upgTab="stat";ui.spSub="inc";
+const upg=$("upg");ui.upgTab="stat";ui.lockOpen=null;ui.spSub="inc";
 function renderUpg(){const pe=S.pe;$("upg-pe").textContent=pe?pe:"";
   if(!upg.open)return;$("pe-v").textContent=pe;
   const lockC=spellsOf().filter(s=>s.locked&&s.cat==="cap"),lockI=spellsOf().filter(s=>s.locked&&s.cat!=="cap");{const ck=clsKey(),own=ownNames(),nc=CATALOG.filter(x=>catOk(x,ck)&&!own.has(x.name.toLowerCase())).length;
@@ -1327,7 +1474,7 @@ function renderUpg(){const pe=S.pe;$("upg-pe").textContent=pe?pe:"";
   const L=$("upg-list");
   if(ui.upgTab==="stat"){L.setAttribute("aria-labelledby","ut-stat");
     L.innerHTML=STATN.map(n=>{const c=lvCost(n),l=lvlBase(n),m=modFor,up=m(l+1)>m(l),top=l>=EXPMAX;
-      if(physLock(n))return `<div class="ur"><div class="ur-t"><b>${n}</b><span class="note num">LVL ${l} · da anziano non può salire</span></div><button class="pri" disabled aria-label="${n}: bloccata, un personaggio anziano non può aumentarla">Bloccata</button></div>`;
+      if(physLock(n))return `<div class="ur lk"><div class="ur-t"><b>${n}</b><span class="note num">LVL ${l}</span></div><button type="button" class="lockb" data-lock="${n}" aria-expanded="${ui.lockOpen===n}" aria-label="${n} bloccata: perché?"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="1.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2.5"/></svg></button>${ui.lockOpen===n?`<p class="bubble lk-tip">${esc(S.cfg.name)} è <b>anziano</b>: per il regolamento Forza, Agilità e Tenacia non possono mai aumentare, né con i PE né con magia od oggetti (massimo 12). I malus invece contano.</p>`:""}</div>`;
       return `<div class="ur"><div class="ur-t"><b>${n}</b><span class="note num">${top?`LVL ${l} · massimo raggiunto`:`LVL ${l} → ${l+1} · <span class="${up?"up":""}">MOD ${sign(m(l))} → ${sign(m(l+1))}</span>`}</span></div><button class="pri" data-buy="${n}" ${top||pe<c?"disabled":""} aria-label="${n}: ${top?"già al massimo con i PE, 15":`sali al livello ${l+1} per ${c} PE`}">${top?"Max 15":c+" PE"}</button></div>`}).join("")+
       `<p class="note" style="margin-top:10px">Un livello costa 100 PE se la MOD resta uguale, 200 PE se la MOD sale di un punto. Con i PE si arriva al massimo a 15.</p>`}
   else{const isCap=ui.upgTab==="cap",locked=isCap?lockC:lockI;L.setAttribute("aria-labelledby",isCap?"ut-cap":"ut-inc");
@@ -1346,17 +1493,17 @@ function renderUpg(){const pe=S.pe;$("upg-pe").textContent=pe?pe:"";
         <button class="pri" data-learn="${esc(x.name)}" ${pe<x.exp||full?"disabled":""} aria-label="Impara ${esc(x.name)} per ${x.exp} PE">${x.exp} PE</button></div>`).join("")
       :`<p class="note">Hai già tutte le capacità del catalogo disponibili per la tua classe.</p>`)
       :"";
-    L.innerHTML=(locked.length?`<h3 class="sub-h">${isCap?"Capacità":"Incantesimi"} in attesa di sblocco</h3>`:(isCap||SPELLCAT.some(x=>x.cls===ck)?"":`<p class="note">Nessun incantesimo in attesa. Quando il master te ne concede uno nuovo, aggiungilo qui con il suo costo in PE e lo sblocchi quando li hai.</p>`))+(locked.length?locked.map(sp=>{const c=spCost(sp);
+    L.innerHTML=(locked.length?`<h3 class="sub-h">${isCap?"Capacità":"Incantesimi"} in attesa di sblocco</h3>`:(isCap||IS_APP||SPELLCAT.some(x=>x.cls===ck)?"":`<p class="note">Nessun incantesimo in attesa. Quando il master te ne concede uno nuovo, aggiungilo qui con il suo costo in PE e lo sblocchi quando li hai.</p>`))+(locked.length?locked.map(sp=>{const c=spCost(sp);
       return `<div class="ur"><div class="ur-t"><b>${esc(sp.name)}</b><span class="note">${sp.tipo?esc(sp.tipo):(sp.cat==="cap"?"Capacità":"Incantesimo")}</span>
         ${sp.desc||sp.levels.length?`<details><summary>Dettagli</summary>${sp.desc?`<p>${esc(sp.desc)}</p>`:""}${sp.levels.map(l=>`<p><b>${l.label?esc(l.label)+" · ":""}${l.ps} PS</b> — ${esc(l.text)}</p>`).join("")}</details>`:""}</div>
         <button class="pri" data-unl="${sp.id}" ${pe<c?"disabled":""} aria-label="Sblocca ${esc(sp.name)} per ${c} PE">${c} PE</button></div>`}).join("")
       :"")+catHTML+spHTML+
-      `<button id="upg-add" type="button">${isCap?"+ Aggiungi capacità fuori catalogo":ui.spSub==="rit"?"+ Aggiungi rituale da sbloccare":"+ Aggiungi incantesimo da sbloccare"}</button>`}
+      (IS_APP?"":`<button id="upg-add" type="button">${isCap?"+ Aggiungi capacità fuori catalogo":ui.spSub==="rit"?"+ Aggiungi rituale da sbloccare":"+ Aggiungi incantesimo da sbloccare"}</button>`)}
 }
 $("upg-b").onclick=()=>{$("pe-err").textContent="";openDlg(upg);renderUpg();$("upg-x").focus()};
 $("upg-x").onclick=()=>closeDlg(upg);
 document.querySelector(".upg-tabs").onclick=e=>{const b=e.target.closest("[data-t]");if(!b)return;ui.upgTab=b.dataset.t;renderUpg()};
-$("upg-list").onclick=e=>{
+$("upg-list").onclick=e=>{const lk=e.target.closest("[data-lock]");if(lk){ui.lockOpen=ui.lockOpen===lk.dataset.lock?null:lk.dataset.lock;renderUpg();return}
   const bu=e.target.closest("[data-buy]");
   if(bu){const n=bu.dataset.buy,c=lvCost(n);if(S.pe<c||lvlBase(n)>=EXPMAX||physLock(n))return;act(()=>{const o=lvlBase(n),om=modOf(n),b=S.pe;S.pe-=c;S.lvl[n]=o+1;log(`Upgrade · ${n}: LVL ${o} → ${o+1} (MOD ${sign(om)} → ${sign(modOf(n))}) per ${c} PE. PE ${b} → ${S.pe}.`)});return}
   const ub=e.target.closest("[data-unl]");
@@ -1392,20 +1539,43 @@ const cndlg=$("conddlg");let cdEdit=null,cdArm=null;
 const STAT_OPTS=STATN.map(n=>`<option value="${n}">${n}</option>`).join("");
 const effTxt=c=>c.eff.map(e=>`${e.n} ${e.v>0?"+":"−"}${Math.abs(e.v)}`).join(", ");
 const ABBR={Forza:"FOR",Agilità:"AGI",Tenacia:"TEN",Intelletto:"INT",Istinto:"IST",Presenza:"PRE",Volontà:"VOL"};
-ui.cdOpen=true;ui.cdTip=null;
-function renderConds(){const t=$("cdtab");t.hidden=!S.cond.length;if(!S.cond.length){$("cdtip").hidden=true;ui.cdTip=null;return}
-  const neg=S.cond.filter(c=>c.eff.reduce((a,e)=>a+e.v,0)<0).length,pos=S.cond.length-neg;
-  $("cdtab-n").innerHTML=(neg?`<i style="color:var(--danger)">▼${neg}</i>`:"")+(pos?`<i style="color:var(--bronze)">▲${pos}</i>`:"");
-  $("cdtab-h").setAttribute("aria-expanded",ui.cdOpen);$("cdtab-h").setAttribute("aria-label",`Condizioni permanenti: ${S.cond.length}. Tocca per ${ui.cdOpen?"chiudere":"aprire"}`);
-  $("cdtab-l").innerHTML=S.cond.map(c=>{const tot=c.eff.reduce((a,e)=>a+e.v,0),ok=tot>0;
-    return `<button type="button" class="cdi${ok?" pos":""}" data-cdi="${c.id}" aria-expanded="${ui.cdTip===c.id}" aria-label="${esc(c.name)}: ${esc(effTxt(c))}"><span>${ok?"▲":"▼"}</span><b>${c.eff.map(e=>ABBR[e.n]||e.n.slice(0,3).toUpperCase()).join("·")}</b></button>`}).join("");
-  drawCdTip()}
-function drawCdTip(){const tip=$("cdtip"),c=S.cond.find(x=>x.id===ui.cdTip);tip.hidden=!c;if(!c)return;
-  tip.innerHTML=`<b>${esc(c.name)}</b>${c.eff.map(e=>`<span class="ef ${e.v<0?"neg":"pos"}">${e.n} ${e.v>0?"+":"−"}${Math.abs(e.v)} → ora ${lvlOf(e.n)} (MOD ${sign(modOf(e.n))})</span>`).join("")}${c.note?`<small>${esc(c.note)}</small>`:""}<button type="button" data-cded="${c.id}">Modifica</button>`}
-$("cdtab-h").onclick=()=>{ui.cdOpen=!ui.cdOpen;if(!ui.cdOpen)ui.cdTip=null;renderConds()};
-$("cdtab-l").onclick=e=>{const b=e.target.closest("[data-cdi]");if(!b)return;e.stopPropagation();ui.cdTip=ui.cdTip===b.dataset.cdi?null:b.dataset.cdi;renderConds()};
-$("cdtip").onclick=e=>{const b=e.target.closest("[data-cded]");if(b){e.stopPropagation();ui.cdTip=null;renderConds();openCond(b.dataset.cded)}};
-document.addEventListener("click",e=>{if(ui.cdTip&&!e.target.closest("#cdtip,#cdtab")){ui.cdTip=null;renderConds()}});
+const CDICO={for:'<path d="M6.5 11.5V8.2a1.6 1.6 0 0 1 3.2 0V11"/><path d="M9.7 8V6.6a1.6 1.6 0 0 1 3.2 0V11"/><path d="M12.9 7.6a1.6 1.6 0 0 1 3.2 0V11"/><path d="M16.1 9.2a1.6 1.6 0 0 1 3.2 0v4.3c0 4.1-2.8 7-6.6 7-3.6 0-6.2-2.6-6.2-6.4v-2.6"/><path d="M6.5 12.2c1.6-.6 4.6-.6 6.4.6"/>',agi:'<path d="M19 4C11 4 5 9.5 5 17v3"/><path d="M19 4c-1 7-5.5 12-12.5 13"/><path d="M9.5 13.5H14M8 10.5h7.5M11.5 7.5h5"/>',ten:'<path d="M2.5 19.5 9 8l3.5 5.5L15 10l6.5 9.5z"/><path d="M7.4 10.8 9 12.2l1.4-1.6"/>',int:'<path d="M12 5.5c-.8-1.7-3.6-2.2-5-.4-1.9-.1-3.2 1.8-2.5 3.6C3 9.7 3 12.6 4.8 13.6c-.3 2 1.4 3.6 3.4 3.3.8 1.5 2.9 1.9 3.8.3"/><path d="M12 5.5c.8-1.7 3.6-2.2 5-.4 1.9-.1 3.2 1.8 2.5 3.6 1.5 1 1.5 3.9-.3 4.9.3 2-1.4 3.6-3.4 3.3-.8 1.5-2.9 1.9-3.8.3"/><path d="M12 5.5v11.7M8 9.5c1 .2 1.8 1 2 2M16 9.5c-1 .2-1.8 1-2 2"/>',ist:'<path d="M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12z"/><path d="M12 8.2c1.2 1 1.6 2.4 1.6 3.8S13.2 14.8 12 15.8c-1.2-1-1.6-2.4-1.6-3.8s.4-2.8 1.6-3.8z"/>',pre:'<path d="M4 17.5h16l1.2-9.5-5.2 4L12 5.5 8 12 2.8 8z"/><path d="M4.5 20.5h15"/>',vol:'<path d="M12 2.5c.6 3.6 5.5 5.3 5.5 10.6a5.5 5.5 0 0 1-11 0c0-2.7 1.6-4 2.2-5.8 1 1 1.6 2.1 1.6 3.4 1.2-1.9 1.7-4.6 1.7-8.2z"/><path d="M12 20.5c-1.6 0-2.6-1.2-2.6-2.7 0-1.6 1.3-2.5 2.6-4.3 1.3 1.8 2.6 2.7 2.6 4.3 0 1.5-1 2.7-2.6 2.7z"/>',gen:'<path d="M12 3l2.2 6.3L21 12l-6.8 2.7L12 21l-2.2-6.3L3 12l6.8-2.7z"/>'};
+const CDK={Forza:"for",Agilità:"agi",Tenacia:"ten",Intelletto:"int",Istinto:"ist",Presenza:"pre",Volontà:"vol"};
+const cdSvg=n=>`<svg viewBox="0 0 24 24" aria-hidden="true">${CDICO[CDK[n]||"gen"]}</svg>`;
+ui.cdTip=null;ui.cdMore=false;
+/* caratteristiche toccate dalle condizioni: {n, tot, conds:[{c,v}]} */
+function cdStats(){const m=new Map();S.cond.forEach(c=>c.eff.forEach(e=>{if(!e.v)return;if(!m.has(e.n))m.set(e.n,{n:e.n,tot:0,conds:[]});const x=m.get(e.n);x.tot+=e.v;x.conds.push({c,v:e.v})}));
+  return [...m.values()].sort((a,b)=>STATN.indexOf(a.n)-STATN.indexOf(b.n))}
+const cdCls=x=>x.tot<0?"":x.tot>0?" pos":" mix";
+function renderConds(){const bar=$("cdbar"),st=cdStats();bar.hidden=!st.length;if(!st.length){$("cdtip").hidden=true;ui.cdTip=null;ui.cdMore=false;return}
+  if(ui.cdTip&&!st.some(x=>x.n===ui.cdTip))ui.cdTip=null;
+  const neg=st.some(x=>x.tot<0);
+  bar.innerHTML=st.map(x=>`<button type="button" class="cdic${cdCls(x)}" data-cds="${x.n}" aria-expanded="${ui.cdTip===x.n}" aria-label="${x.n} ${x.tot<0?"ridotta":x.tot>0?"aumentata":"modificata"} da condizioni. Tocca per i dettagli">${cdSvg(x.n)}<span class="ar" aria-hidden="true">${x.tot<0?"▼":x.tot>0?"▲":"="}</span></button>`).join("")+
+    `<button type="button" class="cdic more${neg?"":" pos"}" data-cdmore aria-expanded="${ui.cdMore}" aria-label="${st.length} caratteristiche modificate da condizioni. Tocca per vederle" hidden>${CDICO.gen?`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 21 19H3Z M12 9v5 M12 16.6v.4"/></svg>`:""}<span class="ar">${st.length}</span></button>`;
+  fitCd();drawCdTip()}
+/* se le icone non entrano accanto al nome resta una sola icona che pulsa */
+function fitCd(){const bar=$("cdbar");if(bar.hidden)return;const ics=[...bar.querySelectorAll("[data-cds]")],more=bar.querySelector("[data-cdmore]");
+  ics.forEach(b=>b.hidden=false);more.hidden=true;const row=bar.parentElement,ic=row.querySelector(".hud-ic"),nm=$("hud-name");
+  const free=row.clientWidth-ic.offsetWidth-(nm.offsetParent?Math.min(nm.scrollWidth,row.clientWidth*.5):0)-14;
+  if(bar.scrollWidth>free){ics.forEach(b=>b.hidden=true);more.hidden=false}}
+addEventListener("resize",()=>fitCd());
+function drawCdTip(){const tip=$("cdtip");
+  if(ui.cdMore&&!ui.cdTip){const st=cdStats();tip.hidden=false;tip.innerHTML=`<b>Condizioni attive</b>`+st.map(x=>`<button type="button" class="ct-l${x.tot<0?" neg":x.tot>0?" pos":""}" data-cds="${x.n}">${cdSvg(x.n)}<span>${x.n} ${lvlBaseNoCond(x.n)} → ${lvlOf(x.n)}</span></button>`).join("");return}
+  const x=cdStats().find(y=>y.n===ui.cdTip);tip.hidden=!x;if(!x)return;
+  const n=x.n,l0=lvlBaseNoCond(n),l1=lvlOf(n),m0=modFor(l0)+bonusOf("mod:"+n),m1=modOf(n),rows=[["LVL",`${l0} → ${l1}`,""]];
+  if(m0!==m1)rows.push(["MOD",`${sign(m0)} → ${sign(m1)}`,`tiri ${m1>m0?"+":"−"}${Math.abs(m1-m0)}`]);
+  const k=keySt();if(k&&k.includes(n)&&m0!==m1){const o=k.find(z=>z!==n),f=mm=>Math.max(0,Math.min(15,5+mm+modOf(o)))+bonusOf("spi"),p0=f(m0),p1=f(m1);if(p0!==p1)rows.push(["Spirito massimo",`${p0} → ${p1}`,"segue la MOD"])}
+  if(n==="Tenacia"||n==="Volontà"){const c=n==="Tenacia",r0=Math.max(0,Math.ceil(m0/2)),r1=Math.max(0,Math.ceil(m1/2));if(r0!==r1)rows.push([c?"Difesa Corpo":"Difesa Mente",`${r0} → ${r1}`,"segue la MOD"])}
+  tip.innerHTML=`<b class="ct-h${x.tot<0?" neg":x.tot>0?" pos":""}">${cdSvg(n)} ${n}</b>`+
+    x.conds.map(({c,v})=>`<button type="button" class="ct-c" data-cded="${c.id}" aria-label="Modifica ${esc(c.name)}"><span>${esc(c.name)} ✎</span><span class="${v<0?"neg":"pos"}">${v>0?"+":"−"}${Math.abs(v)}</span></button>`).join("")+
+    `<dl class="ct-g">${rows.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}${r[2]?` <small>${r[2]}</small>`:""}</dd>`).join("")}</dl>`}
+/* livello senza le condizioni (gli effetti a tempo restano) */
+function lvlBaseNoCond(n){const c=S.cond.reduce((a,x)=>a+x.eff.filter(e=>e.n===n).reduce((b,e)=>b+e.v,0),0);const b=bonusOf("lvl:"+n)-c;return Math.max(0,Math.min(LVMAX,lvlBase(n)+(physLock(n)?Math.min(0,b):b)))}
+$("cdbar").onclick=e=>{const b=e.target.closest("[data-cds],[data-cdmore]");if(!b)return;e.stopPropagation();
+  if(b.dataset.cdmore!==undefined){ui.cdMore=!ui.cdMore;ui.cdTip=null}else{ui.cdTip=ui.cdTip===b.dataset.cds?null:b.dataset.cds;ui.cdMore=false}renderConds()};
+$("cdtip").onclick=e=>{const b=e.target.closest("[data-cded]");if(b){e.stopPropagation();ui.cdTip=null;ui.cdMore=false;renderConds();openCond(b.dataset.cded);return}
+  const l=e.target.closest(".ct-l[data-cds]");if(l){e.stopPropagation();ui.cdTip=l.dataset.cds;renderConds()}};
+document.addEventListener("click",e=>{if((ui.cdTip||ui.cdMore)&&!e.target.closest("#cdtip,#cdbar")){ui.cdTip=null;ui.cdMore=false;renderConds()}});
 function addEffRow(n,v){const d=document.createElement("div");d.className="bon-r";d.dataset.v=v==null?-1:v;
   d.innerHTML=`<select aria-label="Caratteristica">${STAT_OPTS}</select><div class="stepper" role="group" aria-label="Valore"><button type="button" data-bs="-1" aria-label="Valore meno uno">−</button><output>${sgn(+d.dataset.v)}</output><button type="button" data-bs="1" aria-label="Valore più uno">+</button></div><button type="button" class="del sq" aria-label="Togli effetto">×</button>`;
   d.querySelector("select").value=n||STATN[0];$("cd-eff").appendChild(d)}
@@ -1441,13 +1611,16 @@ $("pe-form").onsubmit=e=>{e.preventDefault();const raw=$("pe-n").value.trim().re
 
 $("editlvl").onclick=()=>{ui.editLvl=!ui.editLvl;$("editlvl").setAttribute("aria-pressed",ui.editLvl);$("editlvl").textContent=ui.editLvl?"Fine modifica":"Modifica livelli";renderStats()};
 const gV=()=>Math.max(0,modOf("Tenacia")),gKeys=()=>keySt()||["Intelletto","Volontà"],gS=()=>Math.max(0,modOf(gKeys()[0])+modOf(gKeys()[1]));
-$("rest").onclick=()=>act(()=>{const b=S.vig,g=Math.min(MAX.vig-S.vig,gV());S.vig+=g;const bs=S.spi,gs=Math.min(MAX.spi-S.spi,1);S.spi+=gs;S.dtmv={};
-  log(`Riposo: Vigore ${b} → ${S.vig} (+${g}, MOD Tenacia ${gV()}${g<gV()?", fermato al massimo":""}). Spirito ${bs} → ${S.spi} (+${gs}${gs<1?", già al massimo":""}). DTM azzerati, MOD ripristinate.`)});
+/* testo per il registro: quali DTM tornano disponibili (da chiamare prima di azzerarli) */
+let dtmLast="";const dtmGrab=()=>{const u=Object.entries(S.dtmv||{}).filter(([,v])=>v>0);dtmLast=u.length?`DTM ripristinati: ${u.map(([n,v])=>`${n} ${v}`).join(", ")} (MOD di nuovo piene).`:"DTM: nessuno speso.";S.dtmv={}};
+const dtmTxt=()=>dtmLast;
+$("rest").onclick=()=>act(()=>{const b=S.vig,g=Math.min(MAX.vig-S.vig,gV());S.vig+=g;const bs=S.spi,gs=Math.min(MAX.spi-S.spi,1);S.spi+=gs;dtmGrab();
+  log(`Riposo: Vigore ${b} → ${S.vig} (+${g}, MOD Tenacia ${gV()}${g<gV()?", fermato al massimo":""}). Spirito ${bs} → ${S.spi} (+${gs}${gs<1?", già al massimo":""}). ${dtmTxt()}`)});
 /* ERS: chi ha esaurito lo Spirito recupera, al riposo lungo successivo, solo la MOD più alta delle due */
 const gSlow=()=>Math.max(0,...gKeys().map(modOf));
-$("sleep").onclick=()=>act(()=>{const bv=S.vig,v=Math.min(MAX.vig-S.vig,gV());S.vig+=v;const slow=!!S.spiOut,want=slow?gSlow():gS(),bs=S.spi,g=Math.min(MAX.spi-S.spi,want);S.spi+=g;S.dtmv={};S.spiOut=false;
+$("sleep").onclick=()=>act(()=>{const bv=S.vig,v=Math.min(MAX.vig-S.vig,gV());S.vig+=v;const slow=!!S.spiOut,want=slow?gSlow():gS(),bs=S.spi,g=Math.min(MAX.spi-S.spi,want);S.spi+=g;dtmGrab();S.spiOut=false;
   const k=gKeys(),why=slow?`recupero lento: Spirito esaurito, solo la MOD più alta (${k.map(n=>n+" "+sign(modOf(n))).join(", ")})`:`MOD ${k[0]} ${sign(modOf(k[0]))} + ${k[1]} ${sign(modOf(k[1]))}`;
-  log(`Dormito: Vigore ${bv} → ${S.vig} (+${v}, MOD Tenacia). Spirito ${bs} → ${S.spi} (+${g}, ${why}${g<want?", fermato al massimo":""}). DTM azzerati, MOD ripristinate.`)});
+  log(`Dormito: Vigore ${bv} → ${S.vig} (+${v}, MOD Tenacia). Spirito ${bs} → ${S.spi} (+${g}, ${why}${g<want?", fermato al massimo":""}). ${dtmTxt()}`)});
 
 /* ---------- Difesa ---------- */
 const FIG={"Testa":["head",61,31,24],"Torso":["torso",60,38,26],"Braccio destro":["arm",57,28,24],"Braccio sinistro":["arm",57,28,24,1],"Gamba destra":["leg",56,26,20],"Gamba sinistra":["leg",56,26,20,1]};
@@ -1538,6 +1711,20 @@ function hideZone(k){ui.shown.delete(k);const g=$("schema").querySelector(`.call
 function zvOf(k){return $("schema").querySelector(`.zv[data-v="${k}"]`)}
 function flashZ(k){const v=zvOf(k);if(!v)return;v.classList.remove("flash");void v.getBoundingClientRect();v.classList.add("flash")}
 function tapZone(p){const k=p.dataset.k;try{p.blur()}catch(_){}document.querySelectorAll(".zv.foc").forEach(v=>v.classList.remove("foc"));if(ui.shown.has(k))return hideZone(k);flashZ(k);showZone(k,true);showHit(p.dataset.zone)}
+/* ---------- figura sempre visibile ---------- */
+try{new IntersectionObserver(es=>{document.querySelector(".hud").classList.toggle("named",!es[0].isIntersecting);fitCd()},{rootMargin:"-60px 0px 0px 0px"}).observe(document.querySelector("header.who"))}catch(_){}
+const figEl=$("fig-sec"),figSp=$("fig-space"),figBk=$("fig-bk"),hudEl=document.querySelector(".hud");let figH=0;
+function placeFig(){if(figEl.hidden)return;const h=figEl.offsetHeight;if(h&&Math.abs(h-figH)>1){figH=h;figSp.style.height=h+"px"}if(!figH)return;
+  const hb=hudEl.getBoundingClientRect().bottom,r=figSp.getBoundingClientRect(),kmin=Math.min(1,Math.max(120,Math.min(190,innerHeight*.24))/figH);
+  let top,k;if(r.top>=hb){top=r.top;k=1}else{top=hb;k=Math.max(kmin,(r.bottom-hb)/figH)}
+  figEl.style.left=r.left+"px";figEl.style.width=r.width+"px";figEl.style.top=top+"px";figEl.style.transform=k<1?`scale(${k.toFixed(4)})`:"";
+  const mini=k<0.999;figEl.classList.toggle("mini",mini);figEl.setAttribute("aria-label",mini?"Protezione per zona del corpo, ridotta: tocca per ingrandire":"Protezione per zona del corpo");
+  document.documentElement.style.setProperty("--stick",Math.round(hudEl.offsetHeight+figH*kmin)+"px");figBk.hidden=!(r.top<hb);if(!figBk.hidden){figBk.style.top=hb+"px";figBk.style.left=r.left+"px";figBk.style.width=r.width+"px";figBk.style.height=(figH*k)+"px"}}
+addEventListener("scroll",()=>requestAnimationFrame(placeFig),{passive:true});addEventListener("resize",()=>requestAnimationFrame(placeFig));
+try{new ResizeObserver(()=>requestAnimationFrame(placeFig)).observe(figEl)}catch(_){}
+/* da piccola non si interagisce: un tocco riporta su e la figura si riespande */
+const figUp=()=>{const hb=hudEl.getBoundingClientRect().bottom,r=figSp.getBoundingClientRect();scrollBy({top:r.top-hb,behavior:"smooth"})};
+["pointerdown","click","contextmenu"].forEach(ev=>figEl.addEventListener(ev,e=>{if(!figEl.classList.contains("mini"))return;e.stopPropagation();e.preventDefault();if(ev==="click")figUp()},true));
 const schEl=$("schema");let zlp=null;
 schEl.addEventListener("pointerdown",e=>{const p=e.target.closest(".zp");if(!p||p.dataset.k!=="torso")return;
   const pv=zvOf("torso");const cur={p:pv||p,x:e.clientX,y:e.clientY,fired:false};cur.p.classList.add("press");
@@ -1555,11 +1742,17 @@ schEl.addEventListener("focusin",e=>{const p=e.target.closest(".zp");let kb=fals
 schEl.addEventListener("focusout",e=>{const p=e.target.closest(".zp");if(p){const v=zvOf(p.dataset.k);if(v)v.classList.remove("foc")}});
 schEl.addEventListener("keydown",e=>{const p=e.target.closest(".zp");if(p&&(e.key==="Enter"||e.key===" ")){e.preventDefault();tapZone(p)}});
 let prevZ=null;
-function renderDef(){const st=S.stone,on=st.v>0;
+ui.dtip=null;
+function drawDefTip(){const t=$("def-tip"),k=ui.dtip;document.querySelectorAll("[data-dtip]").forEach(b=>b.setAttribute("aria-expanded",b.dataset.dtip===k));t.hidden=!k;if(!k)return;t.dataset.k=k;
+  const c=k==="corpo",st=c?"Tenacia":"Volontà",m=modOf(st),r=resOf(st),adj=(c?S.cfg.corpoAdj:S.cfg.menteAdj)||0,bo=bonusOf(k),tot=c?corpoE():menteE();
+  t.innerHTML=`<b>${c?"Resistenza Fisica":"Resistenza Mentale"}</b>: metà della MOD di ${st} (${sign(m)}), arrotondata per eccesso = ${r}`+(adj?`, ${adj>0?"+":"−"}${Math.abs(adj)} dalla scheda del master`:"")+(bo?`, ${bo>0?"+":"−"}${Math.abs(bo)} da ${esc(srcTxt(k))}`:"")+(adj||bo?` → ${tot}`:"")+`. `+
+    (c?"Si toglie da ogni danno fisico, anche quando armatura e scudo vengono ignorati.":"Protegge da danni psichici, paura e illusioni.")+(physLock(st)?"":` Sale da sola se alzi la ${st}.`)}
+$("sec-def").addEventListener("click",e=>{const b=e.target.closest("[data-dtip]");if(b){ui.dtip=ui.dtip===b.dataset.dtip?null:b.dataset.dtip;drawDefTip();return}if(ui.dtip&&!e.target.closest("#def-tip")){ui.dtip=null;drawDefTip()}});
+function renderDef(){const st=S.stone,on=st.v>0;drawDefTip();
   {const sh=armE("scudo");$("dm-sh-l").hidden=!(sh>0);$("dm-sh-t").textContent=`Parato con lo scudo (−${sh})`;if(!(sh>0))$("dm-sh").checked=false}
   $("corpo-v").textContent=corpoE();$("mente-v").textContent=menteE();
   [["corpo-v","corpo"],["mente-v","mente"]].forEach(([id,t])=>{const box=$(id).parentNode,b=bonusOf(t);box.classList.toggle("up",b>0);box.title=b?`Base ${S.cfg[t]||0}, ${srcTxt(t)}`:""});
-  const sk=JSON.stringify([S.cfg.cls,S.cfg.fig,S.cfg.armor,S.cfg.corpo,S.stone.v,corpoE(),ARMK.map(([k])=>armE(k)),ARMK.map(([k])=>zoneDelta(k))]);const hasCh=!!(S.cfg.name||S.cfg.fig);$("schema-leg").hidden=!hasCh;
+  const sk=JSON.stringify([S.cfg.cls,S.cfg.fig,S.cfg.armor,S.cfg.corpo,S.stone.v,corpoE(),ARMK.map(([k])=>armE(k)),ARMK.map(([k])=>zoneDelta(k))]);const hasCh=!!(S.cfg.name||S.cfg.fig);$("fig-sec").hidden=!hasCh;$("fig-space").hidden=!hasCh;if(!hasCh)$("fig-bk").hidden=true;requestAnimationFrame(placeFig);
   if(sk+hasCh!==schemaKey){schemaKey=sk+hasCh;$("schema").innerHTML=hasCh?schemaSVG():`<p class="note" style="text-align:center">Scegli un personaggio per vedere lo schema del corpo.</p>`;ui.shown.forEach(k=>showZone(k,false))}
   if(hasCh){const zv={},who=S.cfg.name+"|"+S.cfg.fig;ARMK.forEach(([k])=>zv[k]=zoneDelta(k));
     if(prevZ&&prevZ.who===who){const ch=Object.keys(zv).filter(k=>zv[k]!==prevZ.v[k]);
@@ -1750,14 +1943,26 @@ IDB.keys().then(ks=>{const keep=new Set(S.people.filter(p=>p.hasImg).map(p=>p.id
 const initials=n=>(n||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]).join("").toUpperCase();
 function renderPeople(){
   const list=$("people");
-  if(!S.people.length){list.innerHTML=`<p class="note">Nessun personaggio ancora. Aggiungi il primo: nome, immagine, etichette e quello che sai di lui.</p>`;return}
-  list.innerHTML=S.people.map(p=>`<article class="pc${p.notes?" has-rd":""}">${p.hasImg?`<button class="pc-img" data-view="${p.id}" aria-label="Apri l'immagine di ${esc(p.name)}"><img alt="" data-img="${p.id}"></button>`:`<div class="pc-img pc-ph" aria-hidden="true">${esc(initials(p.name))}</div>`}
-    <button class="pc-b" data-edit="${p.id}" aria-label="Modifica ${esc(p.name)}"><span class="pc-h"><b>${esc(p.name)}</b><svg class="pen" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z M14 6l3 3"/></svg></span>
-    ${p.tags.length?`<span class="tags">${p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</span>`:""}${p.notes?`<span class="pc-n">${esc(p.notes)}</span>`:""}</button>${p.notes?`<button class="pc-rd" data-read="${p.id}" aria-label="Leggi le note su ${esc(p.name)}" title="Leggi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7zM14 3v4h4M9.5 11h6M9.5 14.5h6M9.5 18h4"/></svg></button>`:""}</article>`).join("");
+  if(!S.people.length){list.innerHTML=`<p class="note" style="grid-column:1/-1">Nessun personaggio ancora. Tocca + per aggiungere il primo: nome, immagine, etichette e quello che sai di lui.</p>`;return}
+  list.innerHTML=S.people.map(p=>`<button type="button" class="pgal${p.hasImg?"":" noimg"}" data-pd="${p.id}" aria-label="${esc(p.name)}${p.tags.length?", "+esc(p.tags.join(", ")):""}">${p.hasImg?`<img alt="" data-img="${p.id}" loading="lazy">`:`<span class="pg-ph" aria-hidden="true">${esc(initials(p.name))}</span>`}<span class="pg-n">${esc(p.name)}</span></button>`).join("");
   list.querySelectorAll("img[data-img]").forEach(im=>imgURL(im.dataset.img).then(u=>{if(u)im.src=u}).catch(()=>{}));
+  if(pdId)drawPd();
 }
-$("people").onclick=e=>{const rd=e.target.closest("[data-read]");if(rd){const p=S.people.find(x=>x.id===rd.dataset.read);if(p)openNote(p.name,p.notes,null);return}const v=e.target.closest("[data-view]");if(v){openViewer(v.dataset.view);return}const ed=e.target.closest("[data-edit]");if(ed)openPerson(ed.dataset.edit)};
+$("people").onclick=e=>{const g=e.target.closest("[data-pd]");if(g){openPd(g.dataset.pd);return}const rd=e.target.closest("[data-read]");if(rd){const p=S.people.find(x=>x.id===rd.dataset.read);if(p)openNote(p.name,p.notes,null);return}const v=e.target.closest("[data-view]");if(v){openViewer(v.dataset.view);return}const ed=e.target.closest("[data-edit]");if(ed)openPerson(ed.dataset.edit)};
 $("pp-add").onclick=()=>openPerson(null);
+/* dettaglio di un personaggio: immagine, etichette, note; matita per modificare */
+let pdId=null;const pddlg=$("pddlg");
+function drawPd(){const p=S.people.find(x=>x.id===pdId);if(!p){if(pddlg.open)closeDlg(pddlg);pdId=null;return}
+  $("pd-t").textContent=p.name;
+  $("pd-imgw").innerHTML=p.hasImg?`<button type="button" class="pd-img" id="pd-img" aria-label="Apri l'immagine di ${esc(p.name)}"><img alt="" id="pd-im"></button>`:`<div class="pd-img ph" aria-hidden="true">${esc(initials(p.name))}</div>`;
+  if(p.hasImg)imgURL(p.id).then(u=>{const im=$("pd-im");if(u&&im)im.src=u}).catch(()=>{});
+  $("pd-tags").innerHTML=p.tags.length?p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join(""):`<span class="note">Nessuna etichetta</span>`;
+  const n=$("pd-notes");n.textContent=p.notes||"Nessuna nota. Tocca la matita per scrivere cosa sai di questo personaggio.";n.classList.toggle("empty",!p.notes)}
+function openPd(id){pdId=id;drawPd();if(pdId){openDlg(pddlg);$("pd-notes").scrollTop=0}}
+$("pd-x").onclick=()=>{pdId=null;closeDlg(pddlg)};
+pddlg.addEventListener("close",()=>{pdId=null});
+$("pd-ed").onclick=()=>{const id=pdId;pdId=null;closeDlg(pddlg);openPerson(id)};
+$("pd-imgw").onclick=e=>{if(e.target.closest("#pd-img"))openViewer(pdId)};
 const pdlg=$("persondlg");let pe=null;
 function openPerson(id){const p=id?S.people.find(x=>x.id===id):null;
   pe={id:p?p.id:newId(),tags:p?[...p.tags]:[],blob:null,hadImg:p?p.hasImg:false,removeImg:false,blobURL:null};
@@ -1878,7 +2083,7 @@ $("bk-imp").onclick=async()=>{let raw=null;try{raw=JSON.parse($("bk-in").value)}
 
 /* ---------- Intestazione ---------- */
 function renderHead(){const c=S.cfg;
-  $("ch-name").textContent=c.name||"Nuovo personaggio";
+  $("ch-name").textContent=c.name||"Nuovo personaggio";$("hud-name").textContent=c.name||"";
   $("ch-sub").innerHTML=[c.race,c.cls].filter(Boolean).map(esc).concat(c.name?[`Livello <span class="num">${esc(c.level||1)}</span>`]:[]).join(" · ");
   $("race-i").hidden=!c.info;$("race-tip").textContent=c.info||"";if(!c.info)$("race-tip").hidden=true;
   $("ch-trait").hidden=!c.trait;$("trait-n").textContent=c.trait||"";$("trait-u").textContent="";$("trait-u").hidden=true;
