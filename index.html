@@ -92,7 +92,7 @@ button.pri:disabled:hover{background:var(--ink);border-color:var(--ink)}
 .cdtip .ct-g{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font:15px var(--f-num);margin-top:4px;align-items:baseline}.cdtip .ct-g dt{color:var(--muted);font:15px var(--f-body)}.cdtip .ct-g dd{margin:0;white-space:nowrap}.cdtip .ct-g small{font:13px var(--f-body);color:var(--muted)}
 .cdtip .ct-l{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;border:0;border-bottom:1px solid var(--line);background:transparent;padding:2px 0;margin:0;font:15px var(--f-body);color:var(--ink);text-align:left}
 .cdtip .ct-s{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 10px;border-bottom:1px dashed var(--line);padding:4px 0}.cdtip .ct-s .ct-n{grid-column:1;min-width:0;overflow-wrap:break-word}.cdtip .ct-s .ct-n small{display:block;font-size:12px}.cdtip .ct-v{grid-column:1;display:flex;flex-wrap:wrap;gap:0 12px;font:600 14px var(--f-num);text-align:left}.cdtip .ct-s button{grid-column:2;grid-row:1/span 2;margin:0;padding:0 10px}
-.cdtip .ct-v .off{flex-basis:100%;color:var(--muted)}.cdtip .ct-v .off s{text-decoration-thickness:1.5px}.cdtip .ct-v .off small{display:block;font:italic 13px/1.3 var(--f-body)}
+.cdtip .ct-x{margin:0;font:italic 14px/1.35 var(--f-body);color:var(--muted)}.cdtip .ct-v .off{flex-basis:100%;color:var(--muted)}.cdtip .ct-v .off s{text-decoration-thickness:1.5px}.cdtip .ct-v .off small{display:block;font:italic 13px/1.3 var(--f-body)}
 .cdic.off{border-style:dashed;border-color:var(--muted);color:var(--muted)}.cdic.off .ar{background:var(--muted)}.cdic.off[aria-expanded="true"]{background:var(--muted);color:var(--sheet)}
 .cdtip .neg{color:var(--danger)}.cdtip .pos{color:var(--bronze)}
 .cdtip .ct-l svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7}.cdtip button{justify-self:end;min-height:34px;padding:0 12px;font-size:14px;margin-top:4px}
@@ -1266,7 +1266,7 @@ function normS(){
   S.cfg.armor=Object.assign(emptyArmor(),S.cfg.armor||{});
   S.cfg.spells.forEach(sp=>{if(!sp.id)sp.id=newId();["name","tipo","gittata","bersagli","durata","attivazione","frequenza","exp","desc","note"].forEach(k=>{if(sp[k]==null)sp[k]=""});sp.self=!!sp.self;sp.locked=!!sp.locked;if(sp.cat!=="cap")sp.cat="inc";
     sp.levels=Array.isArray(sp.levels)?sp.levels.map(l=>({ps:+l.ps||0,label:l.label||"",text:l.text||""})):[]});
-  S.pe=Number.isFinite(+S.pe)&&S.pe!==null?Math.max(0,Math.round(+S.pe)):0;if(!Array.isArray(S.cond))S.cond=[];S.cond=S.cond.filter(c=>c&&Array.isArray(c.eff));S.dtmv=S.dtmv||{};S.lvl=S.lvl||{};if(!Array.isArray(S.fx))S.fx=[];S.fx=S.fx.filter(f=>f&&Array.isArray(f.bon));S.fx.forEach(f=>{if(!(f.r>0))f.r=null});S.stone=S.stone||{v:0,r:0};if(!Array.isArray(S.log))S.log=[];S.log.forEach(l=>{if(!l.id)l.id=newId()});
+  S.pe=Number.isFinite(+S.pe)&&S.pe!==null?Math.max(0,Math.round(+S.pe)):0;if(!Array.isArray(S.cond))S.cond=[];S.cond=S.cond.filter(c=>c&&Array.isArray(c.eff));S.dtmv=S.dtmv||{};S.lvl=S.lvl||{};if(!Array.isArray(S.fx))S.fx=[];S.fx=S.fx.filter(f=>f&&Array.isArray(f.bon));S.fx.forEach(f=>{if(!(f.r>0))f.r=null});S.stone=S.stone||{v:0,r:0};S.vigCap=Math.max(0,+S.vigCap||0);if(!Array.isArray(S.log))S.log=[];S.log.forEach(l=>{if(!l.id)l.id=newId()});
   if(!Array.isArray(S.items))S.items=[];S.items.forEach(normItem);if(S.cu==null)S.cu=0;
   if(!Array.isArray(S.people))S.people=[];S.people.forEach(p=>{if(!p.id)p.id=newId();p.name=p.name||"Senza nome";p.tags=Array.isArray(p.tags)?p.tags:[];p.notes=p.notes||"";p.hasImg=!!p.hasImg});
   {/* qui modFor e lvlBase non esistono ancora (normS gira all'avvio): formula ripetuta in locale */
@@ -1297,7 +1297,12 @@ const noW=i=>!!i.eq||(i.kind==="equip"&&!!i.worn);
 const weight=()=>S.items.reduce((a,i)=>a+(noW(i)?0:(i.w||0)),0);
 const hist=[],fut=[];
 function log(t){S.log.unshift({id:newId(),t,time:new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})});S.log=S.log.slice(0,150)}
-function act(fn){hist.push(JSON.stringify(S));fut.length=0;if(hist.length>100)hist.shift();fn();S.vig=Math.min(S.vig,MAX.vig);S.spi=Math.min(S.spi,MAX.spi);if(S.spi<=0&&MAX.spi>0)S.spiOut=true;save();render()}
+/* vigCap: Vigore tolto solo perché il massimo è sceso (effetti Vigore massimo −N); torna quando il massimo risale, i danni no */
+function capVig(mv0){S.vigCap=+S.vigCap||0;const mv1=MAX.vig;
+  if(mv1>mv0&&S.vigCap>0){const g=Math.min(S.vigCap,mv1-mv0,mv1-S.vig);if(g>0){S.vig+=g;log(`Vigore +${g}: tornano i punti tolti dal massimo ridotto. Vigore ${S.vig}/${mv1}.`)}S.vigCap-=Math.max(0,Math.min(S.vigCap,mv1-mv0))}
+  if(S.vig>mv1){S.vigCap+=S.vig-mv1;S.vig=mv1}
+  S.vigCap=Math.max(0,Math.min(S.vigCap,-bonSrc("vig").reduce((a,x)=>a+Math.min(0,x[1]),0)))}
+function act(fn){hist.push(JSON.stringify(S));fut.length=0;if(hist.length>100)hist.shift();const mv0=MAX.vig;fn();capVig(mv0);S.spi=Math.min(S.spi,MAX.spi);if(S.spi<=0&&MAX.spi>0)S.spiOut=true;save();render()}
 
 /* ---------- Incantesimi ---------- */
 const EXT=["Bersaglio +1","Durata +1 round","Gittata +2 m","Area +2 m"];
@@ -1557,10 +1562,11 @@ const cdGrp=t=>{const m=/^(lvl|mod):(.+)$/.exec(t);if(m)return m[2];if(t==="corp
 /* gruppi per icona: {n, tot, neg, pos, srcs:[{s,e}]} */
 /* ERS: un anziano non può aumentare Forza, Agilità e Tenacia: quei bonus restano in elenco ma non valgono */
 const effOff=e=>{const m=/^lvl:(.+)$/.exec(e.t);return !!m&&e.v>0&&physLock(m[1])};
-function cdStats(){const m=new Map();actSrc().forEach(s=>s.eff.forEach(e=>{const g=cdGrp(e.t);if(!m.has(g))m.set(g,{n:g,tot:0,neg:false,pos:false,srcs:[]});const x=m.get(g);x.srcs.push({s,e});if(effOff(e))return;x.tot+=e.v;if(e.v<0)x.neg=true;else x.pos=true}));
+function cdStats(){const m=new Map();actSrc().forEach(s=>s.eff.forEach(e=>{const g=cdGrp(e.t);if(!m.has(g))m.set(g,{n:g,tot:0,neg:false,pos:false,srcs:[]});const x=m.get(g);x.srcs.push({s,e});if(effOff(e))return;x.tot+=e.v;x.net=x.net||{};x.net[e.t]=(x.net[e.t]||0)+e.v;if(e.v<0)x.neg=true;else x.pos=true}));
+  m.forEach(x=>{x.cancel=x.neg&&x.pos&&Object.values(x.net).every(v=>v===0)});
   return [...m.values()].sort((a,b)=>CDG.indexOf(a.n)-CDG.indexOf(b.n))}
-const cdCls=x=>!x.neg&&!x.pos?" off":x.neg&&!x.pos?"":x.pos&&!x.neg?" pos":" mix";
-const cdArr=x=>!x.neg&&!x.pos?"–":x.neg&&!x.pos?"▼":x.pos&&!x.neg?"▲":"±";
+const cdCls=x=>x.cancel||!x.neg&&!x.pos?" off":x.neg&&!x.pos?"":x.pos&&!x.neg?" pos":" mix";
+const cdArr=x=>x.cancel?"=":!x.neg&&!x.pos?"–":x.neg&&!x.pos?"▼":x.pos&&!x.neg?"▲":"±";
 const srcVal=(e,full)=>e.t.startsWith("lvl:")?(full?e.t.slice(4)+" ":"")+sgn(e.v):e.t.startsWith("mod:")?(full?"MOD "+e.t.slice(4)+" ":"MOD ")+sgn(e.v):bonLab(e.t)+" "+sgn(e.v);
 const srcTag=s=>s.k==="cond"?"condizione":s.k==="item"?"indossato":s.r==null?"fine scena":s.r+" round";
 const srcBtn=s=>s.k==="cond"?`<button type="button" data-cded="${s.id}" aria-label="Modifica o rimuovi ${esc(s.name)}">Modifica</button>`:s.k==="item"?`<button type="button" data-cdoff="${s.id}" aria-label="Togli ${esc(s.name)}">Togli</button>`:`<button type="button" data-cdend="${s.id}" aria-label="Termina ${esc(s.name)}">Termina</button>`;
@@ -1568,7 +1574,7 @@ const srcRow=(s,eff,full)=>`<div class="ct-s"><span class="ct-n">${esc(s.name)}<
 function renderConds(){const bar=$("cdbar"),st=cdStats();bar.hidden=!st.length;if(!st.length){$("cdtip").hidden=true;ui.cdTip=null;ui.cdMore=false;return}
   if(ui.cdTip&&!st.some(x=>x.n===ui.cdTip))ui.cdTip=null;
   const neg=st.some(x=>x.neg),n=actSrc().length;
-  bar.innerHTML=st.map(x=>`<button type="button" class="cdic${cdCls(x)}" data-cds="${x.n}" aria-expanded="${ui.cdTip===x.n}" aria-label="${x.n} ${!x.neg&&!x.pos?"con bonus senza effetto":x.neg&&!x.pos?"ridotto":x.pos&&!x.neg?"aumentato":"modificato"} da effetti attivi. Tocca per i dettagli">${cdSvg(x.n)}<span class="ar" aria-hidden="true">${cdArr(x)}</span></button>`).join("")+
+  bar.innerHTML=st.map(x=>`<button type="button" class="cdic${cdCls(x)}" data-cds="${x.n}" aria-expanded="${ui.cdTip===x.n}" aria-label="${x.n}: ${x.cancel?"invariato, bonus e malus si annullano":!x.neg&&!x.pos?"bonus senza effetto":x.neg&&!x.pos?"ridotto da effetti attivi":x.pos&&!x.neg?"aumentato da effetti attivi":"modificato da effetti attivi"}. Tocca per i dettagli">${cdSvg(x.n)}<span class="ar" aria-hidden="true">${cdArr(x)}</span></button>`).join("")+
     `<button type="button" class="cdic more${neg?"":" pos"}" data-cdmore aria-expanded="${ui.cdMore}" aria-label="${n} effetti attivi. Tocca per vederli" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 21 19H3Z M12 9v5 M12 16.6v.4"/></svg><span class="ar">${n}</span></button>`;
   fitCd();drawCdTip()}
 /* se le icone non entrano accanto al nome resta una sola icona che pulsa */
@@ -1590,7 +1596,8 @@ function drawCdTip(){const tip=$("cdtip");
     if(n==="Tenacia"||n==="Volontà"){const c=n==="Tenacia",r0=Math.max(0,Math.ceil(m0/2)),r1=Math.max(0,Math.ceil(m1/2));if(r0!==r1)rows.push([c?"Difesa Corpo":"Difesa Mente",`${r0} → ${r1}`,"segue la MOD"])}}
   else if(n==="Difesa"){if(bonusOf("corpo"))rows.push(["Corpo",String(corpoE()),""]);if(bonusOf("mente"))rows.push(["Mente",String(menteE()),""])}
   else if(n==="Vigore")rows.push(["Vigore massimo",String(MAX.vig),""]);else if(n==="Spirito")rows.push(["Spirito massimo",String(MAX.spi),""]);else if(n==="Peso")rows.push(["Peso massimo",String(maxWE()),""]);
-  tip.innerHTML=`<b class="ct-h${x.neg&&!x.pos?" neg":x.pos&&!x.neg?" pos":""}">${cdSvg(n)} ${n}</b>`+[...by].map(([s,eff])=>srcRow(s,eff)).join("")+
+  const why=x.cancel?`<p class="ct-x">Senza effetto: ${[...by].map(([s,eff])=>`${esc(s.name)} (${esc(eff.filter(e=>!effOff(e)).map(e=>srcVal(e,!STATN.includes(n))).join(", "))})`).join(" e ")} si annullano a vicenda, ${STATN.includes(n)?n+" resta invariata":"il valore resta invariato"}.</p>`:"";
+  tip.innerHTML=`<b class="ct-h${x.cancel?"":x.neg&&!x.pos?" neg":x.pos&&!x.neg?" pos":""}">${cdSvg(n)} ${n}</b>`+why+[...by].map(([s,eff])=>srcRow(s,eff)).join("")+
     (rows.length?`<dl class="ct-g">${rows.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}${r[2]?` <small>${r[2]}</small>`:""}</dd>`).join("")}</dl>`:"")+(x.srcs.some(({s})=>s.k==="fx"&&s.r==null)?`<button type="button" data-cdscene>Fine scena</button>`:"")}
 $("cdbar").onclick=e=>{const b=e.target.closest("[data-cds],[data-cdmore]");if(!b)return;e.stopPropagation();
   if(b.dataset.cdmore!==undefined){ui.cdMore=!ui.cdMore;ui.cdTip=null}else{ui.cdTip=ui.cdTip===b.dataset.cds?null:b.dataset.cds;ui.cdMore=false}renderConds()};
