@@ -91,7 +91,7 @@ button.pri:disabled:hover{background:var(--ink);border-color:var(--ink)}
 .cdtip .ct-c span:last-child{font:600 14px var(--f-num);white-space:nowrap}
 .cdtip .ct-g{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font:15px var(--f-num);margin-top:4px;align-items:baseline}.cdtip .ct-g dt{color:var(--muted);font:15px var(--f-body)}.cdtip .ct-g dd{margin:0;white-space:nowrap}.cdtip .ct-g small{font:13px var(--f-body);color:var(--muted)}
 .cdtip .ct-l{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;border:0;border-bottom:1px solid var(--line);background:transparent;padding:2px 0;margin:0;font:15px var(--f-body);color:var(--ink);text-align:left}
-.cdtip .ct-s{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:4px 10px;border-bottom:1px dashed var(--line);padding:2px 0}.cdtip .ct-s .ct-n{min-width:0;overflow-wrap:anywhere}.cdtip .ct-s .ct-n small{display:block;font-size:12px}.cdtip .ct-v{font:600 14px var(--f-num);text-align:right}.cdtip .ct-s button{margin:0;padding:0 10px}
+.cdtip .ct-s{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 10px;border-bottom:1px dashed var(--line);padding:4px 0}.cdtip .ct-s .ct-n{grid-column:1;min-width:0;overflow-wrap:break-word}.cdtip .ct-s .ct-n small{display:block;font-size:12px}.cdtip .ct-v{grid-column:1;display:grid;font:600 14px var(--f-num);text-align:left}.cdtip .ct-s button{grid-column:2;grid-row:1/span 2;margin:0;padding:0 10px}
 .cdtip .neg{color:var(--danger)}.cdtip .pos{color:var(--bronze)}
 .cdtip .ct-l svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7}.cdtip button{justify-self:end;min-height:34px;padding:0 12px;font-size:14px;margin-top:4px}
 .hud-ko{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;border:1.5px solid var(--danger);background:var(--paper);padding:4px 4px 4px 10px}
@@ -1560,7 +1560,7 @@ const cdArr=x=>x.neg&&!x.pos?"▼":x.pos&&!x.neg?"▲":"±";
 const srcVal=e=>e.t.startsWith("lvl:")?sgn(e.v):e.t.startsWith("mod:")?"MOD "+sgn(e.v):bonLab(e.t)+" "+sgn(e.v);
 const srcTag=s=>s.k==="cond"?"condizione":s.k==="item"?"indossato":s.r==null?"fine scena":s.r+" round";
 const srcBtn=s=>s.k==="cond"?`<button type="button" data-cded="${s.id}" aria-label="Modifica o rimuovi ${esc(s.name)}">Modifica</button>`:s.k==="item"?`<button type="button" data-cdoff="${s.id}" aria-label="Togli ${esc(s.name)}">Togli</button>`:`<button type="button" data-cdend="${s.id}" aria-label="Termina ${esc(s.name)}">Termina</button>`;
-const srcRow=(s,eff)=>`<div class="ct-s"><span class="ct-n">${esc(s.name)}<small>${srcTag(s)}</small></span><span class="ct-v ${eff.every(e=>e.v<0)?"neg":eff.every(e=>e.v>0)?"pos":""}">${esc(eff.map(srcVal).join(", "))}</span>${srcBtn(s)}</div>`;
+const srcRow=(s,eff)=>`<div class="ct-s"><span class="ct-n">${esc(s.name)}<small>${srcTag(s)}</small></span><span class="ct-v">${eff.map(e=>`<span class="${e.v<0?"neg":"pos"}">${esc(srcVal(e))}</span>`).join("")}</span>${srcBtn(s)}</div>`;
 function renderConds(){const bar=$("cdbar"),st=cdStats();bar.hidden=!st.length;if(!st.length){$("cdtip").hidden=true;ui.cdTip=null;ui.cdMore=false;return}
   if(ui.cdTip&&!st.some(x=>x.n===ui.cdTip))ui.cdTip=null;
   const neg=st.some(x=>x.neg),n=actSrc().length;
