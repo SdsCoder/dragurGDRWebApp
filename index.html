@@ -1266,7 +1266,7 @@ function normS(){
   S.cfg.armor=Object.assign(emptyArmor(),S.cfg.armor||{});
   S.cfg.spells.forEach(sp=>{if(!sp.id)sp.id=newId();["name","tipo","gittata","bersagli","durata","attivazione","frequenza","exp","desc","note"].forEach(k=>{if(sp[k]==null)sp[k]=""});sp.self=!!sp.self;sp.locked=!!sp.locked;if(sp.cat!=="cap")sp.cat="inc";
     sp.levels=Array.isArray(sp.levels)?sp.levels.map(l=>({ps:+l.ps||0,label:l.label||"",text:l.text||""})):[]});
-  S.pe=Number.isFinite(+S.pe)&&S.pe!==null?Math.max(0,Math.round(+S.pe)):0;if(!Array.isArray(S.cond))S.cond=[];S.cond=S.cond.filter(c=>c&&Array.isArray(c.eff));S.dtmv=S.dtmv||{};S.lvl=S.lvl||{};if(!Array.isArray(S.fx))S.fx=[];S.fx=S.fx.filter(f=>f&&Array.isArray(f.bon));S.fx.forEach(f=>{if(!(f.r>0))f.r=null});S.stone=S.stone||{v:0,r:0};S.vigCap=Math.max(0,+S.vigCap||0);if(!Array.isArray(S.log))S.log=[];S.log.forEach(l=>{if(!l.id)l.id=newId()});
+  S.pe=Number.isFinite(+S.pe)&&S.pe!==null?Math.max(0,Math.round(+S.pe)):0;if(!Array.isArray(S.cond))S.cond=[];S.cond=S.cond.filter(c=>c&&Array.isArray(c.eff));S.dtmv=S.dtmv||{};S.lvl=S.lvl||{};if(!Array.isArray(S.fx))S.fx=[];S.fx=S.fx.filter(f=>f&&Array.isArray(f.bon));S.fx.forEach(f=>{if(!(f.r>0))f.r=null});S.stone=S.stone||{v:0,r:0};S.vigCap=Math.max(0,+S.vigCap||0);S.spiCap=Math.max(0,+S.spiCap||0);if(!Array.isArray(S.log))S.log=[];S.log.forEach(l=>{if(!l.id)l.id=newId()});
   if(!Array.isArray(S.items))S.items=[];S.items.forEach(normItem);if(S.cu==null)S.cu=0;
   if(!Array.isArray(S.people))S.people=[];S.people.forEach(p=>{if(!p.id)p.id=newId();p.name=p.name||"Senza nome";p.tags=Array.isArray(p.tags)?p.tags:[];p.notes=p.notes||"";p.hasImg=!!p.hasImg});
   {/* qui modFor e lvlBase non esistono ancora (normS gira all'avvio): formula ripetuta in locale */
@@ -1297,12 +1297,13 @@ const noW=i=>!!i.eq||(i.kind==="equip"&&!!i.worn);
 const weight=()=>S.items.reduce((a,i)=>a+(noW(i)?0:(i.w||0)),0);
 const hist=[],fut=[];
 function log(t){S.log.unshift({id:newId(),t,time:new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})});S.log=S.log.slice(0,150)}
-/* vigCap: Vigore tolto solo perché il massimo è sceso (effetti Vigore massimo −N); torna quando il massimo risale, i danni no */
-function capVig(mv0){S.vigCap=+S.vigCap||0;const mv1=MAX.vig;
-  if(mv1>mv0&&S.vigCap>0){const g=Math.min(S.vigCap,mv1-mv0,mv1-S.vig);if(g>0){S.vig+=g;log(`Vigore +${g}: tornano i punti tolti dal massimo ridotto. Vigore ${S.vig}/${mv1}.`)}S.vigCap-=Math.max(0,Math.min(S.vigCap,mv1-mv0))}
-  if(S.vig>mv1){S.vigCap+=S.vig-mv1;S.vig=mv1}
-  S.vigCap=Math.max(0,Math.min(S.vigCap,-bonSrc("vig").reduce((a,x)=>a+Math.min(0,x[1]),0)))}
-function act(fn){hist.push(JSON.stringify(S));fut.length=0;if(hist.length>100)hist.shift();const mv0=MAX.vig;fn();capVig(mv0);S.spi=Math.min(S.spi,MAX.spi);if(S.spi<=0&&MAX.spi>0)S.spiOut=true;save();render()}
+/* vigCap/spiCap: punti tolti solo perché il massimo è sceso per un effetto; tornano quando il massimo risale. Danni e PS spesi no */
+function bareMax(k){const f=S.fx,c=S.cond,it=S.items;S.fx=[];S.cond=[];S.items=it.filter(i=>!(i.kind==="equip"&&i.worn));const v=MAX[k];S.fx=f;S.cond=c;S.items=it;return v}
+function capPool(k,m0){const ck=k+"Cap",nm=k==="vig"?"Vigore":"Spirito";S[ck]=+S[ck]||0;const m1=MAX[k];
+  if(m1>m0&&S[ck]>0){const g=Math.min(S[ck],m1-m0,m1-S[k]);if(g>0){S[k]+=g;log(`${nm} +${g}: tornano i punti tolti dal massimo ridotto. ${nm} ${S[k]}/${m1}.`)}S[ck]-=Math.min(S[ck],m1-m0)}
+  if(S[k]>m1){S[ck]+=S[k]-m1;S[k]=m1}
+  S[ck]=Math.max(0,Math.min(S[ck],bareMax(k)-m1))}
+function act(fn){hist.push(JSON.stringify(S));fut.length=0;if(hist.length>100)hist.shift();const mv0=MAX.vig,ms0=MAX.spi;fn();capPool("vig",mv0);capPool("spi",ms0);S.spi=Math.min(S.spi,MAX.spi);if(S.spi<=0&&MAX.spi>0)S.spiOut=true;save();render()}
 
 /* ---------- Incantesimi ---------- */
 const EXT=["Bersaglio +1","Durata +1 round","Gittata +2 m","Area +2 m"];
