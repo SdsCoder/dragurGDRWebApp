@@ -2191,7 +2191,8 @@ document.querySelectorAll(".dk").forEach(b=>{b.querySelector(".dk-i").outerHTML=
   b.onclick=()=>{const id=b.dataset.sec,on=!openSecs.includes(id);openSecs=on?[...openSecs,id]:openSecs.filter(x=>x!==id);
     try{localStorage.setItem(UIK,JSON.stringify(openSecs))}catch(e){}applySecs();
     if(on)$(id).scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"})}});
-function applySecs(){document.querySelectorAll(".dk").forEach(b=>{const on=openSecs.includes(b.dataset.sec);b.setAttribute("aria-expanded",on);$(b.dataset.sec).hidden=!on})}
+/* pila: l'ultima sezione aperta va in cima, subito sotto il personaggio; le altre scendono. Effetti attivi in fondo */
+function applySecs(){document.querySelectorAll(".dk").forEach(b=>{const id=b.dataset.sec,i=openSecs.indexOf(id),on=i>=0;b.setAttribute("aria-expanded",on);$(id).hidden=!on;$(id).style.order=on?openSecs.length-i:""});$("fx").style.order=999}
 applySecs();
 
 function fillInputs(){
