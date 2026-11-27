@@ -778,7 +778,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   <div class="gpop" id="gpop" hidden role="group" aria-label="Vigore e Spirito">
     <div class="gp-r hp"><span class="gp-n">Vigore</span><button class="sq" id="m-vig" aria-label="Vigore meno uno">−</button><b id="gp-vig"></b><button class="sq" id="p-vig" aria-label="Vigore più uno">+</button></div>
     <div class="gp-r mp"><span class="gp-n">Spirito</span><button class="sq" id="m-spi" aria-label="Spirito meno uno">−</button><b id="gp-spi"></b><button class="sq" id="p-spi" aria-label="Spirito più uno">+</button></div>
-    <p class="note gp-h">Tocco sul cerchio: −1 · pressione lunga: questo pannello</p>
+    <p class="note gp-h">Tieni premuto un cerchio per aprire questo pannello</p>
   </div>
 </div>
 <div class="fig-space" id="fig-space" hidden></div><div class="fig-bk" id="fig-bk" hidden></div>
@@ -1406,7 +1406,7 @@ const BN={vig:"Vigore",spi:"Spirito"};
 function renderBars(){
   ["vig","spi"].forEach(k=>{const v=S[k],m=MAX[k],n=k==="vig"?"Vigore":"Spirito";
     $("g-"+k).style.height=(m?Math.min(100,v/m*100):0)+"%";$("t-"+k).innerHTML=`<b>${v}</b><small>/${m}</small><em>${n}</em>`;$("gp-"+k).textContent=`${v} / ${m}`;
-    $("gauge-"+k).setAttribute("aria-label",`${n} ${v} su ${m}. Tocca per togliere 1, tieni premuto per più e meno`);
+    $("gauge-"+k).setAttribute("aria-label",`${n} ${v} su ${m}. Tieni premuto per più e meno`);
     $("gauge-"+k).classList.toggle("warn",k==="vig"?v>=1&&v<=2:v>=1&&v<=3);
     $("m-"+k).disabled=v<=0;$("p-"+k).disabled=v>=m;});
 }
@@ -1439,7 +1439,7 @@ function renderBars(){
   items.forEach(b=>b.addEventListener("click",()=>setTimeout(()=>setOpen(false),120)));
   window.arcMenu={setOpen,dots,layout:()=>{layout();fitHit()}};new MutationObserver(dots).observe(arc,{subtree:true,attributes:true,attributeFilter:["aria-expanded"]});
   layout();fitHit();dots()})();
-/* cerchi in basso: tocco = −1, pressione lunga = pannello con − e + */
+/* cerchi in basso: solo la pressione lunga apre il pannello con − e + (il tocco singolo non toglie nulla: evita tocchi involontari) */
 (function(){let lp=null;const pop=$("gpop");
   const close=()=>{pop.hidden=true};
   ["vig","spi"].forEach(k=>{const o=$("gauge-"+k);
@@ -1448,8 +1448,7 @@ function renderBars(){
     o.addEventListener("pointermove",e=>{if(lp&&Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>10){cancel();lp=null}});
     ["pointerup","pointercancel","pointerleave"].forEach(ev=>o.addEventListener(ev,cancel));
     o.addEventListener("contextmenu",e=>e.preventDefault());
-    o.addEventListener("click",e=>{if(lp&&lp.fired){lp=null;return}lp=null;if(!pop.hidden){close();return}
-      const b=$("m-"+k);if(!b.disabled){b.click();o.classList.remove("hit");void o.offsetWidth;o.classList.add("hit")}});
+    o.addEventListener("click",e=>{if(lp&&lp.fired){lp=null;return}lp=null;if(!pop.hidden)close()});
     o.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="+"){e.preventDefault();$("p-"+k).click()}})});
   document.addEventListener("pointerdown",e=>{if(!pop.hidden&&!e.target.closest("#gpop,.orb"))close()},true);
 })();
