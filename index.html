@@ -10,7 +10,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>/* testi lunghi senza spazi (nomi, note…) vanno a capo invece di allargare la pagina */html{overflow-wrap:anywhere}
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
 <style>
 /* Layout: barra fissa vita/mana in alto; poi incantesimi (colonna 1) e scheda (colonna 2); cronaca in fondo */
@@ -1819,7 +1820,7 @@ function expireFx(){S.fx=S.fx.filter(x=>{if(x.r!=null&&x.r<=0){log(`${esc(x.name
 /* striscia in alto con gli effetti a round; la gestione è nelle icone degli effetti */
 function renderFx(){const f=S.fx;
   const timed=f.filter(x=>x.r!=null),stn=S.stone.v>0,hf=$("hud-fx");hf.hidden=!timed.length&&!stn;
-  if(!hf.hidden){const items=[...timed.map(x=>`${esc(x.name)} <b>${x.r}</b>`),...(stn?[`Magia +${S.stone.v} <b>${S.stone.r}</b>`]:[])];$("hud-fx-t").innerHTML=`⏳ ${items.join(" · ")}`;$("hud-fx-t").title=$("hud-fx-t").textContent}}
+  if(!hf.hidden){const sh=n=>n.length>18?n.slice(0,17).trim()+"…":n,items=[...timed.map(x=>`${esc(sh(x.name))} <b>${x.r}</b>`),...(stn?[`Magia +${S.stone.v} <b>${S.stone.r}</b>`]:[])];$("hud-fx-t").innerHTML=`⏳ ${items.join(" · ")}`;$("hud-fx-t").title=$("hud-fx-t").textContent}}
 function endRound(){act(()=>{const n=S.fx.filter(x=>x.r!=null).length;S.fx.forEach(x=>{if(x.r!=null)x.r--});
     let mg="";if(S.stone.v>0){S.stone.r--;if(S.stone.r<=0){S.stone={v:0,r:0};mg=" Protezione magica terminata: tornata a 0."}else mg=` Protezione magica: ne restano ${S.stone.r}.`}
     log(`Fine round: −1 round a ${n} ${n===1?"effetto":"effetti"}.${mg}`);expireFx()})}
