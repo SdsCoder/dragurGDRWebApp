@@ -575,6 +575,9 @@ body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 .arc .dk::after{display:none}
 .arc .dk.off{pointer-events:none}
 .arc-hit{position:absolute;left:0;right:0;bottom:0;pointer-events:auto;touch-action:none}
+/* menu aperto: le icone non avviano lo scorrimento e la pagina resta ferma, così il trascinamento ruota sempre l'anello */
+.arc .dk{touch-action:none}
+html.arc-lock,html.arc-lock body{overflow:hidden;overscroll-behavior:none}html.arc-lock .gbar,html.arc-lock .arc-bg{touch-action:none}
 @media (prefers-reduced-motion:reduce){.arc .dk,.arc-ring path,.gm-btn svg{transition:none}}
 .gpop{position:absolute;left:8px;right:8px;bottom:calc(100% + 8px);max-width:420px;margin:0 auto;background:var(--sheet);border:1.5px solid var(--ink);box-shadow:0 -6px 18px rgba(0,0,0,.25);padding:10px 12px;display:grid;gap:8px}
 .gp-r{display:grid;grid-template-columns:62px 48px 1fr 48px;align-items:center;gap:8px}
@@ -1417,7 +1420,7 @@ function renderBars(){
       const inside=deg>=A1-14&&deg<=A0+14,full=deg>=A1-1&&deg<=A0+1;b.style.setProperty("--x",x+"px");b.style.setProperty("--y",y+"px");b.style.setProperty("--o",full?1:inside?.3:0);
       b.classList.toggle("off",!inside);b.style.transitionDelay=open&&!drag?(i*35)+"ms":"0ms"})}
   function dots(){$("gm-dots").innerHTML=items.filter(b=>b.getAttribute("aria-expanded")==="true").map(()=>"<i></i>").join("")}
-  function setOpen(v){open=v;btn.setAttribute("aria-expanded",v);arc.hidden=bg.hidden=!v;if(v){layout();requestAnimationFrame(()=>requestAnimationFrame(()=>arc.classList.add("on")))}else arc.classList.remove("on");dots()}
+  function setOpen(v){open=v;btn.setAttribute("aria-expanded",v);document.documentElement.classList.toggle("arc-lock",v);arc.hidden=bg.hidden=!v;if(v){layout();requestAnimationFrame(()=>requestAnimationFrame(()=>arc.classList.add("on")))}else arc.classList.remove("on");dots()}
   btn.onclick=()=>setOpen(!open);bg.onclick=()=>setOpen(false);
   addEventListener("keydown",e=>{if(open&&e.key==="Escape")setOpen(false)});addEventListener("resize",()=>{if(open)layout()});
   /* trascinare in orizzontale ruota l'arco */
