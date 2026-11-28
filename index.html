@@ -284,9 +284,11 @@ dialog.page::backdrop{background:var(--sheet)}
 .g-head{grid-column:2}.g-shield{grid-column:3;grid-row:1}
 
 /* Inventario */
-.wbar{height:8px;background:var(--line);position:relative;overflow:hidden;margin-bottom:10px}
+.wbar{height:10px;background:var(--line);position:relative;overflow:hidden;margin-bottom:2px}
+.wm{position:absolute;top:0;bottom:0;width:2px;background:var(--ink);opacity:.55}.wm.g{background:var(--danger);opacity:.8}
+.wlab{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:2px 14px;margin:3px 0 10px;font:12px var(--f-body);color:var(--muted)}.wlab span{display:inline-flex;align-items:center;gap:5px}.wlab .lt{width:2px;height:11px;background:var(--ink);opacity:.55}.wlab .g{color:var(--danger)}.wlab .g .lt{background:var(--danger);opacity:.8}
 .wbar i{position:absolute;inset:0 auto 0 0;background:var(--bronze)}
-.over .wbar i{background:var(--danger)}
+.over .wbar i{background:var(--aura)}.grave .wbar i{background:var(--danger)}
 .over #w-tot{color:var(--danger)}
 .w-over{margin:-4px 0 10px;padding:6px 10px;border-left:3px solid var(--danger);font-size:14px;color:var(--ink)}.w-over b{color:var(--danger);font-weight:600}
 .it.nw .wt{opacity:.4}.it.nw .wt::after{content:"";position:absolute;left:4px;right:4px;top:50%;border-top:2px solid currentColor;transform:rotate(-20deg)}
@@ -304,6 +306,11 @@ dialog.page::backdrop{background:var(--sheet)}
 .err:empty{display:none}
 .sub-h{font:17px var(--f-display);margin:16px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
 .coins{display:grid;gap:6px}
+.purse{border:1px solid var(--line);margin:0 0 10px;background:var(--paper)}
+.purse summary{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;list-style:none}.purse summary::-webkit-details-marker{display:none}
+.purse summary::after{content:"▾";color:var(--muted);transition:transform .15s}.purse[open] summary::after{transform:rotate(180deg)}
+.pu-l{font:15px var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.pu-s{flex:1;text-align:right;font:15px var(--f-num)}.pu-s b{font-weight:600}.pu-s .o{color:var(--aura)}.pu-s .a{color:var(--muted)}.pu-s .r{color:#b0703a}
+.pu-b{padding:2px 10px 10px;display:grid;gap:8px}.pu-i{display:flex;align-items:center;gap:8px}.pu-i .note{font-size:13px}
 .coins .val{min-width:2.2em;text-align:center}
 .chk{display:flex;gap:8px;align-items:center}
 .chk input{width:20px;height:20px;accent-color:var(--bronze);flex:none}.chk-n{display:block;font-size:13px;line-height:1.3}
@@ -392,6 +399,9 @@ dialog h3[tabindex="-1"]:focus{outline:none}.dm-l{font-size:13px;color:var(--mut
 /* Inventario a righe */
 #items{list-style:none;margin:0;padding:0;display:grid}
 .it-g{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:14px 6px 4px;border-bottom:1px solid var(--line);font:13px var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.it-g:first-child{padding-top:4px}.it-g small{letter-spacing:0;text-transform:none;font-size:12px}
+.it-ic{width:22px;height:22px;flex:none;fill:none;stroke:var(--bronze);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.85}.it.unworn .it-ic{stroke:var(--muted)}
+.it-b{justify-content:flex-start!important}.it-b .it-n{flex:1}
+.it-e{display:flex;flex-wrap:wrap;gap:0 8px}.it-e .neg{color:var(--danger)}.it-e .pos{color:var(--bronze)}
 .it-q{font:600 14px var(--f-num);color:var(--bronze);margin-left:6px;white-space:nowrap}
 .it-d{color:var(--muted)!important}
 .ia-info{display:grid;gap:4px;font-size:15px}.ia-info .row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding:3px 0}.ia-info .row>span:first-child{color:var(--muted)}.ia-info .row>span:last-child{text-align:right}
@@ -789,7 +799,6 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   <button class="dk" data-sec="sec-stats" data-ico="stats" aria-expanded="false" aria-controls="sec-stats"><span class="dk-i"></span><small>Caratteristiche</small></button>
   <button class="dk" data-sec="sec-def" data-ico="def" aria-expanded="false" aria-controls="sec-def"><span class="dk-i"></span><small>Difesa</small></button>
   <button class="dk" data-sec="inv-sec" data-ico="inv" aria-expanded="false" aria-controls="inv-sec"><span class="dk-i"></span><small>Inventario</small></button>
-  <button class="dk" data-sec="sec-coin" data-ico="coin" aria-expanded="false" aria-controls="sec-coin"><span class="dk-i"></span><small>Borsa</small></button>
   <button class="dk" data-sec="pp-sec" data-ico="people" aria-expanded="false" aria-controls="pp-sec"><span class="dk-i"></span><small>Personaggi</small></button>
 </nav>
   </div>
@@ -866,8 +875,16 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 
 <section id="inv-sec" class="sec" hidden>
   <h2>Inventario <small id="w-tot" class="num"></small></h2>
-  <div class="wbar"><i id="w-bar"></i></div>
+  <div class="wbar" id="wbar"><i id="w-bar"></i><span class="wm" id="wm1"></span><span class="wm g" id="wm2"></span></div><div class="wlab" id="wlab"></div>
   <p class="w-over" id="w-over" hidden></p>
+  <details class="purse" id="purse"><summary><span class="pu-l">Borsa</span><span class="pu-s" id="pu-s"></span></summary>
+  <div class="pu-b"><div class="pu-i"><button class="info-i" id="coin-i" aria-expanded="false" aria-controls="coin-tip" aria-label="Come funziona la borsa"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10 0a10 10 0 1 1 0 20a10 10 0 1 1 0-20Z M10 3.6a1.9 1.9 0 1 0 0 3.8a1.9 1.9 0 1 0 0-3.8Z M8.3 9h3.4v7.4H8.3Z"/></svg></button><span class="note">Cambio automatico tra le monete</span></div>
+  <div class="bubble" id="coin-tip" hidden>10 rame = 1 argento, 10 argento = 1 oro. Il cambio è automatico: il decimo rame diventa 1 argento, e se togli un rame quando sei a 0 si spezza una moneta più grande.</div>
+  <div class="coins">
+    <div class="row"><span>Oro</span><div class="ctl"><button class="sq" data-coin="-100" aria-label="Oro meno uno">−</button><span class="val num" id="c-oro"></span><button class="sq" data-coin="100" aria-label="Oro più uno">+</button></div></div>
+    <div class="row"><span>Argento</span><div class="ctl"><button class="sq" data-coin="-10" aria-label="Argento meno uno">−</button><span class="val num" id="c-arg"></span><button class="sq" data-coin="10" aria-label="Argento più uno">+</button></div></div>
+    <div class="row"><span>Rame</span><div class="ctl"><button class="sq" data-coin="-1" aria-label="Rame meno uno">−</button><span class="val num" id="c-ram"></span><button class="sq" data-coin="1" aria-label="Rame più uno">+</button></div></div>
+  </div></div></details>
   <ul id="items"></ul>
   <form class="itemform" id="itemform" novalidate hidden>
     <input id="it-name" aria-label="Nome oggetto" placeholder="Nome oggetto" autocomplete="off">
@@ -883,15 +900,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   <textarea id="inv-extra" style="min-height:84px" hidden></textarea>
 </section>
 
-<section id="sec-coin" class="sec" hidden>
-  <h2 class="bag">Borsa <button class="info-i" id="coin-i" aria-expanded="false" aria-controls="coin-tip" aria-label="Come funziona la borsa"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10 0a10 10 0 1 1 0 20a10 10 0 1 1 0-20Z M10 3.6a1.9 1.9 0 1 0 0 3.8a1.9 1.9 0 1 0 0-3.8Z M8.3 9h3.4v7.4H8.3Z"/></svg></button></h2>
-  <div class="bubble" id="coin-tip" hidden>10 rame = 1 argento, 10 argento = 1 oro. Il cambio è automatico: il decimo rame diventa 1 argento, e se togli un rame quando sei a 0 si spezza una moneta più grande.</div>
-  <div class="coins">
-    <div class="row"><span>Oro</span><div class="ctl"><button class="sq" data-coin="-100" aria-label="Oro meno uno">−</button><span class="val num" id="c-oro"></span><button class="sq" data-coin="100" aria-label="Oro più uno">+</button></div></div>
-    <div class="row"><span>Argento</span><div class="ctl"><button class="sq" data-coin="-10" aria-label="Argento meno uno">−</button><span class="val num" id="c-arg"></span><button class="sq" data-coin="10" aria-label="Argento più uno">+</button></div></div>
-    <div class="row"><span>Rame</span><div class="ctl"><button class="sq" data-coin="-1" aria-label="Rame meno uno">−</button><span class="val num" id="c-ram"></span><button class="sq" data-coin="1" aria-label="Rame più uno">+</button></div></div>
-  </div>
-</section>
+
 
 <section id="pp-sec" class="sec" hidden>
   <h2 class="pp-h">Personaggi <button type="button" class="icx pp-add" id="pp-add" aria-label="Aggiungi personaggio" title="Aggiungi personaggio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></h2>
@@ -1850,10 +1859,15 @@ function renderInv(){
   const ov=t-maxWE();
   $("w-tot").textContent=`Peso ${fmt(t)} / ${maxWE()}${ov>2?" · sovraccarico grave":ov>0?" · sovraccarico":""}`;
   $("w-over").hidden=!(ov>0);$("w-over").innerHTML=ov>2?`<b>Sovraccarico grave</b> (+${fmt(ov)}): niente corsa né scatti, svantaggio ai Test di Forza, Agilità e Tenacia. Il Narratore può imporre pause.`:ov>0?`<b>Sovraccarico leggero</b> (+${fmt(ov)}): svantaggio ai Test di Agilità, movimento −2 m.`:"";
-  $("w-bar").style.width=Math.min(100,t/(maxWE()||10)*100)+"%";$("inv-sec").classList.toggle("over",t>maxWE());
+  {/* barra in scala fino a 3 oltre il massimo: tacca al massimo (leggero) e a +2 (grave) */
+   const mx=maxWE(),sc=Math.max(mx+3,t,1),pc=v=>Math.min(100,v/sc*100);$("w-bar").style.width=pc(t)+"%";
+   $("wm1").style.left=pc(mx)+"%";$("wm2").style.left=pc(mx+2)+"%";
+   $("wlab").innerHTML=`<span><i class="lt"></i>leggero oltre ${fmt(mx)}</span><span class="g"><i class="lt"></i>grave oltre ${fmt(mx+2)}</span>`;
+   $("inv-sec").classList.toggle("over",t>mx);$("inv-sec").classList.toggle("grave",t>mx+2)}
+  {const o=Math.floor(S.cu/100),a=Math.floor(S.cu/10)%10,r=S.cu%10;$("pu-s").innerHTML=`<b class="o">${o}</b> oro · <b class="a">${a}</b> arg. · <b class="r">${r}</b> rame`}
   const tag=i=>i.kind==="equip"?(i.worn?"indossato":"non indossato"):i.kind==="pot"?(i.dur?i.dur+" round":"scena"):"";
-  const bt=i=>[i.dmg?`<small class="it-d">Danno ${esc(i.dmg)}</small>`:"",i.bon.length?`<small>${esc(i.bon.map(bonTxt).join(", "))}</small>`:""].join("");
-  const row=i=>{const q=i.qty||1,tw=i.w==null?null:i.w*q;return `<li class="it${i.worn?" worn":i.kind==="equip"?" unworn":""}${noW(i)?" nw":""}"><button class="it-b" data-id="${i.id}" aria-label="${esc(i.name)}${q>1?`, quantità ${q}`:""}${tag(i)?", "+tag(i):""}, peso ${tw==null?"non indicato":fmt(tw)}${noW(i)?" (non conta)":""}. Tocca per le azioni"><span class="it-n"><span>${esc(i.name)}${q>1?`<span class="it-q">×${q}</span>`:""}${tag(i)?`<span class="it-tag${i.kind==="equip"&&!i.worn?" off":""}">${tag(i)}</span>`:""}</span>${bt(i)}</span>${wIcon(tw)}</button></li>`};
+  const bt=i=>[i.dmg?`<small class="it-d">Danno ${esc(i.dmg)}</small>`:"",i.bon.length?`<small class="it-e">${i.bon.map(b=>`<span class="${b.v<0?"neg":"pos"}">${esc(bonTxt(b))}</span>`).join("")}</small>`:""].join("");
+  const row=i=>{const q=i.qty||1,tw=i.w==null?null:i.w*q;return `<li class="it${i.worn?" worn":i.kind==="equip"?" unworn":""}${noW(i)?" nw":""}"><button class="it-b" data-id="${i.id}" aria-label="${esc(i.name)}${q>1?`, quantità ${q}`:""}${tag(i)?", "+tag(i):""}, peso ${tw==null?"non indicato":fmt(tw)}${noW(i)?" (non conta)":""}. Tocca per le azioni">${itIco(i)}<span class="it-n"><span>${esc(i.name)}${q>1?`<span class="it-q">×${q}</span>`:""}${tag(i)?`<span class="it-tag${i.kind==="equip"&&!i.worn?" off":""}">${tag(i)}</span>`:""}</span>${bt(i)}</span>${wIcon(tw)}</button></li>`};
   const G=[["on","Addosso","non contano nel peso"],["cons","Consumabili",""],["bag","Zaino",""]];
   $("items").innerHTML=S.items.length?G.map(([k,t,sub])=>{const l=S.items.filter(i=>itGrp(i)===k);if(!l.length)return "";const n=l.reduce((a,i)=>a+(i.qty||1),0);
     return `<li class="it-g" role="presentation"><span>${t}</span><small>${n} ${n===1?"oggetto":"oggetti"}${sub?" · "+sub:""}</small></li>`+l.map(row).join("")}).join(""):`<li class="note">Inventario vuoto. Aggiungi il primo oggetto qui sotto.</li>`;
@@ -1864,6 +1878,9 @@ function renderInv(){
 const wIcon=w=>`<span class="wt" aria-hidden="true"><svg viewBox="0 0 40 36"><circle cx="20" cy="7" r="5"/><path d="M9 13h22l6 21H3z"/></svg><span>${w==null?"—":fmt(w)}</span></span>`;
 const parseW=v=>{const raw=String(v).trim().replace(",",".");if(raw==="")return null;const n=Number(raw);return isFinite(n)&&n>=0?n:false};
 /* gruppi: Addosso (indossati o pronti all'uso), Consumabili (pozioni e oggetti con Usa), Zaino (il resto) */
+const IT_ICO={arma:'<path d="M19.5 4.5 9 15M14.5 4.5h5v5M6.5 12.5l5 5M4 20l3.5-3.5"/>',armatura:'<path d="M12 3l7 3v5c0 4.6-3 8-7 10-4-2-7-5.4-7-10V6z"/>',gioiello:'<path d="M6 9l3-5h6l3 5-6 11z M6 9h12"/>',pozione:'<path d="M9 3h6M10 3v5l-4.8 8.6A3 3 0 0 0 7.8 21h8.4a3 3 0 0 0 2.6-4.4L14 8V3M7 15h10"/>',cibo:'<path d="M4 11h16a8 7 0 0 1-16 0z M8 8c0-1.5 1.5-1.5 1.5-3M12.5 8c0-1.5 1.5-1.5 1.5-3"/>',oggetto:'<path d="M7 8h10l2.5 12h-15z M9.5 8a2.5 2.5 0 0 1 5 0"/>'};
+const itType=i=>i.kind==="pot"?"pozione":i.dmg?"arma":i.kind==="equip"?(i.bon.some(b=>b.t.startsWith("arm:"))?"armatura":"gioiello"):i.cons?"cibo":"oggetto";
+const itIco=i=>`<svg class="it-ic" viewBox="0 0 24 24" aria-hidden="true">${IT_ICO[itType(i)]}</svg>`;
 const itGrp=i=>noW(i)?"on":(i.kind==="pot"||i.cons)?"cons":"bag";
 /* scheda azioni di un oggetto: si apre con un tocco */
 const iadlg=$("itemact");let iaId=null,iaArm=null;
@@ -2272,6 +2289,7 @@ $("spform").onsubmit=e=>{e.preventDefault();if(!spEdit)return;const sp=spEdit.sp
 
 /* ---------- Fila di icone ---------- */
 const UIK=IS_APP?"dragur-ui":"dragur-prova3-ui";let openSecs=[];try{const v=JSON.parse(localStorage.getItem(UIK)||"[]");if(Array.isArray(v))openSecs=v}catch(e){}
+openSecs=openSecs.filter(id=>document.querySelector(`.dk[data-sec="${id}"]`));/* la Borsa ora sta dentro l'Inventario */
 document.querySelectorAll(".dk").forEach(b=>{b.querySelector(".dk-i").outerHTML=glyph(b.dataset.ico);
   b.onclick=()=>{const id=b.dataset.sec,on=openSecs[openSecs.length-1]!==id;openSecs=openSecs.filter(x=>x!==id);if(on)openSecs.push(id);
     try{localStorage.setItem(UIK,JSON.stringify(openSecs))}catch(e){}applySecs();
