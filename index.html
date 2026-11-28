@@ -606,10 +606,10 @@ h2.bag .info-i{align-self:center}
 .sel{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.62);cursor:move;box-sizing:border-box;touch-action:none}
 .sel i{position:absolute;width:24px;height:24px;border:4px solid #fff;box-sizing:border-box}
 .sel i::after{content:"";position:absolute;inset:-12px}
-.sel i[data-h="nw"]{left:-5px;top:-5px;border-right:0;border-bottom:0;cursor:nwse-resize}
-.sel i[data-h="ne"]{right:-5px;top:-5px;border-left:0;border-bottom:0;cursor:nesw-resize}
-.sel i[data-h="sw"]{left:-5px;bottom:-5px;border-right:0;border-top:0;cursor:nesw-resize}
-.sel i[data-h="se"]{right:-5px;bottom:-5px;border-left:0;border-top:0;cursor:nwse-resize}
+.sel i[data-h="nw"]{left:0;top:0;border-right:0;border-bottom:0;cursor:nwse-resize}
+.sel i[data-h="ne"]{right:0;top:0;border-left:0;border-bottom:0;cursor:nesw-resize}
+.sel i[data-h="sw"]{left:0;bottom:0;border-right:0;border-top:0;cursor:nesw-resize}
+.sel i[data-h="se"]{right:0;bottom:0;border-left:0;border-top:0;cursor:nwse-resize}
 #race-i{align-self:center}
 .race-tip{flex-basis:100%;margin:2px 0 0}
 .race-tip::before{left:var(--ax,20px)}
@@ -1059,9 +1059,9 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 
 <dialog id="cropdlg" aria-labelledby="cr-t">
   <div class="dlg-h"><h3 id="cr-t" tabindex="-1" autofocus>Ritaglia l'immagine</h3></div>
-  <p class="note">Trascina gli angoli per scegliere la parte da tenere. Trascina il riquadro per spostarlo.</p>
+  <p class="note">È selezionata tutta l'immagine: trascina gli angoli per ritagliarla e il riquadro per spostarlo, poi Salva.</p>
   <div class="crop" id="crop"><img id="cr-img" alt=""><div class="sel" id="cr-sel"><i data-h="nw"></i><i data-h="ne"></i><i data-h="sw"></i><i data-h="se"></i></div></div>
-  <div class="dlg-ft"><button id="cr-cancel">Annulla</button><button id="cr-full">Usa intera</button><button class="pri" id="cr-ok">Usa ritaglio</button></div>
+  <div class="dlg-ft"><button id="cr-cancel">Annulla</button><button class="pri" id="cr-ok">Salva</button></div>
 </dialog>
 
 <dialog id="viewdlg" aria-labelledby="vw-name">
@@ -2046,7 +2046,7 @@ $("pe-del").onclick=()=>{const b=$("pe-del");
 const cdlg=$("cropdlg");let cr=null,drag=null;
 function openCrop(blob,onDone){const url=URL.createObjectURL(blob),im=$("cr-img");cr={blob,url,onDone};
   im.onload=()=>{openDlg(cdlg);requestAnimationFrame(()=>{if(!cr)return;cr.W=im.clientWidth;cr.H=im.clientHeight;
-    cr.sel={x:cr.W*.1,y:cr.H*.1,w:cr.W*.8,h:cr.H*.8};drawSel()})};
+    cr.sel={x:0,y:0,w:cr.W,h:cr.H};drawSel()})};
   im.onerror=()=>{URL.revokeObjectURL(url);cr=null;$("pe-err").textContent="Non riesco ad aprire questa immagine."};
   im.src=url;}
 function drawSel(){const s=cr.sel,e=$("cr-sel");e.style.left=s.x+"px";e.style.top=s.y+"px";e.style.width=s.w+"px";e.style.height=s.h+"px"}
@@ -2062,8 +2062,8 @@ csel.addEventListener("pointermove",e=>{if(!drag||!cr)return;const dx=e.clientX-
 ["pointerup","pointercancel"].forEach(ev=>csel.addEventListener(ev,()=>{drag=null}));
 function endCrop(){if(cr)URL.revokeObjectURL(cr.url);cr=null;closeDlg(cdlg)}
 $("cr-cancel").onclick=endCrop;
-$("cr-full").onclick=()=>{const c=cr;endCrop();if(c)c.onDone(c.blob)};
 $("cr-ok").onclick=()=>{if(!cr||!cr.sel)return;const im=$("cr-img"),k=im.naturalWidth/cr.W,s=cr.sel,cv=document.createElement("canvas");
+  if(s.x<1&&s.y<1&&s.w>cr.W-1&&s.h>cr.H-1){const c=cr;endCrop();c.onDone(c.blob);return}
   cv.width=Math.max(1,Math.round(s.w*k));cv.height=Math.max(1,Math.round(s.h*k));
   cv.getContext("2d").drawImage(im,s.x*k,s.y*k,s.w*k,s.h*k,0,0,cv.width,cv.height);
   const c=cr,type=c.blob.type==="image/png"?"image/png":"image/jpeg";
