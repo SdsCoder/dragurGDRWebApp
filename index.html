@@ -173,6 +173,7 @@ details ul{margin:6px 0 0;padding-left:20px;display:grid;gap:3px}
 .rl-dice{display:grid;gap:10px}.rl-die{display:grid;gap:4px}.rl-dn{font:12px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .rl-fs{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:6px}.rl-fs.many{grid-template-columns:repeat(auto-fill,minmax(36px,1fr))}
 .rl-fs button{min-height:42px;padding:0;font:600 17px var(--f-num);border:1.5px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+.rl-fs.d6 button{display:grid;place-items:center}.rl-fs.d6 svg{width:34px;height:34px;fill:currentColor}
 .rl-fs button[aria-pressed="true"]{background:var(--bronze);border-color:var(--bronze);color:var(--sheet);transform:scale(1.06)}
 .rl-tot{margin:8px 0 0;text-align:center;font:18px var(--f-num);min-height:1.4em}.rl-tot b{font-size:24px;color:var(--bronze)}
 
@@ -1454,10 +1455,13 @@ $("cast").onclick=()=>{
 
 /* ---------- Promemoria del tiro: i dadi si tirano al tavolo, qui si registra il risultato ---------- */
 const rdlg=$("rolldlg");let rl=null;
-/* un gruppo di facce per ogni dado: si tocca il numero uscito sul dado vero */
+/* faccia di un d6 con i puntini, come sul dado vero */
+const PIP={1:[[2,2]],2:[[1,1],[3,3]],3:[[1,1],[2,2],[3,3]],4:[[1,1],[3,1],[1,3],[3,3]],5:[[1,1],[3,1],[2,2],[1,3],[3,3]],6:[[1,1],[3,1],[1,2],[3,2],[1,3],[3,3]]};
+const pips=n=>`<svg viewBox="0 0 24 24" aria-hidden="true">${PIP[n].map(([x,y])=>`<circle cx="${x*6}" cy="${y*6}" r="2.7"/>`).join("")}</svg>`;
+/* un gruppo di facce per ogni dado: si tocca la faccia uscita sul dado vero */
 function openRoll(sp,lvl,dice){const m=DICE.exec(dice),n=Math.max(1,Math.min(10,+m[1]||1)),f=Math.max(2,Math.min(100,+m[2])),k=m[3]?+m[3].replace(/\s/g,"").replace("−","-"):0;
   rl={name:sp.name,ps:lvl.ps,dice,n,f,k,v:Array(n).fill(null)};$("rl-t").textContent=sp.name;$("rl-d").textContent=dice;$("rl-x").innerHTML=diceHi(lvl.text);
-  $("rl-dice").innerHTML=rl.v.map((_,i)=>`<div class="rl-die" role="group" aria-label="Dado ${i+1} di ${n}, d${f}">${n>1?`<span class="rl-dn">Dado ${i+1}</span>`:""}<div class="rl-fs${f>12?" many":""}">${Array.from({length:f},(_,j)=>`<button type="button" data-d="${i}" data-f="${j+1}" aria-pressed="false">${j+1}</button>`).join("")}</div></div>`).join("");
+  $("rl-dice").innerHTML=rl.v.map((_,i)=>`<div class="rl-die" role="group" aria-label="Dado ${i+1} di ${n}, d${f}">${n>1?`<span class="rl-dn">Dado ${i+1}</span>`:""}<div class="rl-fs${f>12?" many":""}${f===6?" d6":""}">${Array.from({length:f},(_,j)=>`<button type="button" data-d="${i}" data-f="${j+1}" aria-pressed="false" aria-label="${j+1}">${f===6?pips(j+1):j+1}</button>`).join("")}</div></div>`).join("");
   drawRoll();openDlg(rdlg)}
 function drawRoll(){if(!rl)return;const done=rl.v.every(x=>x!=null),sum=rl.v.reduce((a,b)=>a+(b||0),0)+rl.k;
   $("rl-dice").querySelectorAll("[data-d]").forEach(b=>b.setAttribute("aria-pressed",rl.v[+b.dataset.d]===+b.dataset.f));
