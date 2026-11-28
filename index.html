@@ -479,13 +479,15 @@ h2.pp-h{align-items:center;flex-wrap:nowrap}
 .pgal.noimg .pg-n{color:var(--ink);background:none;padding-top:5px;border-top:1px solid var(--line)}
 .pgal:hover{background:var(--paper)}.pgal:hover .pg-n{text-decoration:underline}
 /* scheda di dettaglio */
-#pddlg{display:none;flex-direction:column;gap:10px;height:82vh}#pddlg[open]{display:flex}#pddlg .dlg-ft{justify-content:flex-end}
-.pd-top{display:flex;gap:12px;align-items:flex-start}
-.pd-img{flex:none;width:110px;aspect-ratio:3/4;padding:0;border:1px solid var(--ink);overflow:hidden;background:var(--paper);min-height:0}
-.pd-img img{width:100%;height:100%;object-fit:cover;display:block}
-.pd-img.ph{display:grid;place-items:center;font:34px var(--f-display);color:var(--muted);border-color:var(--line)}
-.pd-meta{display:grid;gap:8px;min-width:0;flex:1}
-.pd-notes{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;white-space:pre-line;font-size:16px;line-height:1.5;border-top:1px solid var(--line);padding-top:10px}
+/* anteprima personaggio: foto grande, nome compatto, note alte quanto il testo; scorre tutto il dialogo se serve */
+#pddlg{display:none;flex-direction:column;gap:10px;max-height:90vh;overflow:auto}#pddlg[open]{display:flex}#pddlg .dlg-ft{justify-content:flex-end;margin-top:2px}
+#pddlg .dlg-h{margin-bottom:0}#pd-t{font-size:20px;line-height:1.2;margin:0;min-width:0;overflow-wrap:anywhere}#pd-ed{flex:none;width:38px;height:38px;min-height:0;padding:0}
+.pd-top{display:grid;gap:10px}
+.pd-img{display:block;width:100%;padding:0;border:1px solid var(--line);overflow:hidden;background:var(--paper);min-height:0;line-height:0}
+.pd-img img{width:100%;height:auto;max-height:56vh;object-fit:contain;display:block;margin:0 auto}
+.pd-img.ph{width:96px;aspect-ratio:3/4;display:grid;place-items:center;font:34px var(--f-display);color:var(--muted);line-height:1}
+.pd-meta{display:flex;flex-wrap:wrap;gap:8px;min-width:0}.pd-meta:has(.tags:empty){display:none}
+.pd-notes{flex:none;white-space:pre-line;font-size:16px;line-height:1.5;border-top:1px solid var(--line);padding-top:10px}
 .pd-notes.empty{color:var(--muted);font-style:italic}
 
 .pc{display:flex;gap:10px;border:1px solid var(--line);background:var(--paper);padding:8px;min-width:0}
@@ -1983,9 +1985,9 @@ function drawPd(){const p=S.people.find(x=>x.id===pdId);if(!p){if(pddlg.open)clo
   $("pd-t").textContent=p.name;
   $("pd-imgw").innerHTML=p.hasImg?`<button type="button" class="pd-img" id="pd-img" aria-label="Apri l'immagine di ${esc(p.name)}"><img alt="" id="pd-im"></button>`:`<div class="pd-img ph" aria-hidden="true">${esc(initials(p.name))}</div>`;
   if(p.hasImg)imgURL(p.id).then(u=>{const im=$("pd-im");if(u&&im)im.src=u}).catch(()=>{});
-  $("pd-tags").innerHTML=p.tags.length?p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join(""):`<span class="note">Nessuna etichetta</span>`;
-  const n=$("pd-notes");n.textContent=p.notes||"Nessuna nota. Tocca la matita per scrivere cosa sai di questo personaggio.";n.classList.toggle("empty",!p.notes)}
-function openPd(id){pdId=id;drawPd();if(pdId){openDlg(pddlg);$("pd-notes").scrollTop=0}}
+  $("pd-tags").innerHTML=p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("");
+  const n=$("pd-notes");n.textContent=p.notes||"Nessuna nota: tocca la matita per aggiungerne.";n.classList.toggle("empty",!p.notes)}
+function openPd(id){pdId=id;drawPd();if(pdId){openDlg(pddlg);pddlg.scrollTop=0}}
 $("pd-x").onclick=()=>{pdId=null;closeDlg(pddlg)};
 pddlg.addEventListener("close",()=>{pdId=null});
 $("pd-ed").onclick=()=>{const id=pdId;pdId=null;closeDlg(pddlg);openPerson(id)};
