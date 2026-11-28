@@ -509,7 +509,7 @@ h2.pp-h{align-items:center;flex-wrap:nowrap}
 .pd-in{width:100%;box-sizing:border-box;font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--bronze);padding:6px 8px}
 #pd-name-in{font:20px var(--f-display);min-width:0;flex:1}
 #pd-notes-in{font-size:16px;line-height:1.5;resize:none;overflow:hidden;min-height:3em}
-.pd-imgbox{position:relative}.pd-imgbox .pe-tools{opacity:1;pointer-events:auto;justify-content:flex-end;gap:8px;padding:8px}
+.pd-imgbox{position:relative}.pd-imgbox .pe-tools{justify-content:flex-end;gap:8px;padding:8px}.pd-imgbox .pe-tools{opacity:0;pointer-events:none}.pd-imgbox.act .pe-tools{opacity:1;pointer-events:auto}
 .pd-img.ph.add{width:auto;aspect-ratio:auto;padding:14px;display:flex;align-items:center;justify-content:center;gap:10px;font:16px var(--f-body);color:var(--ink);border:1px dashed var(--line);cursor:pointer}
 .pd-img.ph.add b{font:28px var(--f-display);color:var(--muted)}
 .pd-tags{gap:6px}.pd-tags .tag{font-size:13px;padding:2px 4px 2px 10px}.pd-tags .tag button{min-width:24px;min-height:24px}
@@ -2044,7 +2044,7 @@ let pdId=null,pdTag=false;const pddlg=$("pddlg");
 const pdP=()=>S.people.find(x=>x.id===pdId);
 function drawPd(){const p=pdP();if(!p){if(pddlg.open)closeDlg(pddlg);pdId=null;return}
   $("pd-t").textContent=p.name;$("pd-t").hidden=false;$("pd-name-in").hidden=true;$("pd-err").textContent="";
-  $("pd-imgw").innerHTML=p.hasImg?`<div class="pd-imgbox"><button type="button" class="pd-img" id="pd-img" aria-label="Apri l'immagine di ${esc(p.name)}"><img alt="" id="pd-im"></button><div class="pe-tools"><button type="button" class="ti" data-pdi="chg" aria-label="Cambia immagine" title="Cambia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 8.5 12 4l4.5 4.5M5 15v4h14v-4"/></svg></button><button type="button" class="ti" data-pdi="crop" aria-label="Ritaglia immagine" title="Ritaglia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v14h14M3 7h14v14"/></svg></button><button type="button" class="ti" data-pdi="rm" aria-label="Togli immagine" title="Togli"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13M10.5 11v6M13.5 11v6"/></svg></button></div></div>`
+  $("pd-imgw").innerHTML=p.hasImg?`<div class="pd-imgbox"><button type="button" class="pd-img" id="pd-img" aria-expanded="false" aria-label="Comandi dell'immagine di ${esc(p.name)}"><img alt="" id="pd-im"></button><div class="pe-tools"><button type="button" class="ti" data-pdi="chg" aria-label="Cambia immagine" title="Cambia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 8.5 12 4l4.5 4.5M5 15v4h14v-4"/></svg></button><button type="button" class="ti" data-pdi="crop" aria-label="Ritaglia immagine" title="Ritaglia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v14h14M3 7h14v14"/></svg></button><button type="button" class="ti" data-pdi="rm" aria-label="Togli immagine" title="Togli"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13M10.5 11v6M13.5 11v6"/></svg></button></div></div>`
     :`<button type="button" class="pd-img ph add" data-pdi="chg"><b>${esc(initials(p.name))}</b>+ Aggiungi immagine</button>`;
   if(p.hasImg)imgURL(p.id).then(u=>{const im=$("pd-im");if(u&&im)im.src=u}).catch(()=>{});
   drawPdTags();
@@ -2087,7 +2087,8 @@ async function pdImg(b){const id=pdId;if(!id||!b)return;try{await IDB.put(id,b);
   const p=S.people.find(x=>x.id===id);if(!p)return;const had=p.hasImg;act(()=>{p.hasImg=true;log(`Immagine ${had?"aggiornata":"aggiunta"}: ${esc(p.name)}.`)})}
 $("pd-file").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
   if(!/^image\//.test(f.type)){$("pd-err").textContent="Il file scelto non è un'immagine.";return}openCrop(f,pdImg)};
-$("pd-imgw").onclick=async e=>{if(e.target.closest("#pd-img"))return openViewer(pdId);const b=e.target.closest("[data-pdi]");if(!b)return;const k=b.dataset.pdi;
+/* tocco sull'immagine: mostra o nasconde Cambia, Ritaglia e Togli */
+$("pd-imgw").onclick=async e=>{const im=e.target.closest("#pd-img");if(im){const bx=im.parentNode,on=!bx.classList.contains("act");bx.classList.toggle("act",on);im.setAttribute("aria-expanded",on);return}const b=e.target.closest("[data-pdi]");if(!b)return;const k=b.dataset.pdi;
   if(k==="chg")return $("pd-file").click();
   if(k==="crop"){let bl=null;try{bl=await IDB.get(pdId)}catch(_){}if(bl)openCrop(bl,pdImg);return}
   if(k==="rm")pdSet(q=>{q.hasImg=false;log(`Immagine tolta: ${esc(q.name)}.`)})};
