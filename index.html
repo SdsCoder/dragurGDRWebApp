@@ -486,7 +486,17 @@ h2.pp-h{align-items:center;flex-wrap:nowrap}
 .pd-img{display:block;width:100%;padding:0;border:1px solid var(--line);overflow:hidden;background:var(--paper);min-height:0;line-height:0}
 .pd-img img{width:100%;height:auto;max-height:56vh;object-fit:contain;display:block;margin:0 auto}
 .pd-img.ph{width:96px;aspect-ratio:3/4;display:grid;place-items:center;font:34px var(--f-display);color:var(--muted);line-height:1}
-.pd-meta{display:flex;flex-wrap:wrap;gap:8px;min-width:0}.pd-meta:has(.tags:empty){display:none}
+.pd-ed{cursor:text;border-bottom:1px dashed transparent}.pd-ed:hover,.pd-ed:focus-visible{border-bottom-color:var(--line)}
+.pd-in{width:100%;box-sizing:border-box;font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--bronze);padding:6px 8px}
+#pd-name-in{font:20px var(--f-display);min-width:0;flex:1}
+#pd-notes-in{font-size:16px;line-height:1.5;resize:none;overflow:hidden;min-height:3em}
+.pd-imgbox{position:relative}.pd-imgbox .pe-tools{opacity:1;pointer-events:auto;justify-content:flex-end;gap:8px;padding:8px}
+.pd-img.ph.add{width:auto;aspect-ratio:auto;padding:14px;display:flex;align-items:center;justify-content:center;gap:10px;font:16px var(--f-body);color:var(--ink);border:1px dashed var(--line);cursor:pointer}
+.pd-img.ph.add b{font:28px var(--f-display);color:var(--muted)}
+.pd-tags{gap:6px}.pd-tags .tag{font-size:13px;padding:2px 4px 2px 10px}.pd-tags .tag button{min-width:24px;min-height:24px}
+.pd-tags .tag.add{background:transparent;border-style:dashed;color:var(--muted);padding:2px 10px;cursor:pointer;font:13px var(--f-body)}
+.pd-tags input{font:13px var(--f-body);width:9em;padding:2px 8px;border:1px solid var(--bronze);border-radius:999px;background:var(--paper);color:var(--ink);min-height:0}
+#pd-del.arm{background:var(--danger);color:#fff;border-color:var(--danger)}
 .pd-notes{flex:none;white-space:pre-line;font-size:16px;line-height:1.5;border-top:1px solid var(--line);padding-top:10px}
 .pd-notes.empty{color:var(--muted);font-style:italic}
 
@@ -777,7 +787,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   <div class="gpop" id="gpop" hidden role="group" aria-label="Vigore e Spirito">
     <div class="gp-r hp"><span class="gp-n">Vigore</span><button class="sq" id="m-vig" aria-label="Vigore meno uno">−</button><b id="gp-vig"></b><button class="sq" id="p-vig" aria-label="Vigore più uno">+</button></div>
     <div class="gp-r mp"><span class="gp-n">Spirito</span><button class="sq" id="m-spi" aria-label="Spirito meno uno">−</button><b id="gp-spi"></b><button class="sq" id="p-spi" aria-label="Spirito più uno">+</button></div>
-    <p class="note gp-h">Tieni premuto un cerchio per aprire questo pannello</p>
+
   </div>
 </div>
 <div class="fig-space" id="fig-space" hidden></div><div class="fig-bk" id="fig-bk" hidden></div>
@@ -909,9 +919,10 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 </dialog>
 
 <dialog id="pddlg" aria-labelledby="pd-t">
-  <div class="dlg-h"><h3 id="pd-t" tabindex="-1" autofocus>Personaggio</h3><button type="button" class="icx" id="pd-ed" aria-label="Modifica" title="Modifica"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z M14 6l3 3"/></svg></button></div>
-  <div class="pd-top"><div id="pd-imgw"></div><div class="pd-meta"><div class="tags" id="pd-tags"></div></div></div>
-  <div class="pd-notes" id="pd-notes" tabindex="0"></div>
+  <div class="dlg-h"><h3 id="pd-t" class="pd-ed" tabindex="0" role="button" title="Tocca per modificare il nome">Personaggio</h3><input id="pd-name-in" class="pd-in" autocomplete="off" aria-label="Nome" hidden><button type="button" class="icx del" id="pd-del" aria-label="Elimina personaggio" title="Elimina personaggio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13M10.5 11v6M13.5 11v6"/></svg></button></div>
+  <div class="pd-top"><div id="pd-imgw"></div><div class="tags pd-tags" id="pd-tags"></div></div>
+  <div class="pd-notes pd-ed" id="pd-notes" tabindex="0" role="button" title="Tocca per modificare le note"></div><textarea id="pd-notes-in" class="pd-in" rows="2" aria-label="Note" placeholder="Cosa sai di questo personaggio…" hidden></textarea>
+  <input type="file" id="pd-file" accept="image/*" hidden><p class="err" id="pd-err"></p>
   <div class="dlg-ft"><button type="button" id="pd-x" class="pri">Chiudi</button></div>
 </dialog>
 <dialog id="notedlg" aria-labelledby="nt-t">
@@ -1979,19 +1990,65 @@ function renderPeople(){
 }
 $("people").onclick=e=>{const g=e.target.closest("[data-pd]");if(g){openPd(g.dataset.pd);return}const rd=e.target.closest("[data-read]");if(rd){const p=S.people.find(x=>x.id===rd.dataset.read);if(p)openNote(p.name,p.notes,null);return}const v=e.target.closest("[data-view]");if(v){openViewer(v.dataset.view);return}const ed=e.target.closest("[data-edit]");if(ed)openPerson(ed.dataset.edit)};
 $("pp-add").onclick=()=>openPerson(null);
-/* dettaglio di un personaggio: immagine, etichette, note; matita per modificare */
-let pdId=null;const pddlg=$("pddlg");
-function drawPd(){const p=S.people.find(x=>x.id===pdId);if(!p){if(pddlg.open)closeDlg(pddlg);pdId=null;return}
-  $("pd-t").textContent=p.name;
-  $("pd-imgw").innerHTML=p.hasImg?`<button type="button" class="pd-img" id="pd-img" aria-label="Apri l'immagine di ${esc(p.name)}"><img alt="" id="pd-im"></button>`:`<div class="pd-img ph" aria-hidden="true">${esc(initials(p.name))}</div>`;
+/* anteprima di un personaggio, modificabile sul posto: nome, immagine, etichette e note si salvano subito (Annulla nel Registro) */
+let pdId=null,pdTag=false;const pddlg=$("pddlg");
+const pdP=()=>S.people.find(x=>x.id===pdId);
+function drawPd(){const p=pdP();if(!p){if(pddlg.open)closeDlg(pddlg);pdId=null;return}
+  $("pd-t").textContent=p.name;$("pd-t").hidden=false;$("pd-name-in").hidden=true;$("pd-err").textContent="";
+  $("pd-imgw").innerHTML=p.hasImg?`<div class="pd-imgbox"><button type="button" class="pd-img" id="pd-img" aria-label="Apri l'immagine di ${esc(p.name)}"><img alt="" id="pd-im"></button><div class="pe-tools"><button type="button" class="ti" data-pdi="chg" aria-label="Cambia immagine" title="Cambia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 8.5 12 4l4.5 4.5M5 15v4h14v-4"/></svg></button><button type="button" class="ti" data-pdi="crop" aria-label="Ritaglia immagine" title="Ritaglia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v14h14M3 7h14v14"/></svg></button><button type="button" class="ti" data-pdi="rm" aria-label="Togli immagine" title="Togli"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13M10.5 11v6M13.5 11v6"/></svg></button></div></div>`
+    :`<button type="button" class="pd-img ph add" data-pdi="chg"><b>${esc(initials(p.name))}</b>+ Aggiungi immagine</button>`;
   if(p.hasImg)imgURL(p.id).then(u=>{const im=$("pd-im");if(u&&im)im.src=u}).catch(()=>{});
-  $("pd-tags").innerHTML=p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("");
-  const n=$("pd-notes");n.textContent=p.notes||"Nessuna nota: tocca la matita per aggiungerne.";n.classList.toggle("empty",!p.notes)}
-function openPd(id){pdId=id;drawPd();if(pdId){openDlg(pddlg);pddlg.scrollTop=0}}
-$("pd-x").onclick=()=>{pdId=null;closeDlg(pddlg)};
-pddlg.addEventListener("close",()=>{pdId=null});
-$("pd-ed").onclick=()=>{const id=pdId;pdId=null;closeDlg(pddlg);openPerson(id)};
-$("pd-imgw").onclick=e=>{if(e.target.closest("#pd-img"))openViewer(pdId)};
+  drawPdTags();
+  const n=$("pd-notes");n.hidden=false;$("pd-notes-in").hidden=true;n.textContent=p.notes||"Nessuna nota: tocca qui per scriverne.";n.classList.toggle("empty",!p.notes)}
+function drawPdTags(){const p=pdP();if(!p)return;
+  $("pd-tags").innerHTML=p.tags.map((t,i)=>`<span class="tag">${esc(t)}<button type="button" data-pdrt="${i}" aria-label="Togli etichetta ${esc(t)}">×</button></span>`).join("")+
+    (pdTag?`<input id="pd-tag-in" list="tag-list" autocomplete="off" placeholder="Nuova etichetta" aria-label="Nuova etichetta">`:`<button type="button" class="tag add" data-pdta>+ Etichetta</button>`);
+  if(pdTag){$("tag-list").innerHTML=[...new Set(S.people.flatMap(x=>x.tags))].map(t=>`<option value="${esc(t)}">`).join("");$("pd-tag-in").focus()}}
+function pdSet(fn){const p=pdP();if(!p)return;act(()=>fn(p))}
+function openPd(id){pdId=id;pdTag=false;clearTimeout(pdArm);pdArm=null;$("pd-del").classList.remove("arm");drawPd();if(pdId){openDlg(pddlg);pddlg.scrollTop=0}}
+$("pd-x").onclick=()=>closeDlg(pddlg);
+pddlg.addEventListener("close",()=>{pdCommit();pdId=null;pdTag=false});
+/* nome */
+$("pd-t").onclick=()=>{const p=pdP();if(!p)return;const i=$("pd-name-in");i.value=p.name;$("pd-t").hidden=true;i.hidden=false;i.focus();i.select()};
+$("pd-t").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("pd-t").click()}};
+function pdName(){const i=$("pd-name-in");if(i.hidden)return;const p=pdP(),v=i.value.trim();i.hidden=true;$("pd-t").hidden=false;
+  if(p&&v&&v!==p.name){const o=p.name;pdSet(q=>{q.name=v;log(`Personaggio rinominato: ${esc(o)} → ${esc(v)}.`)})}}
+$("pd-name-in").onblur=pdName;
+$("pd-name-in").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();pdName()}else if(e.key==="Escape"){e.preventDefault();e.stopPropagation();const i=$("pd-name-in");i.value=(pdP()||{}).name||"";pdName()}};
+/* note */
+const pdGrow=t=>{t.style.height="auto";t.style.height=t.scrollHeight+2+"px"};
+$("pd-notes").onclick=()=>{const p=pdP();if(!p)return;const t=$("pd-notes-in");t.value=p.notes||"";$("pd-notes").hidden=true;t.hidden=false;pdGrow(t);t.focus();t.setSelectionRange(t.value.length,t.value.length)};
+$("pd-notes").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("pd-notes").click()}};
+$("pd-notes-in").oninput=e=>pdGrow(e.target);
+function pdNotes(){const t=$("pd-notes-in");if(t.hidden)return;const p=pdP(),v=t.value.trim();t.hidden=true;$("pd-notes").hidden=false;
+  if(p&&v!==(p.notes||""))pdSet(q=>{q.notes=v;log(`Note aggiornate: ${esc(q.name)}.`)})}
+$("pd-notes-in").onblur=pdNotes;
+$("pd-notes-in").onkeydown=e=>{if(e.key==="Escape"){e.preventDefault();e.stopPropagation();$("pd-notes-in").value=(pdP()||{}).notes||"";pdNotes()}};
+/* etichette */
+function pdAddTag(keep){const i=$("pd-tag-in");if(!i)return;const v=i.value.trim(),p=pdP();pdTag=!!keep;
+  if(p&&v&&!p.tags.some(t=>t.toLowerCase()===v.toLowerCase()))pdSet(q=>{q.tags.push(v);log(`Etichetta aggiunta a ${esc(q.name)}: ${esc(v)}.`)});else drawPdTags()}
+$("pd-tags").onclick=e=>{const x=e.target.closest("[data-pdrt]");if(x){const k=+x.dataset.pdrt;pdSet(q=>{const t=q.tags[k];q.tags.splice(k,1);log(`Etichetta tolta a ${esc(q.name)}: ${esc(t)}.`)});return}
+  if(e.target.closest("[data-pdta]")){pdTag=true;drawPdTags()}};
+$("pd-tags").addEventListener("keydown",e=>{if(e.target.id!=="pd-tag-in")return;if(e.key==="Enter"){e.preventDefault();pdAddTag(true)}else if(e.key==="Escape"){e.preventDefault();e.stopPropagation();pdTag=false;drawPdTags()}});
+$("pd-tags").addEventListener("focusout",e=>{if(e.target.id==="pd-tag-in")setTimeout(()=>{if(pdTag&&document.activeElement!==$("pd-tag-in"))pdAddTag(false)},0)});
+/* salva ciò che è aperto prima di chiudere */
+function pdCommit(){pdName();pdNotes();if(pdTag)pdAddTag(false)}
+/* immagine */
+async function pdImg(b){const id=pdId;if(!id||!b)return;try{await IDB.put(id,b);dropURL(id)}catch(e){$("pd-err").textContent="Non riesco a salvare l'immagine in questo browser.";return}
+  const p=S.people.find(x=>x.id===id);if(!p)return;const had=p.hasImg;act(()=>{p.hasImg=true;log(`Immagine ${had?"aggiornata":"aggiunta"}: ${esc(p.name)}.`)})}
+$("pd-file").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
+  if(!/^image\//.test(f.type)){$("pd-err").textContent="Il file scelto non è un'immagine.";return}openCrop(f,pdImg)};
+$("pd-imgw").onclick=async e=>{if(e.target.closest("#pd-img"))return openViewer(pdId);const b=e.target.closest("[data-pdi]");if(!b)return;const k=b.dataset.pdi;
+  if(k==="chg")return $("pd-file").click();
+  if(k==="crop"){let bl=null;try{bl=await IDB.get(pdId)}catch(_){}if(bl)openCrop(bl,pdImg);return}
+  if(k==="rm")pdSet(q=>{q.hasImg=false;log(`Immagine tolta: ${esc(q.name)}.`)})};
+/* elimina: doppio tocco */
+let pdArm=null;
+$("pd-del").onclick=()=>{const b=$("pd-del");
+  if(!pdArm){b.classList.add("arm");b.setAttribute("aria-label","Tocca di nuovo per eliminare");pdArm=setTimeout(()=>{pdArm=null;b.classList.remove("arm");b.setAttribute("aria-label","Elimina personaggio")},3000);return}
+  clearTimeout(pdArm);pdArm=null;b.classList.remove("arm");b.setAttribute("aria-label","Elimina personaggio");const p=pdP();if(!p)return;const id=p.id;
+  $("pd-name-in").hidden=true;$("pd-notes-in").hidden=true;pdTag=false;closeDlg(pddlg);
+  act(()=>{S.people=S.people.filter(x=>x.id!==id);log(`Personaggio eliminato: ${esc(p.name)}.`)})};
 const pdlg=$("persondlg");let pe=null;
 function openPerson(id){const p=id?S.people.find(x=>x.id===id):null;
   pe={id:p?p.id:newId(),tags:p?[...p.tags]:[],blob:null,hadImg:p?p.hasImg:false,removeImg:false,blobURL:null};
