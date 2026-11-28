@@ -169,7 +169,12 @@ details ul{margin:6px 0 0;padding-left:20px;display:grid;gap:3px}
 #nomana{width:100%;margin-top:10px;min-height:46px}
 .rl-big{margin:4px 0;font:22px var(--f-display);text-align:center}.rl-big b{font:600 30px var(--f-num);color:var(--bronze);margin-left:6px}
 .rl-txt{margin:0 0 8px;color:var(--muted);text-align:center;font-size:15px}.rl-txt .dc{color:var(--bronze);font-family:var(--f-num)}
-.rl-in{display:grid;gap:4px;font-size:14px;color:var(--muted)}.rl-in input{font:20px var(--f-num);text-align:center;padding:8px}
+.rl-h{margin:0 0 6px;font-size:13px;color:var(--muted);text-align:center}
+.rl-dice{display:grid;gap:10px}.rl-die{display:grid;gap:4px}.rl-dn{font:12px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.rl-fs{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:6px}.rl-fs.many{grid-template-columns:repeat(auto-fill,minmax(36px,1fr))}
+.rl-fs button{min-height:42px;padding:0;font:600 17px var(--f-num);border:1.5px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+.rl-fs button[aria-pressed="true"]{background:var(--bronze);border-color:var(--bronze);color:var(--sheet);transform:scale(1.06)}
+.rl-tot{margin:8px 0 0;text-align:center;font:18px var(--f-num);min-height:1.4em}.rl-tot b{font-size:24px;color:var(--bronze)}
 
 /* Caratteristiche */
 .legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
@@ -1123,7 +1128,9 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   <div class="dlg-h"><h3 id="rl-t" tabindex="-1" autofocus></h3></div>
   <p class="rl-big">Tira <b id="rl-d"></b></p>
   <p class="rl-txt" id="rl-x"></p>
-  <label class="rl-in">Risultato dei dadi (facoltativo, finisce nel Registro)<input id="rl-n" inputmode="numeric" autocomplete="off" placeholder="es. 11"></label>
+  <p class="rl-h">Tocca la faccia uscita su ogni dado (facoltativo, finisce nel Registro)</p>
+  <div class="rl-dice" id="rl-dice"></div>
+  <p class="rl-tot" id="rl-tot"></p>
   <div class="dlg-ft"><button type="button" id="rl-x-b">Chiudi</button><button type="button" class="pri" id="rl-ok">Registra</button></div>
 </dialog>
 <dialog id="stonedlg" aria-labelledby="st-t">
@@ -1447,10 +1454,18 @@ $("cast").onclick=()=>{
 
 /* ---------- Promemoria del tiro: i dadi si tirano al tavolo, qui si registra il risultato ---------- */
 const rdlg=$("rolldlg");let rl=null;
-function openRoll(sp,lvl,dice){rl={name:sp.name,ps:lvl.ps,dice};$("rl-t").textContent=sp.name;$("rl-d").textContent=dice;$("rl-x").innerHTML=diceHi(lvl.text);$("rl-n").value="";openDlg(rdlg)}
+/* un gruppo di facce per ogni dado: si tocca il numero uscito sul dado vero */
+function openRoll(sp,lvl,dice){const m=DICE.exec(dice),n=Math.max(1,Math.min(10,+m[1]||1)),f=Math.max(2,Math.min(100,+m[2])),k=m[3]?+m[3].replace(/\s/g,"").replace("−","-"):0;
+  rl={name:sp.name,ps:lvl.ps,dice,n,f,k,v:Array(n).fill(null)};$("rl-t").textContent=sp.name;$("rl-d").textContent=dice;$("rl-x").innerHTML=diceHi(lvl.text);
+  $("rl-dice").innerHTML=rl.v.map((_,i)=>`<div class="rl-die" role="group" aria-label="Dado ${i+1} di ${n}, d${f}">${n>1?`<span class="rl-dn">Dado ${i+1}</span>`:""}<div class="rl-fs${f>12?" many":""}">${Array.from({length:f},(_,j)=>`<button type="button" data-d="${i}" data-f="${j+1}" aria-pressed="false">${j+1}</button>`).join("")}</div></div>`).join("");
+  drawRoll();openDlg(rdlg)}
+function drawRoll(){if(!rl)return;const done=rl.v.every(x=>x!=null),sum=rl.v.reduce((a,b)=>a+(b||0),0)+rl.k;
+  $("rl-dice").querySelectorAll("[data-d]").forEach(b=>b.setAttribute("aria-pressed",rl.v[+b.dataset.d]===+b.dataset.f));
+  const parts=rl.v.map(x=>x==null?"?":x);$("rl-tot").innerHTML=rl.v.some(x=>x!=null)?`${parts.join(" + ")}${rl.k?` ${rl.k>0?"+":"−"} ${Math.abs(rl.k)}`:""} = <b>${done?sum:"…"}</b>`:"";
+  $("rl-ok").disabled=!done}
+$("rl-dice").onclick=e=>{const b=e.target.closest("[data-d]");if(!b||!rl)return;const i=+b.dataset.d,f=+b.dataset.f;rl.v[i]=rl.v[i]===f?null:f;drawRoll()};
 $("rl-x-b").onclick=()=>closeDlg(rdlg);
-$("rl-ok").onclick=()=>{const v=$("rl-n").value.trim();if(rl&&v)act(()=>log(`<b>${esc(rl.name)}</b> (${rl.ps} PS): tiro ${esc(rl.dice)} → ${esc(v)}.`));closeDlg(rdlg)};
-$("rl-n").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("rl-ok").click()}});
+$("rl-ok").onclick=()=>{if(rl&&rl.v.every(x=>x!=null)){const r=rl,sum=r.v.reduce((a,b)=>a+b,0)+r.k;act(()=>log(`<b>${esc(r.name)}</b> (${r.ps} PS): tiro ${esc(r.dice)} → ${r.v.join(" + ")}${r.k?` ${r.k>0?"+":"−"} ${Math.abs(r.k)}`:""} = <b>${sum}</b>.`))}closeDlg(rdlg)};
 /* ---------- Pelle di Pietra: pop-up ---------- */
 const sdlg=$("stonedlg");
 const openDlg=d=>{if(d.showModal)d.showModal();else d.setAttribute("open","")};
