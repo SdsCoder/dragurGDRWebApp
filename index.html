@@ -134,7 +134,10 @@ button.pri:disabled:hover{background:var(--ink);border-color:var(--ink)}
 /* Incantesimi */
 .sp{border-top:1px solid var(--line)}
 .sp:first-child{border-top:0}
-.sp-h{width:100%;display:grid;grid-template-columns:1fr auto 14px;gap:10px;align-items:center;background:transparent;border:0;padding:8px 4px;text-align:left;min-height:48px}
+.sp-h{width:100%;display:grid;grid-template-columns:26px 1fr auto 14px;gap:10px;align-items:center;background:transparent;border:0;padding:8px 4px;text-align:left;min-height:52px}
+.sp-t{display:grid;min-width:0}.sp-s{font:13px var(--f-body);color:var(--muted);line-height:1.25}.sp-low{font:12px var(--f-body);color:var(--danger)}
+.sp-ic{width:24px;height:24px;fill:none;stroke:var(--bronze);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.sp-ic.k-off{stroke:#d0662f}.sp-ic.k-dif{stroke:var(--mp)}.sp-ic.k-per{stroke:var(--aura)}.sp-ic.k-cur{stroke:var(--hp)}.sp-ic.k-mal{stroke:#8b6bb5}
+.sp.low .sp-n,.sp.low .sp-ic{opacity:.45}.sp.low .sp-c{color:var(--danger)}
 .sp-n{font:21px var(--f-display)}
 .sp-c{font:13px var(--f-num);color:var(--muted)}
 .chev::before{content:"";display:block;width:8px;height:8px;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:translateY(-2px) rotate(45deg);transition:transform .2s}
@@ -146,9 +149,12 @@ button.pri:disabled:hover{background:var(--ink);border-color:var(--ink)}
 .sp-b dd{margin:0}
 .sp-b p{margin:0}
 .sp-b ul{margin:0;padding-left:20px;display:grid;gap:4px;font-size:15px}
-.lv{display:flex;gap:6px;flex-wrap:wrap}
-.lv button{min-width:68px;min-height:40px}
-.lv button[aria-pressed="true"]{background:var(--mp);border-color:var(--mp);color:var(--on-bar)}
+.lv{display:grid;gap:6px}
+.lv .lvc{display:grid;grid-template-columns:minmax(4.2em,max-content) minmax(0,1fr);gap:10px;align-items:baseline;text-align:left;min-height:44px;padding:8px 10px;background:var(--sheet);border:1.5px solid var(--line);color:var(--ink);font-size:15px;line-height:1.35}
+.lv .lvc b{font:600 14px var(--f-num);color:var(--mp);max-width:9em}.lv .lvc>*{min-width:0}
+.lv .lvc .dc{font:600 14px var(--f-num);color:var(--bronze)}
+.lv .lvc[aria-pressed="true"]{border-color:var(--mp);background:color-mix(in srgb,var(--mp) 14%,var(--sheet));box-shadow:inset 4px 0 0 var(--mp)}
+.lv .lvc:disabled{opacity:.45}
 .castbox{border:1px solid var(--line);background:var(--paper);padding:10px 12px;display:grid;gap:8px}
 .castbox h3{font:18px var(--f-display);margin:0;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .castbox h3 small{font:12px var(--f-body);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
@@ -157,8 +163,13 @@ button.pri:disabled:hover{background:var(--ink);border-color:var(--ink)}
 details{font-size:14px;color:var(--muted)}
 summary{cursor:pointer}
 details ul{margin:6px 0 0;padding-left:20px;display:grid;gap:3px}
-.cast{min-height:46px;font-size:19px}
+.cast{min-height:50px;font-size:19px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;line-height:1.15}.cast small{font:13px var(--f-num);opacity:.8}
+.ext-d{border-top:1px dashed var(--line);padding-top:6px}.ext-d>summary{display:flex;justify-content:space-between;align-items:baseline;gap:8px;cursor:pointer;list-style:none;padding:4px 0}.ext-d>summary::-webkit-details-marker{display:none}
+.ext-d>summary span{font:17px var(--f-display);color:var(--bronze)}.ext-d>summary small{font:12px var(--f-body);color:var(--muted)}.ext-d[open]>summary span{color:var(--ink)}
 #nomana{width:100%;margin-top:10px;min-height:46px}
+.rl-big{margin:4px 0;font:22px var(--f-display);text-align:center}.rl-big b{font:600 30px var(--f-num);color:var(--bronze);margin-left:6px}
+.rl-txt{margin:0 0 8px;color:var(--muted);text-align:center;font-size:15px}.rl-txt .dc{color:var(--bronze);font-family:var(--f-num)}
+.rl-in{display:grid;gap:4px;font-size:14px;color:var(--muted)}.rl-in input{font:20px var(--f-num);text-align:center;padding:8px}
 
 /* Caratteristiche */
 .legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
@@ -821,7 +832,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   <button id="nomana" disabled hidden>Ricarica punti Spirito</button>
 
   <div class="castbox" id="castbox" hidden>
-    <h3>Potenziamento Estensivo <small>abilità · +1 PS ciascuno</small></h3>
+    <details class="ext-d" id="extbox"><summary><span>+ Potenzia</span><small id="ext-s">Potenziamento Estensivo · +1 PS ciascuno</small></summary>
     <div id="ext"></div>
     <details>
       <summary>Come funziona</summary>
@@ -832,6 +843,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
         <li>Gittata +2 m. Area +2 m dall'epicentro (raggio 4 m → 6 m).</li>
         <li>Gli effetti si combinano: +2 bersagli e +1 round = 3 PS aggiuntivi.</li>
       </ul>
+    </details>
     </details>
     <button class="pri cast" id="cast">Lancia</button>
   </div>
@@ -1107,6 +1119,13 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   <img id="vw-img" alt="">
 </dialog>
 
+<dialog id="rolldlg" aria-labelledby="rl-t">
+  <div class="dlg-h"><h3 id="rl-t" tabindex="-1" autofocus></h3></div>
+  <p class="rl-big">Tira <b id="rl-d"></b></p>
+  <p class="rl-txt" id="rl-x"></p>
+  <label class="rl-in">Risultato dei dadi (facoltativo, finisce nel Registro)<input id="rl-n" inputmode="numeric" autocomplete="off" placeholder="es. 11"></label>
+  <div class="dlg-ft"><button type="button" id="rl-x-b">Chiudi</button><button type="button" class="pri" id="rl-ok">Registra</button></div>
+</dialog>
 <dialog id="stonedlg" aria-labelledby="st-t">
   <div class="dlg-h"><h3 id="st-t">Pelle di Pietra</h3><button id="st-x">Chiudi</button></div>
   <div id="stone-c"></div>
@@ -1348,16 +1367,24 @@ const spellsOf=()=>S.cfg.spells;
 const lvOf=sp=>[...new Set(sp.levels.map(l=>+l.ps).filter(n=>n>0))].sort((a,b)=>a-b);
 const optLabel=l=>(l.label?l.label+" · ":"")+l.ps+" PS";
 let spEl={};
+/* tipo dell'incantesimo dal campo Tipo: icona e riga breve sotto il nome */
+const SP_ICO={off:'<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2.2 1-3.6 2-4.6.3 1.6 1 2.6 2 3.1C11 9 11 6 12 3z"/>',dif:'<path d="M12 3l7 3v5c0 4.6-3 8-7 10-4-2-7-5.4-7-10V6z"/>',per:'<path d="M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/>',cur:'<path d="M12 20s-7.5-4.6-7.5-10.2A4 4 0 0 1 12 7.2a4 4 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z"/>',mal:'<path d="M12 3a7 7 0 0 0-4 12.7V19h8v-3.3A7 7 0 0 0 12 3zM9.5 11h.01M14.5 11h.01M10 19v2M14 19v2"/>',uti:'<path d="M12 3l2 6.5L20.5 12 14 14.5 12 21l-2-6.5L3.5 12 10 9.5z"/>'};
+const spKind=sp=>{const t=(sp.tipo||"").toLowerCase();return /offens|dann/.test(t)?"off":/cura|guari/.test(t)?"cur":/maledi|debilit|indeboli|malus/.test(t)?"mal":/difens|protez|potenziam/.test(t)?"dif":/percez|investig|divina|rivel|occhio/.test(t)?"per":"uti"};
+const spIco=sp=>`<svg class="sp-ic k-${spKind(sp)}" viewBox="0 0 24 24" aria-hidden="true">${SP_ICO[spKind(sp)]}</svg>`;
+const spSub=sp=>[(sp.tipo||"").split(/[,—–(]/)[0].trim(),sp.gittata].filter(Boolean).join(" · ");
+/* dadi nel testo di un livello (es. 2d6 +2): evidenziati e usati per il promemoria del tiro */
+const DICE=/(\d*)d(\d+)(\s*[+−-]\s*\d+)?/i;
+const diceHi=t=>esc(t||"").replace(/(\d*d\d+(?:\s*[+−-]\s*\d+)?)/gi,'<span class="dc">$1</span>');
 function spCard(sp){const lv=lvOf(sp);
   const meta=[["Tipo",sp.tipo],["Costo",sp.exp?sp.exp+" EXP":""],["Attivazione",sp.attivazione],["Gittata",sp.gittata],["Bersagli",sp.bersagli],["Durata",sp.durata],["Frequenza",sp.frequenza]].filter(x=>x[1]);
   if(sp.self)meta.push(["Lancio","Solo su sé stesso"]);
   const w=document.createElement("div");w.className="sp"+(sp.locked?" locked":"");
-  w.innerHTML=`<button class="sp-h" aria-expanded="false" aria-controls="b-${sp.id}"><span class="sp-n">${esc(sp.name)}</span><span class="sp-c">${sp.locked?`da sbloccare · ${spCost(sp)} PE`:lv.length?(lv.length>1?lv[0]+"–"+lv[lv.length-1]:lv[0])+" PS":""}</span><span class="chev" aria-hidden="true"></span></button>
+  w.innerHTML=`<button class="sp-h" aria-expanded="false" aria-controls="b-${sp.id}">${spIco(sp)}<span class="sp-t"><span class="sp-n">${esc(sp.name)}</span>${spSub(sp)?`<small class="sp-s">${esc(spSub(sp))}</small>`:""}<small class="sp-low" hidden></small></span><span class="sp-c">${sp.locked?`da sbloccare · ${spCost(sp)} PE`:lv.length?(lv.length>1?lv[0]+"–"+lv[lv.length-1]:lv[0])+" PS":""}</span><span class="chev" aria-hidden="true"></span></button>
   <div class="sp-b" id="b-${sp.id}" hidden>${meta.length?`<dl>${meta.map(([a,b])=>`<dt>${a}</dt><dd>${esc(b)}</dd>`).join("")}</dl>`:""}
-    ${sp.desc?`<p>${esc(sp.desc)}</p>`:""}${sp.levels.length?`<ul>${sp.levels.map(l=>`<li><b>${l.label?esc(l.label)+" · ":""}${l.ps} PS</b> — ${esc(l.text)}</li>`).join("")}</ul>`:""}
+    ${sp.desc?`<p>${esc(sp.desc)}</p>`:""}${sp.locked&&sp.levels.length?`<ul>${sp.levels.map(l=>`<li><b>${l.label?esc(l.label)+" · ":""}${l.ps} PS</b> — ${esc(l.text)}</li>`).join("")}</ul>`:""}
     ${sp.note?`<p class="note"><b>${sp.cat==="cap"?"Limitazioni":"Note"}:</b> ${esc(sp.note)}</p>`:""}
-    ${sp.locked?`<div class="unl"><button class="pri" data-unl>Sblocca per ${spCost(sp)} PE</button><span class="note" data-unl-n></span></div>`:`<div class="cap">${sp.levels.length>1?"Scegli":"Costo"}</div>
-    <div class="lv" role="group" aria-label="Opzioni di ${esc(sp.name)}">${sp.levels.map((l,j)=>`<button data-o="${j}">${esc(optLabel(l))}</button>`).join("")}</div>`}
+    ${sp.locked?`<div class="unl"><button class="pri" data-unl>Sblocca per ${spCost(sp)} PE</button><span class="note" data-unl-n></span></div>`:`<div class="cap">${sp.levels.length>1?"Scegli il livello":"Effetto"}</div>
+    <div class="lv" role="group" aria-label="Livelli di ${esc(sp.name)}">${sp.levels.map((l,j)=>`<button data-o="${j}" class="lvc"><b>${l.label?esc(l.label)+" · ":""}${l.ps} PS</b><span>${diceHi(l.text)}</span></button>`).join("")}</div>`}
   </div>`;
   const ub=w.querySelector("[data-unl]");if(ub)ub.onclick=()=>{const c=spCost(sp);if(S.pe<c)return;
     act(()=>{const t=S.cfg.spells.find(x=>x.id===sp.id);if(!t)return;const b=S.pe;S.pe-=c;t.locked=false;log(`Sbloccato: <b>${esc(t.name)}</b> per ${c} PE. PE ${b} → ${S.pe}.`)})};
@@ -1388,6 +1415,7 @@ function renderSpells(){
   let base=0;
   list.forEach(sp=>{const w=spEl[sp.id];if(!w)return;const open=ui.open===sp.id,h=w.querySelector(".sp-h");
     h.disabled=spi<=0&&!sp.locked;h.setAttribute("aria-expanded",open);w.querySelector(".sp-b").hidden=!open;
+    {const mn=Math.min(...sp.levels.map(l=>+l.ps).filter(n=>n>0)),low=!sp.locked&&isFinite(mn)&&mn>spi,lo=w.querySelector(".sp-low");w.classList.toggle("low",low);if(lo){lo.hidden=!low;lo.textContent=low?`Servono ${mn} PS, ne hai ${spi}`:""}}
     if(sp.locked){const c=spCost(sp),ub=w.querySelector("[data-unl]");if(ub){ub.disabled=S.pe<c;w.querySelector("[data-unl-n]").textContent=S.pe<c?`Hai ${S.pe} PE: te ne mancano ${c-S.pe}.`:`Hai ${S.pe} PE.`}return}
     if(open){let sel=ui.sel[sp.id];const ok=sp.levels.map((l,j)=>j).filter(j=>sp.levels[j].ps>0&&sp.levels[j].ps<=spi);
       if(sel==null||!sp.levels[sel]||sp.levels[sel].ps>spi)sel=ok.length?ok[0]:null;
@@ -1396,13 +1424,15 @@ function renderSpells(){
   });
   const cb=$("castbox"),opn=spellsOf().find(s=>s.id===ui.open);cb.hidden=!ui.open||!!(opn&&opn.locked);
   const cur=spellsOf().find(s=>s.id===ui.open);$("cast").textContent=cur&&cur.cat==="cap"?"Usa":"Lancia";
-  [cb.querySelector("h3"),$("ext"),cb.querySelector("details")].forEach(el=>{if(el)el.hidden=!S.cfg.potExt});
+  $("extbox").hidden=!S.cfg.potExt;
   let tot=base+ui.ext.reduce((a,b)=>a+b,0);
   for(let i=3;i>=0&&tot>spi;i--){while(ui.ext[i]>0&&tot>spi){ui.ext[i]--;tot--}}
   ui.ext.forEach((v,i)=>{$("ex-"+i).textContent=v;
     $("ext").querySelector(`[data-i="${i}"][data-d="-1"]`).disabled=v<=0;
     $("ext").querySelector(`[data-i="${i}"][data-d="1"]`).disabled=!base||tot+1>spi});
   $("cast").disabled=!base||tot>spi;
+  if(cur&&!cur.locked){const verb=cur.cat==="cap"?"Usa":"Lancia";$("cast").innerHTML=!base?`Spirito insufficiente`:`${verb} · ${tot} PS <small>Spirito ${spi} → ${spi-tot}</small>`}
+  {const n=ui.ext.reduce((a,b)=>a+b,0);$("ext-s").textContent=n?`${n} potenziament${n===1?"o":"i"} · +${n} PS`:"Potenziamento Estensivo · +1 PS ciascuno";if(n)$("extbox").open=true}
 }
 $("cast").onclick=()=>{
   const sp=spellsOf().find(s=>s.id===ui.open);if(!sp)return;const j=ui.sel[sp.id];const lvl=j==null?null:sp.levels[j];if(!lvl)return;const p=lvl.ps;
@@ -1412,8 +1442,15 @@ $("cast").onclick=()=>{
     log(`<b>${esc(sp.name)}</b>${lvl.label?` (${esc(lvl.label)})`:""} a ${p} PS${sp.self?", su di sé":""}${extra?` + Potenziamento Estensivo (${parts.join(", ")}) = ${tot} PS`:""}. Spirito ${b} → ${S.spi}.${lvl.text?` Effetto: ${esc(lvl.text)}`:""}`)});
   ui.ext=[0,0,0,0];render();
   if(/pelle di pietra/i.test(sp.name)&&{1:8,2:6,3:4}[p])openStone(p,du);
+  else{const m=DICE.exec(lvl.text||"");if(m)openRoll(sp,lvl,m[0].replace(/\s+/g," ").trim())}
 };
 
+/* ---------- Promemoria del tiro: i dadi si tirano al tavolo, qui si registra il risultato ---------- */
+const rdlg=$("rolldlg");let rl=null;
+function openRoll(sp,lvl,dice){rl={name:sp.name,ps:lvl.ps,dice};$("rl-t").textContent=sp.name;$("rl-d").textContent=dice;$("rl-x").innerHTML=diceHi(lvl.text);$("rl-n").value="";openDlg(rdlg)}
+$("rl-x-b").onclick=()=>closeDlg(rdlg);
+$("rl-ok").onclick=()=>{const v=$("rl-n").value.trim();if(rl&&v)act(()=>log(`<b>${esc(rl.name)}</b> (${rl.ps} PS): tiro ${esc(rl.dice)} → ${esc(v)}.`));closeDlg(rdlg)};
+$("rl-n").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("rl-ok").click()}});
 /* ---------- Pelle di Pietra: pop-up ---------- */
 const sdlg=$("stonedlg");
 const openDlg=d=>{if(d.showModal)d.showModal();else d.setAttribute("open","")};
