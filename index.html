@@ -305,7 +305,7 @@ dialog.page::backdrop{background:var(--sheet)}
 .coins{display:grid;gap:6px}
 .coins .val{min-width:2.2em;text-align:center}
 .chk{display:flex;gap:8px;align-items:center}
-.chk input{width:20px;height:20px;accent-color:var(--bronze)}
+.chk input{width:20px;height:20px;accent-color:var(--bronze);flex:none}.chk-n{display:block;font-size:13px;line-height:1.3}
 
 /* Registro */
 dialog{background:var(--sheet);color:var(--ink);border:1px solid var(--ink);padding:16px;width:min(600px,calc(100vw - 32px));max-height:82vh;box-sizing:border-box}
@@ -316,7 +316,7 @@ body.lock .dock,body.lock .hud{pointer-events:none}
 .dlg-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
 .dlg-h h3{font:24px var(--f-display);margin:0;min-width:0;overflow-wrap:anywhere}
 .dlg-ft{display:flex;justify-content:space-between;gap:10px;margin-top:12px}
-.dlg-ft button{min-width:7em}
+.dlg-ft button{min-width:min(7em,calc(50% - 5px));white-space:normal;line-height:1.2}.dlg-ft{align-items:center;flex-wrap:nowrap}.dlg-ft:has(>button:nth-child(3)) button{min-width:0;padding-left:12px;padding-right:12px}
 #nt-ok{margin-left:auto}
 .icx{display:inline-flex;align-items:center;justify-content:center;gap:4px;width:40px;height:40px;min-height:0;padding:0;flex:none;background:transparent;color:var(--ink)}
 .icx svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -966,7 +966,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
     <label>Nome<input id="ie-name" autocomplete="off"></label>
     <div class="ie-row"><label>Peso<input id="ie-w" inputmode="decimal" autocomplete="off"></label><label>Danno<input id="ie-dmg" autocomplete="off" placeholder="es. 1d4"></label></div>
     <label>Note<textarea id="ie-note" rows="3"></textarea></label>
-    <label class="chk" id="ie-eq-l"><input type="checkbox" id="ie-eq"> Indossato o pronto all'uso: non conta nel peso <small class="note">(arma principale, scudo, armatura, abiti)</small></label>
+    <label class="chk" id="ie-eq-l"><input type="checkbox" id="ie-eq"><span>Pronto all'uso: non conta nel peso<small class="note chk-n">Arma principale, scudo, armatura, abiti</small></span></label>
     <label class="chk fx-chk"><input type="checkbox" id="ie-fx"> Oggetto con effetti</label>
     <div class="fx-box" id="ie-fx-box">
     <div class="kind-f"><input type="hidden" id="ie-kind" value="norm"><span class="cap" id="ie-kind-l">Tipo</span>
@@ -981,7 +981,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
     <label class="chk" id="ie-cons-l"><input type="checkbox" id="ie-cons"> Consumabile: un tocco mostra Usa</label>
     <div id="ie-bon-f"><span class="cap">Effetti</span><div class="bon-l" id="ie-bon"></div><button type="button" id="ie-addb" style="margin-top:8px">+ Aggiungi effetto</button></div>
     <p class="err" id="ie-err"></p>
-    <div class="rollrow"><button class="pri" type="submit">Salva</button><button type="button" id="ie-cancel" style="margin-left:auto">Annulla</button></div>
+    <div class="dlg-ft"><button type="button" id="ie-cancel">Annulla</button><button class="pri" type="submit">Salva</button></div>
   </form>
 </dialog>
 
@@ -1013,7 +1013,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
     <ul class="cf-list" id="cf-spells"></ul>
     <div><button type="button" id="cf-addsp">Aggiungi incantesimo o capacità</button></div>
     <p class="err" id="cf-err"></p>
-    <div class="rollrow"><button class="pri" type="submit">Salva</button><button type="button" id="cf-cancel">Annulla</button></div>
+    <div class="dlg-ft"><button type="button" id="cf-cancel">Annulla</button><button class="pri" type="submit">Salva</button></div>
     <details class="cf-danger" id="cf-test"><summary>Cambia personaggio (solo nella versione di prova)</summary>
       <p class="note">Cancella questo personaggio con valori, inventario, borsa, personaggi incontrati e cronaca, e torna alla scelta del personaggio. Esporta prima un backup se vuoi conservarlo.</p>
       <button type="button" class="danger" id="cf-wipe">Cancella e ricomincia</button></details>
@@ -1034,7 +1034,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
     <div class="lab"><span>Livelli o opzioni: costo in PS, nome facoltativo ed effetto</span><div class="sd-lv" id="sd-lv"></div><div><button type="button" id="sd-addlv">Aggiungi livello o opzione</button></div></div>
     <label>Limitazioni o note<textarea id="sd-note" rows="2"></textarea></label>
     <p class="err" id="sd-err"></p>
-    <div class="rollrow"><button class="pri" type="submit">Salva incantesimo</button><button type="button" id="sd-cancel">Annulla</button><button type="button" class="danger" id="sd-del">Elimina</button></div>
+    <div class="dlg-ft"><button type="button" id="sd-cancel">Annulla</button><button type="button" class="danger" id="sd-del">Elimina</button><button class="pri" type="submit">Salva</button></div>
   </form>
 </dialog>
 
@@ -1061,7 +1061,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   <div class="dlg-h"><h3 id="cr-t" tabindex="-1" autofocus>Ritaglia l'immagine</h3></div>
   <p class="note">Trascina gli angoli per scegliere la parte da tenere. Trascina il riquadro per spostarlo.</p>
   <div class="crop" id="crop"><img id="cr-img" alt=""><div class="sel" id="cr-sel"><i data-h="nw"></i><i data-h="ne"></i><i data-h="sw"></i><i data-h="se"></i></div></div>
-  <div class="rollrow"><button class="pri" id="cr-ok">Usa ritaglio</button><button id="cr-full">Usa intera</button><button id="cr-cancel">Annulla</button></div>
+  <div class="dlg-ft"><button id="cr-cancel">Annulla</button><button id="cr-full">Usa intera</button><button class="pri" id="cr-ok">Usa ritaglio</button></div>
 </dialog>
 
 <dialog id="viewdlg" aria-labelledby="vw-name">
