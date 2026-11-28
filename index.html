@@ -391,6 +391,14 @@ dialog h3[tabindex="-1"]:focus{outline:none}.dm-l{font-size:13px;color:var(--mut
 #hit-ok{min-width:120px;min-height:44px}
 /* Inventario a righe */
 #items{list-style:none;margin:0;padding:0;display:grid}
+.it-g{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:14px 6px 4px;border-bottom:1px solid var(--line);font:13px var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.it-g:first-child{padding-top:4px}.it-g small{letter-spacing:0;text-transform:none;font-size:12px}
+.it-q{font:600 14px var(--f-num);color:var(--bronze);margin-left:6px;white-space:nowrap}
+.it-d{color:var(--muted)!important}
+.ia-info{display:grid;gap:4px;font-size:15px}.ia-info .row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding:3px 0}.ia-info .row>span:first-child{color:var(--muted)}.ia-info .row>span:last-child{text-align:right}
+.ia-info .eff{color:var(--bronze);font:600 14px var(--f-num)}.ia-info .eff.neg{color:var(--danger)}.ia-info .nt{white-space:pre-line;color:var(--ink)}
+.ia-qty{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}
+.ia-acts{display:grid;gap:8px;margin-top:12px}.ia-acts button{width:100%;min-height:44px}
+#ia-del.arm{background:var(--danger);color:#fff;border-color:var(--danger)}
 .it{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--line);padding:3px 0}
 .it-b{flex:1;display:flex;justify-content:space-between;align-items:center;gap:10px;border:0;background:transparent;text-align:left;padding:3px 6px;position:relative;overflow:hidden;min-width:0;
   user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y}
@@ -868,7 +876,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   </form>
   <button type="button" class="it-full pri" id="it-full">+ Aggiungi oggetto</button>
   <p class="err" id="it-err"></p>
-  <p class="note" style="margin-top:6px">Tocca un oggetto con effetti per indossarlo o usarlo, un consumabile per usarlo. Tieni premuto un oggetto finché la barra si riempie per vedere info e modificarlo.</p>
+  <p class="note" style="margin-top:6px">Tocca un oggetto per usarlo, indossarlo, cambiarne la quantità, modificarlo o eliminarlo.</p>
 
 
   <h3 class="sub-h" hidden><label for="inv-extra">Note</label></h3>
@@ -919,6 +927,13 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   </form>
 </dialog>
 
+<dialog id="itemact" aria-labelledby="ia-t">
+  <div class="dlg-h"><h3 id="ia-t"></h3></div>
+  <div class="ia-info" id="ia-info"></div>
+  <div class="ia-qty" id="ia-qty"><span>Quantità</span><div class="stepper" role="group" aria-label="Quantità"><button type="button" id="ia-qm" aria-label="Uno in meno">−</button><output id="ia-q"></output><button type="button" id="ia-qp" aria-label="Uno in più">+</button></div></div>
+  <div class="ia-acts" id="ia-acts"></div>
+  <div class="dlg-ft"><button type="button" class="danger" id="ia-del">Elimina</button><button type="button" class="pri" id="ia-x">Chiudi</button></div>
+</dialog>
 <dialog id="pddlg" aria-labelledby="pd-t">
   <div class="dlg-h"><h3 id="pd-t" class="pd-ed" tabindex="0" role="button" title="Tocca per modificare il nome">Personaggio</h3><input id="pd-name-in" class="pd-in" autocomplete="off" aria-label="Nome" hidden><button type="button" class="icx del" id="pd-del" aria-label="Elimina personaggio" title="Elimina personaggio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13M10.5 11v6M13.5 11v6"/></svg></button></div>
   <div class="pd-top"><div id="pd-imgw"></div><div class="tags pd-tags" id="pd-tags"></div></div>
@@ -1180,7 +1195,10 @@ function normItem(i){
   if(i.cons==null)i.cons=/^razion/i.test(i.name||"");i.eq=!!i.eq;if(i.dmg==null)i.dmg="";if(i.note==null)i.note="";
   if(!["norm","equip","pot"].includes(i.kind))i.kind="norm";i.worn=i.kind==="equip"&&!!i.worn;
   i.bon=Array.isArray(i.bon)?i.bon.filter(b=>b&&b.t&&Number.isInteger(+b.v)&&+b.v).map(b=>({t:b.t,v:+b.v})):[];
-  i.dur=Number.isInteger(+i.dur)&&+i.dur>0&&i.dur!==""&&i.dur!==null?+i.dur:null;return i}
+  i.dur=Number.isInteger(+i.dur)&&+i.dur>0&&i.dur!==""&&i.dur!==null?+i.dur:null;i.qty=Number.isInteger(+i.qty)&&+i.qty>0?+i.qty:1;return i}
+/* oggetti identici (non equipaggiamento) diventano una riga sola con la quantità */
+function mergeItems(){const seen=new Map(),out=[];S.items.forEach(i=>{const k=JSON.stringify([i.name.trim().toLowerCase(),i.w,i.kind,i.cons,i.eq,i.dmg,i.note,i.bon,i.dur]);const o=i.kind!=="equip"&&seen.get(k);
+  if(o)o.qty+=i.qty;else{if(i.kind!=="equip")seen.set(k,i);out.push(i)}});S.items=out}
 const ARMK=[["testa","Testa"],["torso","Torso"],["bd","Braccio destro"],["bs","Braccio sinistro"],["gd","Gamba destra"],["gs","Gamba sinistra"],["scudo","Scudo"]];
 const BON_T=[...STATN.map(n=>["lvl:"+n,"LVL "+n]),...STATN.map(n=>["mod:"+n,"MOD "+n]),["vig","Vigore massimo"],["spi","Spirito massimo"],["hv","Cura Vigore (subito)"],["hs","Ricarica Spirito (subito)"],["corpo","Corpo"],["mente","Mente"],...ARMK.map(([k,n])=>["arm:"+k,"Armatura "+n.toLowerCase()]),["maxw","Peso massimo"]];
 const bonLab=t=>(BON_T.find(x=>x[0]===t)||[0,t])[1];
@@ -1277,7 +1295,7 @@ function normS(){
   S.cfg.spells.forEach(sp=>{if(!sp.id)sp.id=newId();["name","tipo","gittata","bersagli","durata","attivazione","frequenza","exp","desc","note"].forEach(k=>{if(sp[k]==null)sp[k]=""});sp.self=!!sp.self;sp.locked=!!sp.locked;if(sp.cat!=="cap")sp.cat="inc";
     sp.levels=Array.isArray(sp.levels)?sp.levels.map(l=>({ps:+l.ps||0,label:l.label||"",text:l.text||""})):[]});
   S.pe=Number.isFinite(+S.pe)&&S.pe!==null?Math.max(0,Math.round(+S.pe)):0;if(!Array.isArray(S.cond))S.cond=[];S.cond=S.cond.filter(c=>c&&Array.isArray(c.eff));S.dtmv=S.dtmv||{};S.lvl=S.lvl||{};if(!Array.isArray(S.fx))S.fx=[];S.fx=S.fx.filter(f=>f&&Array.isArray(f.bon));S.fx.forEach(f=>{if(!(f.r>0))f.r=null});S.stone=S.stone||{v:0,r:0};S.vigCap=Math.max(0,+S.vigCap||0);S.spiCap=Math.max(0,+S.spiCap||0);if(!Array.isArray(S.log))S.log=[];S.log.forEach(l=>{if(!l.id)l.id=newId()});
-  if(!Array.isArray(S.items))S.items=[];S.items.forEach(normItem);if(S.cu==null)S.cu=0;
+  if(!Array.isArray(S.items))S.items=[];S.items.forEach(normItem);mergeItems();if(S.cu==null)S.cu=0;
   if(!Array.isArray(S.people))S.people=[];S.people.forEach(p=>{if(!p.id)p.id=newId();p.name=p.name||"Senza nome";p.tags=Array.isArray(p.tags)?p.tags:[];p.notes=p.notes||"";p.hasImg=!!p.hasImg});
   {/* qui modFor e lvlBase non esistono ancora (normS gira all'avvio): formula ripetuta in locale */
    const r0=n=>{const l=S.lvl[n]!=null?+S.lvl[n]:5,m=l<5?l-5:Math.floor((l-5)/2);return Math.max(0,Math.ceil(m/2))};
@@ -1304,7 +1322,7 @@ const pipsOf=n=>Math.max(0,modOf(n));
 const dtmOf=n=>Math.min(S.dtmv[n]||0,pipsOf(n));
 /* ERS: armature e amuleti indossati, arma principale e scudo equipaggiati non contano come ingombro */
 const noW=i=>!!i.eq||(i.kind==="equip"&&!!i.worn);
-const weight=()=>S.items.reduce((a,i)=>a+(noW(i)?0:(i.w||0)),0);
+const weight=()=>S.items.reduce((a,i)=>a+(noW(i)?0:(i.w||0)*(i.qty||1)),0);
 const hist=[],fut=[];
 function log(t){S.log.unshift({id:newId(),t,time:new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})});S.log=S.log.slice(0,150)}
 /* vigCap/spiCap: punti tolti solo perché il massimo è sceso per un effetto; tornano quando il massimo risale. Danni e PS spesi no */
@@ -1834,42 +1852,55 @@ function renderInv(){
   $("w-over").hidden=!(ov>0);$("w-over").innerHTML=ov>2?`<b>Sovraccarico grave</b> (+${fmt(ov)}): niente corsa né scatti, svantaggio ai Test di Forza, Agilità e Tenacia. Il Narratore può imporre pause.`:ov>0?`<b>Sovraccarico leggero</b> (+${fmt(ov)}): svantaggio ai Test di Agilità, movimento −2 m.`:"";
   $("w-bar").style.width=Math.min(100,t/(maxWE()||10)*100)+"%";$("inv-sec").classList.toggle("over",t>maxWE());
   const tag=i=>i.kind==="equip"?(i.worn?"indossato":"non indossato"):i.kind==="pot"?(i.dur?i.dur+" round":"scena"):"";
-  const bt=i=>i.bon.length?`<small>${esc(i.bon.map(bonTxt).join(", "))}</small>`:"";
-  const act1=i=>i.kind==="equip"?`<button class="pri use" data-wear="${i.id}">${i.worn?"Togli":"Indossa"}</button>`:`<button class="pri use" data-use="${i.id}">Usa</button>`;
-  $("items").innerHTML=S.items.length?S.items.map(i=>`<li class="it${i.worn?" worn":i.kind==="equip"?" unworn":""}${noW(i)?" nw":""}"><button class="it-b" data-id="${i.id}" aria-label="${esc(i.name)}${tag(i)?", "+tag(i):""}, peso ${i.w==null?"non indicato":fmt(i.w)}${noW(i)?" (non conta, è indossato)":""}${i.cons||i.kind!=="norm"?". Tocca per le azioni":""}. Tieni premuto per info e modifica"><span class="it-n"><span>${esc(i.name)}${tag(i)?`<span class="it-tag${i.kind==="equip"&&!i.worn?" off":""}">${tag(i)}</span>`:""}</span>${bt(i)}</span>${wIcon(i.w)}</button>${ui.useOpen===i.id?act1(i):""}<button class="del" data-x="${i.id}" aria-label="Rimuovi ${esc(i.name)}">×</button></li>`).join(""):`<li class="note">Inventario vuoto. Aggiungi il primo oggetto qui sotto.</li>`;
+  const bt=i=>[i.dmg?`<small class="it-d">Danno ${esc(i.dmg)}</small>`:"",i.bon.length?`<small>${esc(i.bon.map(bonTxt).join(", "))}</small>`:""].join("");
+  const row=i=>{const q=i.qty||1,tw=i.w==null?null:i.w*q;return `<li class="it${i.worn?" worn":i.kind==="equip"?" unworn":""}${noW(i)?" nw":""}"><button class="it-b" data-id="${i.id}" aria-label="${esc(i.name)}${q>1?`, quantità ${q}`:""}${tag(i)?", "+tag(i):""}, peso ${tw==null?"non indicato":fmt(tw)}${noW(i)?" (non conta)":""}. Tocca per le azioni"><span class="it-n"><span>${esc(i.name)}${q>1?`<span class="it-q">×${q}</span>`:""}${tag(i)?`<span class="it-tag${i.kind==="equip"&&!i.worn?" off":""}">${tag(i)}</span>`:""}</span>${bt(i)}</span>${wIcon(tw)}</button></li>`};
+  const G=[["on","Addosso","non contano nel peso"],["cons","Consumabili",""],["bag","Zaino",""]];
+  $("items").innerHTML=S.items.length?G.map(([k,t,sub])=>{const l=S.items.filter(i=>itGrp(i)===k);if(!l.length)return "";const n=l.reduce((a,i)=>a+(i.qty||1),0);
+    return `<li class="it-g" role="presentation"><span>${t}</span><small>${n} ${n===1?"oggetto":"oggetti"}${sub?" · "+sub:""}</small></li>`+l.map(row).join("")}).join(""):`<li class="note">Inventario vuoto. Aggiungi il primo oggetto qui sotto.</li>`;
+  if(iaId)drawIa();
   $("c-oro").textContent=Math.floor(S.cu/100);$("c-arg").textContent=Math.floor(S.cu/10)%10;$("c-ram").textContent=S.cu%10;
   document.querySelectorAll("[data-coin]").forEach(b=>b.disabled=S.cu+ +b.dataset.coin<0);
 }
 const wIcon=w=>`<span class="wt" aria-hidden="true"><svg viewBox="0 0 40 36"><circle cx="20" cy="7" r="5"/><path d="M9 13h22l6 21H3z"/></svg><span>${w==null?"—":fmt(w)}</span></span>`;
 const parseW=v=>{const raw=String(v).trim().replace(",",".");if(raw==="")return null;const n=Number(raw);return isFinite(n)&&n>=0?n:false};
-const itemsEl=$("items");let lp=null;
-itemsEl.addEventListener("pointerdown",e=>{const b=e.target.closest(".it-b");if(!b)return;
-  if(lp&&lp.t)clearTimeout(lp.t);
-  const cur={b,id:b.dataset.id,x:e.clientX,y:e.clientY,fired:false};
-  cur.t=setTimeout(()=>{cur.fired=true;b.classList.remove("pressing");try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}openItem(cur.id)},700);
-  lp=cur;b.classList.add("pressing");});
-const cancelLp=()=>{if(lp&&!lp.fired){clearTimeout(lp.t);lp.b.classList.remove("pressing")}};
-itemsEl.addEventListener("pointermove",e=>{if(lp&&!lp.fired&&Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>10){cancelLp();lp=null}});
-["pointerup","pointercancel","pointerleave"].forEach(ev=>itemsEl.addEventListener(ev,cancelLp));
-itemsEl.addEventListener("contextmenu",e=>{if(e.target.closest(".it-b"))e.preventDefault()});
-itemsEl.addEventListener("click",e=>{
-  if(lp&&lp.fired){lp=null;return}lp=null;
-  const x=e.target.closest("[data-x]");
-  if(x){const it=S.items.find(i=>i.id===x.dataset.x);if(!it)return;
-    act(()=>{S.items=S.items.filter(i=>i.id!==it.id);log(`Rimosso: ${esc(it.name)}${it.w!=null?` (peso ${fmt(it.w)})`:""}. Peso ${fmt(weight())} / ${maxWE()}.`)});return}
-  const wr=e.target.closest("[data-wear]");
-  if(wr){const it=S.items.find(i=>i.id===wr.dataset.wear);if(!it)return;ui.useOpen=null;
-    act(()=>{it.worn=!it.worn;log(`${it.worn?"Indossato":"Tolto"}: ${esc(it.name)}${it.bon.length?` (${it.worn?"attivi":"annullati"}: ${esc(it.bon.map(bonTxt).join(", "))})`:""}.`)});return}
-  const u=e.target.closest("[data-use]");
-  if(u){const it=S.items.find(i=>i.id===u.dataset.use);if(!it)return;ui.useOpen=null;
-    act(()=>{S.items=S.items.filter(i=>i.id!==it.id);const ex=[];
+/* gruppi: Addosso (indossati o pronti all'uso), Consumabili (pozioni e oggetti con Usa), Zaino (il resto) */
+const itGrp=i=>noW(i)?"on":(i.kind==="pot"||i.cons)?"cons":"bag";
+/* scheda azioni di un oggetto: si apre con un tocco */
+const iadlg=$("itemact");let iaId=null,iaArm=null;
+const iaIt=()=>S.items.find(i=>i.id===iaId);
+function openIa(id){iaId=id;clearTimeout(iaArm);iaArm=null;$("ia-del").classList.remove("arm");$("ia-del").textContent="Elimina";drawIa();if(iaId)openDlg(iadlg)}
+function drawIa(){const it=iaIt();if(!it){iaId=null;if(iadlg.open)closeDlg(iadlg);return}const q=it.qty||1;
+  $("ia-t").textContent=it.name;
+  const rows=[];if(it.w!=null)rows.push(["Peso",q>1?`${fmt(it.w)} l'uno · ${fmt(it.w*q)} in tutto`:fmt(it.w)]);else rows.push(["Peso","non indicato"]);
+  if(noW(it))rows.push(["Ingombro","non conta: "+(it.kind==="equip"?"indossato":"pronto all'uso")]);
+  if(it.dmg)rows.push(["Danno",esc(it.dmg)]);
+  if(it.kind==="pot")rows.push(["Durata",it.dur?it.dur+" round":"fino a fine scena"]);
+  if(it.bon.length)rows.push([it.kind==="equip"?(it.worn?"Effetti attivi":"Effetti se indossato"):"Effetti",it.bon.map(b=>`<span class="eff${b.v<0?" neg":""}">${esc(bonTxt(b))}</span>`).join("<br>")]);
+  $("ia-info").innerHTML=rows.map(([a,b])=>`<div class="row"><span>${a}</span><span>${b}</span></div>`).join("")+(it.note?`<div class="nt">${esc(it.note)}</div>`:"");
+  $("ia-q").textContent=q;$("ia-qm").disabled=q<=1;$("ia-qty").hidden=it.kind==="equip";
+  const a=[];if(it.kind==="pot"||it.cons)a.push(`<button type="button" class="pri" id="ia-use">Usa${q>1?" (ne restano "+(q-1)+")":""}</button>`);
+  if(it.kind==="equip")a.push(`<button type="button" class="pri" id="ia-wear">${it.worn?"Togli":"Indossa"}</button>`);
+  else a.push(`<button type="button" id="ia-eq">${it.eq?"Riponi nello zaino":"Metti addosso (pronto all'uso)"}</button>`);
+  a.push(`<button type="button" id="ia-edit">Modifica</button>`);$("ia-acts").innerHTML=a.join("")}
+$("ia-x").onclick=()=>closeDlg(iadlg);
+/* l'evento close arriva in ritardo: se nel frattempo la scheda è stata riaperta su un altro oggetto, non va azzerata */
+iadlg.addEventListener("close",()=>{if(!iadlg.open)iaId=null});
+$("ia-qm").onclick=()=>{const it=iaIt();if(it&&it.qty>1)act(()=>{it.qty--;log(`${esc(it.name)}: quantità ${it.qty}. Peso ${fmt(weight())} / ${maxWE()}.`)})};
+$("ia-qp").onclick=()=>{const it=iaIt();if(it)act(()=>{it.qty=(it.qty||1)+1;log(`${esc(it.name)}: quantità ${it.qty}. Peso ${fmt(weight())} / ${maxWE()}.`)})};
+$("ia-del").onclick=()=>{const b=$("ia-del");
+  if(!iaArm){b.classList.add("arm");b.textContent="Tocca di nuovo";iaArm=setTimeout(()=>{iaArm=null;b.classList.remove("arm");b.textContent="Elimina"},3000);return}
+  clearTimeout(iaArm);iaArm=null;const it=iaIt();if(!it)return;closeDlg(iadlg);
+  act(()=>{S.items=S.items.filter(i=>i.id!==it.id);log(`Rimosso: ${esc(it.name)}${it.qty>1?` ×${it.qty}`:""}${it.w!=null?` (peso ${fmt(it.w*(it.qty||1))})`:""}. Peso ${fmt(weight())} / ${maxWE()}.`)})};
+$("ia-acts").onclick=e=>{const it=iaIt();if(!it)return;const b=e.target.closest("button");if(!b)return;
+  if(b.id==="ia-edit"){closeDlg(iadlg);openItem(it.id);return}
+  if(b.id==="ia-eq")return act(()=>{it.eq=!it.eq;log(`${esc(it.name)}: ${it.eq?"addosso, pronto all'uso (non conta nel peso)":"riposto nello zaino"}. Peso ${fmt(weight())} / ${maxWE()}.`)});
+  if(b.id==="ia-wear")return act(()=>{it.worn=!it.worn;log(`${it.worn?"Indossato":"Tolto"}: ${esc(it.name)}${it.bon.length?` (${it.worn?"attivi":"annullati"}: ${esc(it.bon.map(bonTxt).join(", "))})`:""}.`)});
+  if(b.id==="ia-use")act(()=>{const left=(it.qty||1)-1;if(left>0)it.qty=left;else S.items=S.items.filter(i=>i.id!==it.id);const ex=[];
       it.bon.filter(b=>INSTANT.includes(b.t)).forEach(b=>{if(b.t==="hv"){const o=S.vig;S.vig=Math.max(0,Math.min(MAX.vig,S.vig+b.v));ex.push(`Vigore ${o} → ${S.vig}`)}else{const o=S.spi;S.spi=Math.max(0,Math.min(MAX.spi,S.spi+b.v));ex.push(`Spirito ${o} → ${S.spi}`)}});
       const lasting=it.bon.filter(b=>!INSTANT.includes(b.t));
       if(it.kind==="pot"&&lasting.length){S.fx.push({id:newId(),name:it.name,bon:lasting,r:it.dur>0?it.dur:null});ex.push(`effetto attivo ${it.dur?`per ${it.dur} round`:"fino a fine scena"}: ${lasting.map(bonTxt).join(", ")}`)}
-      log(`Usato: ${esc(it.name)}${ex.length?". "+esc(ex.join("; ").replace(/^./,c=>c.toUpperCase()))+".":"."} Peso ${fmt(weight())} / ${maxWE()}.`)});return}
-  const b=e.target.closest(".it-b");if(!b)return;const it=S.items.find(i=>i.id===b.dataset.id);
-  if(it&&(it.cons||it.kind!=="norm")){ui.useOpen=ui.useOpen===it.id?null:it.id;renderInv()}
-});
+      log(`Usato: ${esc(it.name)}${ex.length?". "+esc(ex.join("; ").replace(/^./,c=>c.toUpperCase()))+".":"."}${left>0?` Ne restano ${left}.`:""} Peso ${fmt(weight())} / ${maxWE()}.`)})};
+$("items").addEventListener("click",e=>{const b=e.target.closest(".it-b");if(b)openIa(b.dataset.id)});
 const idlg=$("itemdlg");let editing=null;
 function openItem(id){const it=S.items.find(i=>i.id===id);if(!it)return;editing=id;ui.useOpen=null;
   $("ie-t").textContent=it.name;$("ie-name").value=it.name;$("ie-w").value=it.w==null?"":fmt(it.w);
@@ -1905,7 +1936,7 @@ $("itemedit").onsubmit=e=>{e.preventDefault();const isNew=editing==="__new";cons
   const kind=$("ie-kind").value,dur=kind==="pot"&&durV?durV:null;
   const bon=kind==="norm"?(it?it.bon:[]):[...$("ie-bon").children].map(r=>({t:r.querySelector("select").value,v:+r.dataset.v})).filter(b=>b.v);
   if(kind!=="norm"&&!bon.length){$("ie-err").textContent="Aggiungi almeno un effetto, oppure scegli Normale.";return}
-  if(isNew){act(()=>{const ni=normItem({id:newId(),name,w,dmg:$("ie-dmg").value.trim(),note:$("ie-note").value.trim(),cons:kind==="norm"&&$("ie-cons").checked,kind,dur,bon,worn:kind==="equip"&&$("ie-worn").checked,eq:kind!=="equip"&&$("ie-eq").checked});S.items.push(ni);
+  if(isNew){act(()=>{const ni=normItem({id:newId(),name,w,dmg:$("ie-dmg").value.trim(),note:$("ie-note").value.trim(),cons:kind==="norm"&&$("ie-cons").checked,kind,dur,bon,worn:kind==="equip"&&$("ie-worn").checked,eq:kind!=="equip"&&$("ie-eq").checked});S.items.push(ni);mergeItems();
       log(`Aggiunto: ${esc(name)} (${w==null?"senza peso":"peso "+fmt(w)}${kind==="equip"?`, equipaggiamento${ni.worn?" indossato":" non indossato"}`:kind==="pot"?`, pozione ${dur?dur+" round":"fino a fine scena"}`:""}${bon.length?": "+esc(bon.map(bonTxt).join(", ")):""}). Peso ${fmt(weight())} / ${maxWE()}.`)});
     $("it-name").value="";$("it-w").value="";editing=null;closeDlg(idlg);return}
   act(()=>{const on=it.name,ow=it.w,ob=JSON.stringify(it.bon);Object.assign(it,{name,w,dmg:$("ie-dmg").value.trim(),note:$("ie-note").value.trim(),cons:$("ie-cons").checked,kind,dur,bon,worn:kind==="equip"&&$("ie-worn").checked,eq:kind!=="equip"&&$("ie-eq").checked});
@@ -1926,7 +1957,7 @@ $("itemform").onsubmit=e=>{e.preventDefault();
   const raw=$("it-w").value.trim().replace(",",".");const w=raw===""?null:Number(raw);
   if(raw!==""&&(!isFinite(w)||w<0)){$("it-err").textContent="Il peso deve essere un numero, per esempio 1 o 0,5. Lascialo vuoto se non lo conosci.";$("it-w").focus();return}
   $("it-err").textContent="";
-  act(()=>{S.items.push(normItem({id:newId(),name,w}));log(`Aggiunto: ${esc(name)} (${w==null?"senza peso":"peso "+fmt(w)}). Peso ${fmt(weight())} / ${maxWE()}.`)});
+  act(()=>{S.items.push(normItem({id:newId(),name,w}));mergeItems();log(`Aggiunto: ${esc(name)} (${w==null?"senza peso":"peso "+fmt(w)}). Peso ${fmt(weight())} / ${maxWE()}.`)});
   $("it-name").value="";$("it-w").value="";if(document.activeElement)document.activeElement.blur();
 };
 const CN={100:"oro",10:"argento",1:"rame"};
@@ -2008,7 +2039,7 @@ function drawPdTags(){const p=pdP();if(!p)return;
 function pdSet(fn){const p=pdP();if(!p)return;act(()=>fn(p))}
 function openPd(id){pdId=id;pdTag=false;clearTimeout(pdArm);pdArm=null;$("pd-del").classList.remove("arm");drawPd();if(pdId){openDlg(pddlg);pddlg.scrollTop=0}}
 $("pd-x").onclick=()=>closeDlg(pddlg);
-pddlg.addEventListener("close",()=>{pdCommit();pdId=null;pdTag=false});
+pddlg.addEventListener("close",()=>{if(pddlg.open)return;pdCommit();pdId=null;pdTag=false});
 /* nome */
 $("pd-t").onclick=()=>{const p=pdP();if(!p)return;const i=$("pd-name-in");i.value=p.name;$("pd-t").hidden=true;i.hidden=false;i.focus();i.select()};
 $("pd-t").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("pd-t").click()}};
