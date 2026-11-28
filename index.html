@@ -91,7 +91,8 @@ button.pri:disabled:hover{background:var(--ink);border-color:var(--ink)}
 .cdtip .ct-c span:last-child{font:600 14px var(--f-num);white-space:nowrap}
 .cdtip .ct-g{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font:15px var(--f-num);margin-top:4px;align-items:baseline}.cdtip .ct-g dt{color:var(--muted);font:15px var(--f-body)}.cdtip .ct-g dd{margin:0;white-space:nowrap}.cdtip .ct-g small{font:13px var(--f-body);color:var(--muted)}
 .cdtip .ct-l{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;border:0;border-bottom:1px solid var(--line);background:transparent;padding:2px 0;margin:0;font:15px var(--f-body);color:var(--ink);text-align:left}
-.cdtip .ct-s{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 10px;border-bottom:1px dashed var(--line);padding:4px 0}.cdtip .ct-s .ct-n{grid-column:1;min-width:0;overflow-wrap:break-word}.cdtip .ct-s .ct-n small{display:block;font-size:12px}.cdtip .ct-v{grid-column:1;display:flex;flex-wrap:wrap;gap:0 12px;font:600 14px var(--f-num);text-align:left}.cdtip .ct-s button{grid-column:2;grid-row:1/span 2;margin:0;padding:0 10px}
+.fx-box{display:grid;gap:10px;border-left:3px solid var(--bronze);padding-left:10px}
+.cdtip .ct-s{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 10px;border-bottom:1px dashed var(--line);padding:4px 0}.cdtip .ct-s .ct-n{grid-column:1;min-width:0;overflow-wrap:break-word}.cdtip .ct-s .ct-n small{display:block;font-size:12px}.cdtip .ct-v{grid-column:1;display:flex;flex-wrap:wrap;gap:0 12px;font:600 14px var(--f-num);text-align:left}.cdtip .ct-b{grid-column:2;grid-row:1/span 2;display:flex;gap:6px}.cdtip .ct-s button{margin:0;padding:0 10px}.cdtip .ct-s button.sq{width:34px;padding:0}.cdtip .ct-f{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}.cdtip .ct-f button{margin:4px 0 0}
 .cdtip .ct-x{margin:0;font:italic 14px/1.35 var(--f-body);color:var(--muted)}.cdtip .ct-v .off{flex-basis:100%;color:var(--muted)}.cdtip .ct-v .off s{text-decoration-thickness:1.5px}.cdtip .ct-v .off small{display:block;font:italic 13px/1.3 var(--f-body)}
 .cdic.off{border-style:dashed;border-color:var(--muted);color:var(--muted)}.cdic.off .ar{background:var(--muted)}.cdic.off[aria-expanded="true"]{background:var(--muted);color:var(--sheet)}
 .cdtip .neg{color:var(--danger)}.cdtip .pos{color:var(--bronze)}
@@ -433,18 +434,11 @@ dialog h3[tabindex="-1"]:focus{outline:none}.dm-l{font-size:13px;color:var(--mut
 .cd-t small{font-size:13px;color:var(--muted)}
 .cd-e{font:600 13px var(--f-num);white-space:nowrap}
 .st-n .bon{color:var(--bronze);font-size:13px}
-.fx{grid-column:1/-1;border:1px solid var(--bronze);background:var(--bronze-soft);padding:8px 10px;display:grid;gap:6px}
-.fx-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.fx-i{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;border-top:1px solid var(--line);padding-top:6px}
-.fx-t{flex:1 1 10em;min-width:0;display:grid}.fx-t b{font-weight:600}
-.fx-r{font-family:var(--f-num);white-space:nowrap}
-.fx-i button{min-height:32px;padding:2px 10px;font-size:14px}
 .bon-l{display:grid;gap:6px}
 .bon-r{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px;border:1px solid var(--line);background:var(--paper)}
 .it-full{width:100%;margin-top:8px;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:4px 8px;border-style:dashed;border-color:var(--bronze);color:var(--ink);background:transparent;min-height:44px}
 .it-full span{color:var(--bronze)}.it-full small{color:var(--muted);font-size:13px}
 .kseg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:4px}
-.fx-box{display:grid;gap:10px;border-left:3px solid var(--bronze);padding-left:10px}
 .it-full.pri{border-style:solid;color:var(--sheet);align-items:center;font-size:17px}
 .kseg button{display:grid;gap:2px;justify-items:start;text-align:left;padding:8px;min-height:56px;font-size:15px}
 .kseg button small{font-size:11px;color:var(--muted)}
@@ -788,7 +782,6 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 
 
 <div class="secs">
-<div id="fx" class="fx" hidden aria-live="polite"></div>
 <section id="sec-spells" class="sec" hidden>
   <h2>Incantesimi <small>uno aperto alla volta</small></h2>
   <div id="spell-list"></div>
@@ -1556,9 +1549,10 @@ function actSrc(){const r=[];
   S.cond.forEach(c=>r.push({k:"cond",id:c.id,name:c.name,eff:c.eff.filter(e=>e.v).map(e=>({t:"lvl:"+e.n,v:e.v}))}));
   S.fx.forEach(f=>r.push({k:"fx",id:f.id,name:f.name,r:f.r,eff:f.bon.filter(b=>b.v)}));
   S.items.forEach(i=>{if(i.kind==="equip"&&i.worn)r.push({k:"item",id:i.id,name:i.name,eff:(i.bon||[]).filter(b=>b.v)})});
+  if(S.stone&&S.stone.v>0)r.push({k:"stone",id:"stone",name:"Protezione magica",r:S.stone.r,eff:[{t:"mag",v:S.stone.v}]});
   return r.filter(s=>s.eff.length)}
 const CDG=[...STATN,"Difesa","Vigore","Spirito","Peso","Altro"];
-const cdGrp=t=>{const m=/^(lvl|mod):(.+)$/.exec(t);if(m)return m[2];if(t==="corpo"||t==="mente"||t.startsWith("arm:"))return "Difesa";return {vig:"Vigore",spi:"Spirito",maxw:"Peso"}[t]||"Altro"};
+const cdGrp=t=>{const m=/^(lvl|mod):(.+)$/.exec(t);if(m)return m[2];if(t==="corpo"||t==="mente"||t==="mag"||t.startsWith("arm:"))return "Difesa";return {vig:"Vigore",spi:"Spirito",maxw:"Peso"}[t]||"Altro"};
 /* gruppi per icona: {n, tot, neg, pos, srcs:[{s,e}]} */
 /* ERS: un anziano non può aumentare Forza, Agilità e Tenacia: quei bonus restano in elenco ma non valgono */
 const effOff=e=>{const m=/^lvl:(.+)$/.exec(e.t);return !!m&&e.v>0&&physLock(m[1])};
@@ -1567,9 +1561,12 @@ function cdStats(){const m=new Map();actSrc().forEach(s=>s.eff.forEach(e=>{const
   return [...m.values()].sort((a,b)=>CDG.indexOf(a.n)-CDG.indexOf(b.n))}
 const cdCls=x=>x.cancel||!x.neg&&!x.pos?" off":x.neg&&!x.pos?"":x.pos&&!x.neg?" pos":" mix";
 const cdArr=x=>x.cancel?"=":!x.neg&&!x.pos?"–":x.neg&&!x.pos?"▼":x.pos&&!x.neg?"▲":"±";
-const srcVal=(e,full)=>e.t.startsWith("lvl:")?(full?e.t.slice(4)+" ":"")+sgn(e.v):e.t.startsWith("mod:")?(full?"MOD "+e.t.slice(4)+" ":"MOD ")+sgn(e.v):bonLab(e.t)+" "+sgn(e.v);
+const srcVal=(e,full)=>e.t==="mag"?"Magia "+sgn(e.v):e.t.startsWith("lvl:")?(full?e.t.slice(4)+" ":"")+sgn(e.v):e.t.startsWith("mod:")?(full?"MOD "+e.t.slice(4)+" ":"MOD ")+sgn(e.v):bonLab(e.t)+" "+sgn(e.v);
 const srcTag=s=>s.k==="cond"?"condizione":s.k==="item"?"indossato":s.r==null?"fine scena":s.r+" round";
-const srcBtn=s=>s.k==="cond"?`<button type="button" data-cded="${s.id}" aria-label="Modifica o rimuovi ${esc(s.name)}">Modifica</button>`:s.k==="item"?`<button type="button" data-cdoff="${s.id}" aria-label="Togli ${esc(s.name)}">Togli</button>`:`<button type="button" data-cdend="${s.id}" aria-label="Termina ${esc(s.name)}">Termina</button>`;
+const timed=s=>(s.k==="fx"&&s.r!=null)||s.k==="stone";
+const srcBtn=s=>`<div class="ct-b">${timed(s)?`<button type="button" class="sq" data-cdrm="${s.id}" aria-label="${esc(s.name)}: un round in meno">−</button>`:""}${srcBtn1(s)}</div>`;
+const srcBtn1=s=>s.k==="cond"?`<button type="button" data-cded="${s.id}" aria-label="Modifica o rimuovi ${esc(s.name)}">Modifica</button>`:s.k==="item"?`<button type="button" data-cdoff="${s.id}" aria-label="Togli ${esc(s.name)}">Togli</button>`:`<button type="button" data-cdend="${s.id}" aria-label="Termina ${esc(s.name)}">Termina</button>`;
+const tipFoot=ss=>{const r=ss.some(timed),sc=ss.some(s=>s.k==="fx"&&s.r==null);return r||sc?`<div class="ct-f">${r?`<button type="button" data-cdround aria-label="Fine round: un round in meno a tutti gli effetti a tempo">Fine round</button>`:""}${sc?`<button type="button" data-cdscene>Fine scena</button>`:""}</div>`:""};
 const srcRow=(s,eff,full)=>`<div class="ct-s"><span class="ct-n">${esc(s.name)}<small>${srcTag(s)}</small></span><span class="ct-v">${eff.map(e=>effOff(e)?`<span class="off"><s>${esc(srcVal(e,full))}</s><small>senza effetto: in età avanzata Forza, Agilità e Tenacia non possono aumentare</small></span>`:`<span class="${e.v<0?"neg":"pos"}">${esc(srcVal(e,full))}</span>`).join("")}</span>${srcBtn(s)}</div>`;
 function renderConds(){const bar=$("cdbar"),st=cdStats();bar.hidden=!st.length;if(!st.length){$("cdtip").hidden=true;ui.cdTip=null;ui.cdMore=false;return}
   if(ui.cdTip&&!st.some(x=>x.n===ui.cdTip))ui.cdTip=null;
@@ -1585,7 +1582,7 @@ function fitCd(){const bar=$("cdbar");if(bar.hidden)return;const ics=[...bar.que
 addEventListener("resize",()=>fitCd());
 function drawCdTip(){const tip=$("cdtip");
   if(ui.cdMore&&!ui.cdTip){const all=actSrc(),sc=S.fx.some(x=>x.r==null);tip.hidden=false;
-    tip.innerHTML=`<b>Effetti attivi</b>`+all.map(s=>srcRow(s,s.eff,true)).join("")+(sc?`<button type="button" data-cdscene>Fine scena</button>`:"");return}
+    tip.innerHTML=`<b>Effetti attivi</b>`+all.map(s=>srcRow(s,s.eff,true)).join("")+tipFoot(all);return}
   const x=cdStats().find(y=>y.n===ui.cdTip);tip.hidden=!x;if(!x)return;
   const by=new Map();x.srcs.forEach(({s,e})=>{if(!by.has(s))by.set(s,[]);by.get(s).push(e)});
   const rows=[],n=x.n;
@@ -1598,13 +1595,17 @@ function drawCdTip(){const tip=$("cdtip");
   else if(n==="Vigore")rows.push(["Vigore massimo",String(MAX.vig),""]);else if(n==="Spirito")rows.push(["Spirito massimo",String(MAX.spi),""]);else if(n==="Peso")rows.push(["Peso massimo",String(maxWE()),""]);
   const why=x.cancel?`<p class="ct-x">Senza effetto: ${[...by].map(([s,eff])=>`${esc(s.name)} (${esc(eff.filter(e=>!effOff(e)).map(e=>srcVal(e,!STATN.includes(n))).join(", "))})`).join(" e ")} si annullano a vicenda, ${STATN.includes(n)?n+" resta invariata":"il valore resta invariato"}.</p>`:"";
   tip.innerHTML=`<b class="ct-h${x.cancel?"":x.neg&&!x.pos?" neg":x.pos&&!x.neg?" pos":""}">${cdSvg(n)} ${n}</b>`+why+[...by].map(([s,eff])=>srcRow(s,eff)).join("")+
-    (rows.length?`<dl class="ct-g">${rows.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}${r[2]?` <small>${r[2]}</small>`:""}</dd>`).join("")}</dl>`:"")+(x.srcs.some(({s})=>s.k==="fx"&&s.r==null)?`<button type="button" data-cdscene>Fine scena</button>`:"")}
+    (rows.length?`<dl class="ct-g">${rows.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}${r[2]?` <small>${r[2]}</small>`:""}</dd>`).join("")}</dl>`:"")+tipFoot([...by.keys()])}
 $("cdbar").onclick=e=>{const b=e.target.closest("[data-cds],[data-cdmore]");if(!b)return;e.stopPropagation();
   if(b.dataset.cdmore!==undefined){ui.cdMore=!ui.cdMore;ui.cdTip=null}else{ui.cdTip=ui.cdTip===b.dataset.cds?null:b.dataset.cds;ui.cdMore=false}renderConds()};
 $("cdtip").onclick=e=>{const b=e.target.closest("[data-cded]");if(b){e.stopPropagation();ui.cdTip=null;ui.cdMore=false;renderConds();openCond(b.dataset.cded);return}
-  const en=e.target.closest("[data-cdend]");if(en){e.stopPropagation();endFx(en.dataset.cdend);return}
+  const en=e.target.closest("[data-cdend]");if(en){e.stopPropagation();if(en.dataset.cdend==="stone")act(()=>{S.stone={v:0,r:0};log("Protezione magica terminata: tornata a 0.")});else endFx(en.dataset.cdend);return}
   const of=e.target.closest("[data-cdoff]");if(of){e.stopPropagation();const it=S.items.find(i=>i.id===of.dataset.cdoff);if(it)act(()=>{it.worn=false;log(`Tolto: ${esc(it.name)} (annullati: ${esc(it.bon.map(bonTxt).join(", "))}).`)});return}
-  if(e.target.closest("[data-cdscene]")){e.stopPropagation();endScene();return}};
+  if(e.target.closest("[data-cdscene]")){e.stopPropagation();endScene();return}
+  if(e.target.closest("[data-cdround]")){e.stopPropagation();endRound();return}
+  const rm=e.target.closest("[data-cdrm]");if(rm){e.stopPropagation();const id=rm.dataset.cdrm;
+    if(id==="stone")return act(()=>{S.stone.r--;if(S.stone.r<=0){S.stone={v:0,r:0};log("Protezione magica terminata: tornata a 0.")}else log(`Protezione magica: −1 round, ne restano ${S.stone.r}.`)});
+    return act(()=>{const x=S.fx.find(y=>y.id===id);if(!x)return;x.r--;if(x.r>0)log(`${esc(x.name)}: −1 round, ne restano ${x.r}.`);expireFx()})}};
 document.addEventListener("click",e=>{if((ui.cdTip||ui.cdMore)&&!e.target.closest("#cdtip,#cdbar")){ui.cdTip=null;ui.cdMore=false;renderConds()}});
 function addEffRow(n,v){const d=document.createElement("div");d.className="bon-r";d.dataset.v=v==null?-1:v;
   d.innerHTML=`<select aria-label="Caratteristica">${STAT_OPTS}</select><div class="stepper" role="group" aria-label="Valore"><button type="button" data-bs="-1" aria-label="Valore meno uno">−</button><output>${sgn(+d.dataset.v)}</output><button type="button" data-bs="1" aria-label="Valore più uno">+</button></div><button type="button" class="del sq" aria-label="Togli effetto">×</button>`;
@@ -1799,24 +1800,14 @@ $("stone-m").onclick=()=>{if(S.stone.v<=0)return;act(()=>{S.stone.r--;
 
 /* ---------- Inventario ---------- */
 function expireFx(){S.fx=S.fx.filter(x=>{if(x.r!=null&&x.r<=0){log(`${esc(x.name)}: effetto scaduto, bonus annullato (${esc(x.bon.map(bonTxt).join(", "))}).`);return false}return true})}
-function renderFx(){const el=$("fx"),f=S.fx;
+/* striscia in alto con gli effetti a round; la gestione è nelle icone degli effetti */
+function renderFx(){const f=S.fx;
   const timed=f.filter(x=>x.r!=null),stn=S.stone.v>0,hf=$("hud-fx");hf.hidden=!timed.length&&!stn;
-  if(!hf.hidden){const items=[...timed.map(x=>`${esc(x.name)} <b>${x.r}</b>`),...(stn?[`Magia +${S.stone.v} <b>${S.stone.r}</b>`]:[])];$("hud-fx-t").innerHTML=`⏳ ${items.join(" · ")}`;$("hud-fx-t").title=$("hud-fx-t").textContent}
-  el.hidden=!f.length;if(!f.length){el.innerHTML="";return}
-  el.innerHTML=`<div class="fx-h"><span class="cap">Effetti attivi</span>${f.some(x=>x.r!=null)||S.stone.v>0?`<button id="fx-round" aria-label="Fine round: un round in meno a tutti gli effetti a tempo">Fine round</button>`:""}${f.some(x=>x.r==null)?`<button id="fx-scene" aria-label="Fine scena: termina tutti gli effetti che durano fino a fine scena">Fine scena</button>`:""}</div>`+
-   f.map(x=>`<div class="fx-i"><div class="fx-t"><b>${esc(x.name)}</b><span class="note">${esc(x.bon.map(bonTxt).join(", "))}</span></div><span class="fx-r">${x.r==null?"fine scena":x.r+(x.r===1?" round":" round")}</span>${x.r!=null?`<button class="sq" data-fxm="${x.id}" aria-label="${esc(x.name)}: un round in meno">−</button>`:""}<button data-fxend="${x.id}">Termina</button></div>`).join("")}
+  if(!hf.hidden){const items=[...timed.map(x=>`${esc(x.name)} <b>${x.r}</b>`),...(stn?[`Magia +${S.stone.v} <b>${S.stone.r}</b>`]:[])];$("hud-fx-t").innerHTML=`⏳ ${items.join(" · ")}`;$("hud-fx-t").title=$("hud-fx-t").textContent}}
 function endRound(){act(()=>{const n=S.fx.filter(x=>x.r!=null).length;S.fx.forEach(x=>{if(x.r!=null)x.r--});
     let mg="";if(S.stone.v>0){S.stone.r--;if(S.stone.r<=0){S.stone={v:0,r:0};mg=" Protezione magica terminata: tornata a 0."}else mg=` Protezione magica: ne restano ${S.stone.r}.`}
     log(`Fine round: −1 round a ${n} ${n===1?"effetto":"effetti"}.${mg}`);expireFx()})}
 $("hud-fx-r").onclick=endRound;
-$("fx").onclick=e=>{
-  if(e.target.closest("#fx-round"))return endRound();
-  const m=e.target.closest("[data-fxm]");
-  if(m)return act(()=>{const x=S.fx.find(y=>y.id===m.dataset.fxm);if(!x)return;x.r--;if(x.r>0)log(`${esc(x.name)}: −1 round, ne restano ${x.r}.`);expireFx()});
-  const en=e.target.closest("[data-fxend]");
-  if(en)return endFx(en.dataset.fxend);
-  if(e.target.closest("#fx-scene"))endScene();
-};
 function endFx(id){const x=S.fx.find(y=>y.id===id);if(!x)return;act(()=>{S.fx=S.fx.filter(y=>y!==x);log(`${esc(x.name)}: effetto terminato, bonus annullato (${esc(x.bon.map(bonTxt).join(", "))}).`)})}
 function endScene(){const e=S.fx.filter(x=>x.r==null);if(!e.length)return;act(()=>{S.fx=S.fx.filter(x=>x.r!=null);log(`Fine scena: terminati ${e.map(x=>`${esc(x.name)} (${esc(x.bon.map(bonTxt).join(", "))})`).join("; ")}.`)})}
 function renderInv(){
@@ -1887,7 +1878,7 @@ holdRepeat($("ie-dm"),()=>setDur(durV-1));holdRepeat($("ie-dp"),()=>setDur(durV+
 let lastFx="equip";$("ie-fx").onchange=e=>setKind(e.target.checked?lastFx:"norm");
 function setKind(k){if(k!=="norm")lastFx=k;$("ie-kind").value=k;document.querySelectorAll(".kseg [data-k]").forEach(b=>b.setAttribute("aria-checked",b.dataset.k===k));kindUI()}
 document.querySelector(".kseg").onclick=e=>{const b=e.target.closest("[data-k]");if(b)setKind(b.dataset.k)};
-const KIND_N={norm:"Oggetto semplice, senza effetti sulla scheda.",equip:"Tocca l'oggetto per Indossa o Togli. I bonus valgono solo mentre è indossato.",pot:"Tocca l'oggetto per Usa: sparisce, i bonus vanno in Effetti attivi e si annullano allo scadere dei round. Cura e Ricarica si applicano subito."};
+const KIND_N={norm:"Oggetto semplice, senza effetti sulla scheda.",equip:"Tocca l'oggetto per Indossa o Togli. I bonus valgono solo mentre è indossato.",pot:"Tocca l'oggetto per Usa: sparisce, i bonus compaiono nelle icone degli effetti in alto e si annullano allo scadere dei round o a fine scena. Cura e Ricarica si applicano subito."};
 function kindUI(){const k=$("ie-kind").value;$("ie-fx").checked=k!=="norm";$("ie-fx-box").hidden=k==="norm";$("ie-kind-n").textContent=KIND_N[k];$("ie-dur-l").hidden=k!=="pot";$("ie-cons-l").hidden=k!=="norm";$("ie-worn-l").hidden=k!=="equip";$("ie-eq-l").hidden=k==="equip";$("ie-bon-f").hidden=k==="norm";
   if(k!=="norm"&&!$("ie-bon").children.length)addBonRow()}
 $("ie-cancel").onclick=()=>{editing=null;closeDlg(idlg)};
@@ -2188,11 +2179,11 @@ $("spform").onsubmit=e=>{e.preventDefault();if(!spEdit)return;const sp=spEdit.sp
 /* ---------- Fila di icone ---------- */
 const UIK=IS_APP?"dragur-ui":"dragur-prova3-ui";let openSecs=[];try{const v=JSON.parse(localStorage.getItem(UIK)||"[]");if(Array.isArray(v))openSecs=v}catch(e){}
 document.querySelectorAll(".dk").forEach(b=>{b.querySelector(".dk-i").outerHTML=glyph(b.dataset.ico);
-  b.onclick=()=>{const id=b.dataset.sec,on=!openSecs.includes(id);openSecs=on?[...openSecs,id]:openSecs.filter(x=>x!==id);
+  b.onclick=()=>{const id=b.dataset.sec,on=openSecs[openSecs.length-1]!==id;openSecs=openSecs.filter(x=>x!==id);if(on)openSecs.push(id);
     try{localStorage.setItem(UIK,JSON.stringify(openSecs))}catch(e){}applySecs();
     if(on)$(id).scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"})}});
-/* pila: l'ultima sezione aperta va in cima, subito sotto il personaggio; le altre scendono. Effetti attivi in fondo */
-function applySecs(){document.querySelectorAll(".dk").forEach(b=>{const id=b.dataset.sec,i=openSecs.indexOf(id),on=i>=0;b.setAttribute("aria-expanded",on);$(id).hidden=!on;$(id).style.order=on?openSecs.length-i:""});$("fx").style.order=999}
+/* pila: l'ultima sezione toccata va in cima, subito sotto il personaggio; le altre scendono */
+function applySecs(){document.querySelectorAll(".dk").forEach(b=>{const id=b.dataset.sec,i=openSecs.indexOf(id),on=i>=0;b.setAttribute("aria-expanded",on);$(id).hidden=!on;$(id).style.order=on?openSecs.length-i:""})}
 applySecs();
 
 function fillInputs(){
